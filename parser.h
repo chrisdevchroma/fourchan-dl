@@ -1,0 +1,63 @@
+#ifndef PARSER_H
+#define PARSER_H
+
+#include <QObject>
+#include <QtDebug>
+#include <QUrl>
+#include <QtNetwork>
+
+struct _IMAGE
+{
+    QString largeURI;
+    QString thumbURI;
+    bool downloaded;
+    bool requested;
+};
+
+class Parser : public QObject
+{
+    Q_OBJECT
+public:
+    explicit Parser(QObject *parent = 0);
+
+    void reloadFile(QString filename);
+signals:
+
+private:
+    QUrl uri;
+    QString sURI;
+    QString savePath;
+    QString html;
+    QNetworkAccessManager* manager;
+    QList<_IMAGE> images2dl;
+
+    void parseHTML(void);
+    void addImage(_IMAGE img);
+    int getNextImage(QString* s);
+    int getTotalCount(void);
+    int getDownloadedCount(void);
+
+    bool downloading;
+
+private slots:
+    void replyFinished(QNetworkReply*);
+    void download(bool b);
+    int setCompleted(QString s);
+
+public slots:
+    void setURI(QString pURI) { uri = QUrl(pURI); sURI = pURI;}
+    void setSavePath(QString pSavePath) { savePath = pSavePath; }
+    void start(void);
+    void stop(void);
+
+signals:
+    void finished(void);
+    void downloadsAvailable(bool);
+    void totalCountChanged(int);
+    void downloadedCountChanged(int);
+    void fileFinished(QString);
+    void error(int);
+    void threadTitleChanged(QString);
+};
+
+#endif // PARSER_H

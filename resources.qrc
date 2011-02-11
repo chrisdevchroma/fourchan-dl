@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>resources/close.png</file>
+        <file>resources/reload.png</file>
+        <file>resources/search.png</file>
+        <file>resources/add.png</file>
+        <file>resources/remove.png</file>
+    </qresource>
+</RCC>
