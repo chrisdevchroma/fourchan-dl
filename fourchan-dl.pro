@@ -6,7 +6,7 @@
 
 QT       += core gui network
 
-TARGET = 4chan_Downloader
+TARGET = fourchan-dl
 TEMPLATE = app
 
 SOURCES += main.cpp\
@@ -28,4 +28,4 @@ RESOURCES += \
     resources.qrc
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.1beta\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9\\\""

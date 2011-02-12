@@ -41,7 +41,7 @@
       <item row="0" column="0">
        <widget class="QLineEdit" name="leSavepath">
         <property name="text">
-         <string>V:\tmp</string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -199,12 +199,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>20</x>
-     <y>116</y>
+     <x>30</x>
+     <y>139</y>
     </hint>
     <hint type="destinationlabel">
-     <x>134</x>
-     <y>114</y>
+     <x>179</x>
+     <y>140</y>
     </hint>
    </hints>
   </connection>
@@ -215,8 +215,8 @@
    <slot>start()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>298</x>
-     <y>113</y>
+     <x>340</x>
+     <y>142</y>
     </hint>
     <hint type="destinationlabel">
      <x>247</x>
@@ -231,8 +231,8 @@
    <slot>stop()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>374</x>
-     <y>105</y>
+     <x>421</x>
+     <y>142</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
@@ -247,12 +247,28 @@
    <slot>chooseLocation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>396</x>
-     <y>66</y>
+     <x>412</x>
+     <y>102</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
      <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leSavepath</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>UI4chan</receiver>
+   <slot>labelDirectoryChanged(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>95</x>
+     <y>86</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>127</x>
+     <y>50</y>
     </hint>
    </hints>
   </connection>
@@ -261,5 +277,6 @@
   <slot>start()</slot>
   <slot>stop()</slot>
   <slot>chooseLocation()</slot>
+  <slot>labelDirectoryChanged(QString)</slot>
  </slots>
 </ui>

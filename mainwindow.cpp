@@ -10,16 +10,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tabWidget->removeTab(0);
     addTab();
 
+    defaultDirectory = "";
+
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
 }
 
 int MainWindow::addTab() {
     int ci;
+    UI4chan* w;
 
-    ci = ui->tabWidget->addTab(new UI4chan(), "no name");
+    w = new UI4chan(this);
 
-    connect(ui->tabWidget->widget(ci), SIGNAL(errorMessage(QString)), this, SLOT(displayError(QString)));
-    connect(ui->tabWidget->widget(ci), SIGNAL(tabTitleChanged(QString)), this, SLOT(changeTabTitle(QString)));
+    ci = ui->tabWidget->addTab(w, "no name");
+    w->setDirectory(defaultDirectory);
+
+    connect(w, SIGNAL(errorMessage(QString)), this, SLOT(displayError(QString)));
+    connect(w, SIGNAL(tabTitleChanged(QString)), this, SLOT(changeTabTitle(QString)));
+    connect(w, SIGNAL(directoryChanged(QString)), this, SLOT(setDefaultDirectory(QString)));
 
     ui->tabWidget->setCurrentIndex(ci);
 
@@ -50,6 +57,10 @@ void MainWindow::showInfo(void) {
 
     uiInfo = new UIInfo(this);
     uiInfo->show();
+}
+
+void MainWindow::setDefaultDirectory(QString d) {
+    defaultDirectory = d;
 }
 
 MainWindow::~MainWindow()

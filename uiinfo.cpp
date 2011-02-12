@@ -11,6 +11,7 @@ UIInfo::UIInfo(QWidget *parent) :
     text = ui->label_2->text();
     text.replace("%%VERSION%%", PROGRAM_VERSION);
     text.replace("%%BUILDDATE%%", BUILDDATE);
+    text.replace("%%QT_VERSION%%", QT_VERSION_STR);
     ui->label_2->setText(text);
 }
 

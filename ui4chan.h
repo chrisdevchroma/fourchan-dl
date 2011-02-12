@@ -20,7 +20,7 @@ public:
     explicit UI4chan(QWidget *parent = 0);
     ~UI4chan();
     QString getURI(void);
-    int getFrequency(void);
+    void setDirectory(QString);
 
 private:
     Ui::UI4chan *ui;
@@ -43,6 +43,7 @@ private slots:
     void openFile(void);
     void errorHandler(int);
     void setTabTitle(QString);
+    void labelDirectoryChanged(QString);
 
 public slots:
     void start(void);
@@ -52,6 +53,7 @@ signals:
     void finished(void);
     void errorMessage(QString);
     void tabTitleChanged(QString);
+    void directoryChanged(QString);
 };
 
 #endif // UI4CHAN_H

@@ -21,6 +21,7 @@ public:
 private:
     Ui::MainWindow *ui;
     QList<UI4chan> widgetList;
+    QString defaultDirectory;
 
 private slots:
     int addTab(void);
@@ -28,6 +29,7 @@ private slots:
     void displayError(QString);
     void changeTabTitle(QString);
     void showInfo(void);
+    void setDefaultDirectory(QString);
 };
 
 #endif // MAINWINDOW_H

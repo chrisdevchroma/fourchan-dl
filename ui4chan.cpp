@@ -209,3 +209,11 @@ void UI4chan::errorHandler(int err) {
 void UI4chan::setTabTitle(QString s) {
     emit tabTitleChanged(s);
 }
+
+void UI4chan::labelDirectoryChanged(QString s) {
+    emit directoryChanged(s);
+}
+
+void UI4chan::setDirectory(QString d) {
+    ui->leSavepath->setText(d);
+}
