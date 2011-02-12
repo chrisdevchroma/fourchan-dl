@@ -5,5 +5,7 @@
         <file>resources/search.png</file>
         <file>resources/add.png</file>
         <file>resources/remove.png</file>
+        <file>resources/open.png</file>
+        <file>resources/4chan.png</file>
     </qresource>
 </RCC>

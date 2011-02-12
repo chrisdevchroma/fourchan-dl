@@ -5,6 +5,8 @@ UI4chan::UI4chan(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::UI4chan)
 {
+    QClipboard *clipboard = QApplication::clipboard();
+
     ui->setupUi(this);
     p = new Parser();
     timer = new QTimer();
@@ -16,6 +18,8 @@ UI4chan::UI4chan(QWidget *parent) :
     deleteFileAction->setIcon(QIcon(":/icons/resources/remove.png"));
     reloadFileAction = new QAction("Reload File", this);
     reloadFileAction->setIcon(QIcon(":/icons/resources/reload.png"));
+    openFileAction = new QAction("Open File", this);
+    openFileAction->setIcon(QIcon(":/icons/resources/open.png"));
 
 //    listModel = new QAbstractListModel(ui->listView);
 
@@ -36,15 +40,20 @@ UI4chan::UI4chan(QWidget *parent) :
     ui->listWidget->setIconSize(iconSize);
     ui->listWidget->setGridSize(QSize(iconSize.width()+10,iconSize.height()+10));
 
+    if (clipboard->text().contains("http://boards.4chan.org"))
+        ui->leURI->setText(clipboard->text());
+
     connect(p, SIGNAL(downloadedCountChanged(int)), ui->progressBar, SLOT(setValue(int)));
     connect(p, SIGNAL(totalCountChanged(int)), ui->progressBar, SLOT(setMaximum(int)));
     connect(p, SIGNAL(finished()), this, SLOT(downloadsFinished()));
     connect(p, SIGNAL(fileFinished(QString)), this, SLOT(addThumbnail(QString)));
     connect(p, SIGNAL(error(int)), this, SLOT(errorHandler(int)));
     connect(p, SIGNAL(threadTitleChanged(QString)), ui->lTitle, SLOT(setText(QString)));
+    connect(p, SIGNAL(tabTitleChanged(QString)), this, SLOT(setTabTitle(QString)));
 
     connect(deleteFileAction, SIGNAL(triggered()), this, SLOT(deleteFile()));
     connect(reloadFileAction, SIGNAL(triggered()), this, SLOT(reloadFile()));
+    connect(openFileAction, SIGNAL(triggered()), this, SLOT(openFile()));
 
     connect(timer, SIGNAL(timeout()), this, SLOT(triggerRescan()));
 }
@@ -107,7 +116,6 @@ void UI4chan::triggerRescan(void) {
 //    qDebug() << "Triggering rescan";
 
     p->start();
-
     timer->start();
 }
 
@@ -137,6 +145,7 @@ void UI4chan::on_listWidget_customContextMenuRequested(QPoint pos)
 {
     QMenu contextMenu(tr("Context menu"), this);
 
+    contextMenu.addAction(openFileAction);
     contextMenu.addAction(deleteFileAction);
     contextMenu.addAction(reloadFileAction);
     contextMenu.exec(ui->listWidget->mapTo(this,mapToGlobal(pos)));
@@ -179,6 +188,15 @@ void UI4chan::reloadFile(void) {
     }
 }
 
+void UI4chan::openFile(void) {
+    QString filename;
+
+    filename = ui->listWidget->currentItem()->text();
+    if (filename != "") {
+        QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(filename)));
+    }
+}
+
 void UI4chan::errorHandler(int err) {
     switch (err) {
     case 404:
@@ -192,4 +210,8 @@ void UI4chan::errorHandler(int err) {
     default:
         break;
     }
+}
+
+void UI4chan::setTabTitle(QString s) {
+    emit tabTitleChanged(s);
 }

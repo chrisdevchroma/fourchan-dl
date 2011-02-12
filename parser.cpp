@@ -76,10 +76,11 @@ void Parser::parseHTML() {
 //    QRegExp rx("<a href=\"([^\"]+)\"", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rx("<a href=\"http://images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rxTitle("<span class=\"filetitle\">([^<]+)</span>");
-
+    bool imagesAdded;
     int pos;
     _IMAGE i;
 
+    imagesAdded = false;
     pos = 0;
     i.downloaded = false;
     i.requested = false;
@@ -94,7 +95,8 @@ void Parser::parseHTML() {
 //        qDebug() << pos << ": " << res;
 
         if (pos != -1){
-            addImage(i);
+            if (addImage(i))
+                imagesAdded = true;
         }
     }
 
@@ -108,6 +110,9 @@ void Parser::parseHTML() {
     }
 
 //    qDebug() << images2dl.length();
+
+    if (!imagesAdded)
+        emit finished();
 }
 
 void Parser::start(void) {
@@ -132,7 +137,7 @@ void Parser::stop(void) {
 
 }
 
-void Parser::addImage(_IMAGE img) {
+bool Parser::addImage(_IMAGE img) {
     int i;
     bool alreadyInList;
 
@@ -150,6 +155,8 @@ void Parser::addImage(_IMAGE img) {
         emit downloadsAvailable(true);
         emit totalCountChanged(getTotalCount());
     }
+
+    return !alreadyInList;
 }
 
 int Parser::getNextImage(QString* s) {

@@ -25,6 +25,7 @@ private slots:
     int addTab(void);
     void closeTab(int);
     void displayError(QString);
+    void changeTabTitle(QString);
 };
 
 #endif // MAINWINDOW_H

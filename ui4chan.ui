@@ -26,7 +26,7 @@
      <item>
       <widget class="QLineEdit" name="leURI">
        <property name="text">
-        <string>http://boards.4chan.org/wg/res/3934699</string>
+        <string/>
        </property>
       </widget>
      </item>

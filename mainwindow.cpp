@@ -19,6 +19,7 @@ int MainWindow::addTab() {
     ci = ui->tabWidget->addTab(new UI4chan(), "no name");
 
     connect(ui->tabWidget->widget(ci), SIGNAL(errorMessage(QString)), this, SLOT(displayError(QString)));
+    connect(ui->tabWidget->widget(ci), SIGNAL(tabTitleChanged(QString)), this, SLOT(changeTabTitle(QString)));
 
     ui->tabWidget->setCurrentIndex(ci);
 
@@ -38,6 +39,10 @@ void MainWindow::closeTab(int i) {
 
 void MainWindow::displayError(QString s) {
     ui->statusBar->showMessage(s, 3000);
+}
+
+void MainWindow::changeTabTitle(QString s) {
+    qDebug() << s;
 }
 
 MainWindow::~MainWindow()

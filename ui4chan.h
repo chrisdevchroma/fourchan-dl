@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QFileDialog>
 #include <QMenu>
+#include <QClipboard>
+#include <QDesktopServices>
 #include "parser.h"
 
 namespace Ui {
@@ -28,6 +30,7 @@ private:
     QSize iconSize;
     QAction* deleteFileAction;
     QAction* reloadFileAction;
+    QAction* openFileAction;
 
 private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);
@@ -37,7 +40,9 @@ private slots:
     void downloadsFinished(void);
     void deleteFile(void);
     void reloadFile(void);
+    void openFile(void);
     void errorHandler(int);
+    void setTabTitle(QString);
 
 public slots:
     void start(void);
@@ -46,6 +51,7 @@ public slots:
 signals:
     void finished(void);
     void errorMessage(QString);
+    void tabTitleChanged(QString);
 };
 
 #endif // UI4CHAN_H

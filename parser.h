@@ -32,7 +32,7 @@ private:
     QList<_IMAGE> images2dl;
 
     void parseHTML(void);
-    void addImage(_IMAGE img);
+    bool addImage(_IMAGE img);
     int getNextImage(QString* s);
     int getTotalCount(void);
     int getDownloadedCount(void);
@@ -58,6 +58,7 @@ signals:
     void fileFinished(QString);
     void error(int);
     void threadTitleChanged(QString);
+    void tabTitleChanged(QString);
 };
 
 #endif // PARSER_H
