@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QList>
 #include "ui4chan.h"
+#include "uiinfo.h"
 
 namespace Ui {
     class MainWindow;
@@ -26,6 +27,7 @@ private slots:
     void closeTab(int);
     void displayError(QString);
     void changeTabTitle(QString);
+    void showInfo(void);
 };
 
 #endif // MAINWINDOW_H

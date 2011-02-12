@@ -7,5 +7,7 @@
         <file>resources/remove.png</file>
         <file>resources/open.png</file>
         <file>resources/4chan.png</file>
+        <file>resources/about.png</file>
+        <file>resources/about-large.png</file>
     </qresource>
 </RCC>

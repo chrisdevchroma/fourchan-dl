@@ -9,18 +9,23 @@ QT       += core gui network
 TARGET = 4chan_Downloader
 TEMPLATE = app
 
-
 SOURCES += main.cpp\
         mainwindow.cpp \
     parser.cpp \
-    ui4chan.cpp
+    ui4chan.cpp \
+    uiinfo.cpp
 
 HEADERS  += mainwindow.h \
     parser.h \
-    ui4chan.h
+    ui4chan.h \
+    uiinfo.h
 
 FORMS    += mainwindow.ui \
-    ui4chan.ui
+    ui4chan.ui \
+    uiinfo.ui
 
 RESOURCES += \
     resources.qrc
+
+BUILDDATE = __DATE__
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.1beta\\\""

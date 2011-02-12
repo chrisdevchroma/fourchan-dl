@@ -45,6 +45,13 @@ void MainWindow::changeTabTitle(QString s) {
     qDebug() << s;
 }
 
+void MainWindow::showInfo(void) {
+    UIInfo* uiInfo;
+
+    uiInfo = new UIInfo(this);
+    uiInfo->show();
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;

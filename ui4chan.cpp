@@ -21,8 +21,6 @@ UI4chan::UI4chan(QWidget *parent) :
     openFileAction = new QAction("Open File", this);
     openFileAction->setIcon(QIcon(":/icons/resources/open.png"));
 
-//    listModel = new QAbstractListModel(ui->listView);
-
     timeoutValues << 15 << 30 << 60 << 120 << 300;
 
     foreach (int i, timeoutValues) {
@@ -66,30 +64,31 @@ UI4chan::~UI4chan()
 void UI4chan::start(void) {
     QDir dir;
 
-    ui->leURI->setEnabled(false);
-    p->setURI(ui->leURI->text());
-    dir.setPath(ui->leSavepath->text());
-    if (dir.exists()) {
-        ui->leSavepath->setEnabled(false);
-        p->setSavePath(ui->leSavepath->text());
-        p->start();
+    if (ui->leURI->text() != "") {
+        ui->leURI->setEnabled(false);
+        p->setURI(ui->leURI->text());
+        dir.setPath(ui->leSavepath->text());
+        if (dir.exists()) {
+            ui->leSavepath->setEnabled(false);
+            p->setSavePath(ui->leSavepath->text());
+            p->start();
 
-        ui->btnStart->setEnabled(false);
-        ui->btnStop->setEnabled(true);
-        ui->cbRescan->setEnabled(false);
-        ui->comboBox->setEnabled(false);
-        ui->progressBar->setEnabled(true);
+            ui->btnStart->setEnabled(false);
+            ui->btnStop->setEnabled(true);
+            ui->cbRescan->setEnabled(false);
+            ui->comboBox->setEnabled(false);
+            ui->progressBar->setEnabled(true);
 
-        if (ui->cbRescan->isChecked()) {
-//            qDebug() << "Timer interval: " << timeoutValues.at(ui->comboBox->currentIndex())*1000;
-            timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
+            if (ui->cbRescan->isChecked()) {
+                timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
 
-            timer->start();
+                timer->start();
+            }
         }
-    }
-    else
-    {
-//        qDebug() << "Directory does not exist";
+        else
+        {
+            emit errorMessage("Directory does not exist");
+        }
     }
 }
 
@@ -113,8 +112,6 @@ void UI4chan::chooseLocation(void) {
 }
 
 void UI4chan::triggerRescan(void) {
-//    qDebug() << "Triggering rescan";
-
     p->start();
     timer->start();
 }
@@ -157,7 +154,6 @@ void UI4chan::deleteFile(void) {
 
     filename = ui->listWidget->currentItem()->text();
     if (filename != "") {
-//        qDebug() << "Going to delete " << filename;
         f.setFileName(filename);
 
         if (f.exists()) {
@@ -174,8 +170,6 @@ void UI4chan::reloadFile(void) {
 
     filename = ui->listWidget->currentItem()->text();
     if (filename != "") {
-//        qDebug() << "Going to reload " << filename;
-
         f.setFileName(filename);
 
         if (f.exists()) {

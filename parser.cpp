@@ -16,14 +16,11 @@ Parser::Parser(QObject *parent) :
 
 void Parser::replyFinished(QNetworkReply* r) {
     QString requestURI;
-//    qDebug() << r;
 
     if (r->isFinished()) {
         requestURI = r->request().url().toString();
 
         if (requestURI.indexOf(QRegExp("(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive)) != -1) {
-            // Image!
-
             QFile f;
             QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
             QStringList res;
@@ -49,14 +46,11 @@ void Parser::replyFinished(QNetworkReply* r) {
 //                    qDebug() << "Oh Oh!";
                 }
             }
-            // Get next image
+
             QString imgURI;
 
             if (0 != getNextImage(&imgURI)) {
                 manager->get(QNetworkRequest(QUrl(imgURI)));
-            }
-            else {
-//                qDebug() << "Finished";
             }
         }
         else {
@@ -73,7 +67,6 @@ void Parser::replyFinished(QNetworkReply* r) {
 
 void Parser::parseHTML() {
     QStringList res;
-//    QRegExp rx("<a href=\"([^\"]+)\"", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rx("<a href=\"http://images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rxTitle("<span class=\"filetitle\">([^<]+)</span>");
     bool imagesAdded;
@@ -92,8 +85,6 @@ void Parser::parseHTML() {
         i.largeURI = "http://images.4chan.org/"+res.at(1);
         i.thumbURI = res.at(2);
 
-//        qDebug() << pos << ": " << res;
-
         if (pos != -1){
             if (addImage(i))
                 imagesAdded = true;
@@ -108,8 +99,6 @@ void Parser::parseHTML() {
         if (res.at(1) != "")
             emit threadTitleChanged(res.at(1));
     }
-
-//    qDebug() << images2dl.length();
 
     if (!imagesAdded)
         emit finished();
