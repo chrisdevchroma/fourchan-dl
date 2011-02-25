@@ -50,19 +50,9 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAdd_Tab"/>
-   <addaction name="actionQuit"/>
    <addaction name="actionShowInfo"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionQuit">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/close.png</normaloff>:/icons/resources/close.png</iconset>
-   </property>
-   <property name="text">
-    <string>Quit</string>
-   </property>
-  </action>
   <action name="actionAdd_Tab">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -78,7 +68,7 @@
      <normaloff>:/icons/resources/about.png</normaloff>:/icons/resources/about.png</iconset>
    </property>
    <property name="text">
-    <string>ShowInfo</string>
+    <string>Program Info</string>
    </property>
   </action>
  </widget>
@@ -87,22 +77,6 @@
   <include location="resources.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>actionQuit</sender>
-   <signal>activated()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>close()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>269</x>
-     <y>304</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>actionAdd_Tab</sender>
    <signal>activated()</signal>

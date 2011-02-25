@@ -11,8 +11,8 @@ UI4chan::UI4chan(QWidget *parent) :
     p = new Parser();
     timer = new QTimer();
 
-    iconSize.setHeight(100);
-    iconSize.setWidth(100);
+    iconSize.setHeight(200);
+    iconSize.setWidth(200);
 
     deleteFileAction = new QAction(QString("Delete File"), this);
     deleteFileAction->setIcon(QIcon(":/icons/resources/remove.png"));
@@ -21,7 +21,7 @@ UI4chan::UI4chan(QWidget *parent) :
     openFileAction = new QAction("Open File", this);
     openFileAction->setIcon(QIcon(":/icons/resources/open.png"));
 
-    timeoutValues << 15 << 30 << 60 << 120 << 300;
+    timeoutValues << 30 << 60 << 120 << 300 << 600;
 
     foreach (int i, timeoutValues) {
         if (i <= 60)
@@ -48,12 +48,15 @@ UI4chan::UI4chan(QWidget *parent) :
     connect(p, SIGNAL(error(int)), this, SLOT(errorHandler(int)));
     connect(p, SIGNAL(threadTitleChanged(QString)), ui->lTitle, SLOT(setText(QString)));
     connect(p, SIGNAL(tabTitleChanged(QString)), this, SLOT(setTabTitle(QString)));
+    connect(ui->cbOriginalFilename, SIGNAL(stateChanged(int)), p, SLOT(setUseOriginalFilename(int)));
 
     connect(deleteFileAction, SIGNAL(triggered()), this, SLOT(deleteFile()));
     connect(reloadFileAction, SIGNAL(triggered()), this, SLOT(reloadFile()));
     connect(openFileAction, SIGNAL(triggered()), this, SLOT(openFile()));
 
     connect(timer, SIGNAL(timeout()), this, SLOT(triggerRescan()));
+
+    setTabTitle("idling");
 }
 
 UI4chan::~UI4chan()
@@ -78,6 +81,7 @@ void UI4chan::start(void) {
             ui->cbRescan->setEnabled(false);
             ui->comboBox->setEnabled(false);
             ui->progressBar->setEnabled(true);
+            ui->cbOriginalFilename->setEnabled(false);
 
             if (ui->cbRescan->isChecked()) {
                 timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
@@ -101,6 +105,7 @@ void UI4chan::stop(void) {
     ui->cbRescan->setEnabled(true);
     ui->comboBox->setEnabled(true);
     ui->progressBar->setEnabled(false);
+    ui->cbOriginalFilename->setEnabled(true);
 }
 
 void UI4chan::chooseLocation(void) {
@@ -114,6 +119,8 @@ void UI4chan::chooseLocation(void) {
 void UI4chan::triggerRescan(void) {
     p->start();
     timer->start();
+
+    setTabTitle("rescanning");
 }
 
 void UI4chan::addThumbnail(QString filename) {
@@ -121,7 +128,7 @@ void UI4chan::addThumbnail(QString filename) {
     QPixmap pixmapLarge, pixmapSmall;
 
     pixmapLarge.load(filename);
-    pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio);
+    pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
 
     item = new QListWidgetItem(
             QIcon(pixmapSmall),
@@ -129,11 +136,11 @@ void UI4chan::addThumbnail(QString filename) {
             ui->listWidget);
 
     ui->listWidget->addItem(item);
-
-
 }
 
 void UI4chan::downloadsFinished() {
+    setTabTitle("idling");
+
     if (!ui->cbRescan->isChecked())
         stop();
 }
@@ -198,6 +205,7 @@ void UI4chan::errorHandler(int err) {
         stop();
 
         emit errorMessage("404 - Page not found");
+        setTabTitle("Thread 404'ed");
 
         break;
 
@@ -207,7 +215,7 @@ void UI4chan::errorHandler(int err) {
 }
 
 void UI4chan::setTabTitle(QString s) {
-    emit tabTitleChanged(s);
+    emit tabTitleChanged(this, s);
 }
 
 void UI4chan::labelDirectoryChanged(QString s) {

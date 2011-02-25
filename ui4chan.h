@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QDesktopServices>
+#include <QStyle>
 #include "parser.h"
 
 namespace Ui {
@@ -52,7 +53,7 @@ public slots:
 signals:
     void finished(void);
     void errorMessage(QString);
-    void tabTitleChanged(QString);
+    void tabTitleChanged(UI4chan*,QString);
     void directoryChanged(QString);
 };
 

@@ -10,6 +10,7 @@ struct _IMAGE
 {
     QString largeURI;
     QString thumbURI;
+    QString originalFilename;
     bool downloaded;
     bool requested;
 };
@@ -38,6 +39,7 @@ private:
     int getDownloadedCount(void);
 
     bool downloading;
+    bool useOriginalFilename;
 
 private slots:
     void replyFinished(QNetworkReply*);
@@ -49,6 +51,7 @@ public slots:
     void setSavePath(QString pSavePath) { savePath = pSavePath; }
     void start(void);
     void stop(void);
+    void setUseOriginalFilename(int);
 
 signals:
     void finished(void);

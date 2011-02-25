@@ -25,10 +25,12 @@ int MainWindow::addTab() {
     w->setDirectory(defaultDirectory);
 
     connect(w, SIGNAL(errorMessage(QString)), this, SLOT(displayError(QString)));
-    connect(w, SIGNAL(tabTitleChanged(QString)), this, SLOT(changeTabTitle(QString)));
+    connect(w, SIGNAL(tabTitleChanged(UI4chan*, QString)), this, SLOT(changeTabTitle(UI4chan*, QString)));
     connect(w, SIGNAL(directoryChanged(QString)), this, SLOT(setDefaultDirectory(QString)));
 
     ui->tabWidget->setCurrentIndex(ci);
+
+    changeTabTitle(w, "idling");
 
     return ci;
 }
@@ -48,10 +50,6 @@ void MainWindow::displayError(QString s) {
     ui->statusBar->showMessage(s, 3000);
 }
 
-void MainWindow::changeTabTitle(QString s) {
-    qDebug() << s;
-}
-
 void MainWindow::showInfo(void) {
     UIInfo* uiInfo;
 
@@ -62,6 +60,14 @@ void MainWindow::showInfo(void) {
 void MainWindow::setDefaultDirectory(QString d) {
     defaultDirectory = d;
 }
+
+void MainWindow::changeTabTitle(UI4chan* w, QString s) {
+    int i;
+
+    i = ui->tabWidget->indexOf((QWidget*)w);
+    ui->tabWidget->setTabText(i, s);
+}
+
 
 MainWindow::~MainWindow()
 {

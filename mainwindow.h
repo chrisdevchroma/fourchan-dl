@@ -27,7 +27,7 @@ private slots:
     int addTab(void);
     void closeTab(int);
     void displayError(QString);
-    void changeTabTitle(QString);
+    void changeTabTitle(UI4chan*, QString);
     void showInfo(void);
     void setDefaultDirectory(QString);
 };

@@ -4,6 +4,7 @@ Parser::Parser(QObject *parent) :
     QObject(parent)
 {
     downloading = false;
+    useOriginalFilename = true;
 
     manager = new QNetworkAccessManager();
 
@@ -32,14 +33,27 @@ void Parser::replyFinished(QNetworkReply* r) {
             res = rx.capturedTexts();
 
             if (pos != -1) {
-
                 f.setFileName(savePath+"/"+res.at(1)+res.at(2));
+
+                if (useOriginalFilename) {
+                    _IMAGE tmp;
+
+                    for (int i=0; i<images2dl.count(); i++) {
+                        if (images2dl.at(i).largeURI.endsWith("/"+res.at(1)+res.at(2))) {
+                            tmp = images2dl.at(i);
+
+                            f.setFileName(savePath+"/"+tmp.originalFilename);
+                            break;
+                        }
+                    }
+                }
+
                 f.open(QIODevice::ReadWrite);
 
                 f.write(r->readAll());
                 f.close();
 
-                emit fileFinished(savePath+"/"+res.at(1)+res.at(2));
+                emit fileFinished(f.fileName());
 
                 if (0 != setCompleted(requestURI))
                 {
@@ -67,7 +81,9 @@ void Parser::replyFinished(QNetworkReply* r) {
 
 void Parser::parseHTML() {
     QStringList res;
-    QRegExp rx("<a href=\"http://images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
+                          //    QRegExp rx("<a href=\"http://images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rx(">([^>]+)</span>\\)</span><br><a href=\"http://images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
+
     QRegExp rxTitle("<span class=\"filetitle\">([^<]+)</span>");
     bool imagesAdded;
     int pos;
@@ -82,8 +98,9 @@ void Parser::parseHTML() {
         pos = rx.indexIn(html, pos+1);
         res = rx.capturedTexts();
 
-        i.largeURI = "http://images.4chan.org/"+res.at(1);
-        i.thumbURI = res.at(2);
+        i.originalFilename = res.at(1);
+        i.largeURI = "http://images.4chan.org/"+res.at(2);
+        i.thumbURI = res.at(3);
 
         if (pos != -1){
             if (addImage(i))
@@ -100,8 +117,10 @@ void Parser::parseHTML() {
             emit threadTitleChanged(res.at(1));
     }
 
-    if (!imagesAdded)
+    if (!imagesAdded){
         emit finished();
+        emit tabTitleChanged("finished");
+    }
 }
 
 void Parser::start(void) {
@@ -199,10 +218,12 @@ int Parser::setCompleted(QString s) {
             images2dl.replace(i,tmp);
 
             emit downloadedCountChanged(getDownloadedCount());
+            emit tabTitleChanged(QString("%1/%2").arg(getDownloadedCount()).arg(getTotalCount()));
 
             if (getDownloadedCount() == getTotalCount()) {
                 downloading = false;
                 emit finished();
+                emit tabTitleChanged("finished");
             }
             return 0;
         }
@@ -248,4 +269,11 @@ void Parser::reloadFile(QString filename) {
     }
 
     download(true);
+}
+
+void Parser::setUseOriginalFilename(int i) {
+    if (i == Qt::Checked)
+        useOriginalFilename = true;
+    else
+        useOriginalFilename = false;
 }
