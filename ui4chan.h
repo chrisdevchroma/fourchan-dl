@@ -7,6 +7,7 @@
 #include <QClipboard>
 #include <QDesktopServices>
 #include <QStyle>
+#include <QSettings>
 #include "parser.h"
 
 namespace Ui {
@@ -22,6 +23,11 @@ public:
     ~UI4chan();
     QString getURI(void);
     void setDirectory(QString);
+    QString getValues(void);
+    void setValues(QString);
+    bool setThumbnailSize(QSize s);
+    void setMaxDownloads(int);
+    void setSettings(QSettings*);
 
 private:
     Ui::UI4chan *ui;
@@ -32,6 +38,9 @@ private:
     QAction* deleteFileAction;
     QAction* reloadFileAction;
     QAction* openFileAction;
+    QSettings* settings;
+
+    bool thumbnailsizeLocked;
 
 private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);
@@ -55,6 +64,7 @@ signals:
     void errorMessage(QString);
     void tabTitleChanged(UI4chan*,QString);
     void directoryChanged(QString);
+    void closeRequest(UI4chan*);
 };
 
 #endif // UI4CHAN_H

@@ -4,7 +4,9 @@ Parser::Parser(QObject *parent) :
     QObject(parent)
 {
     downloading = false;
-    useOriginalFilename = true;
+    useOriginalFilename = false;
+    activeDownloads = 0;
+    maxDownloads = 2;
 
     manager = new QNetworkAccessManager();
 
@@ -54,17 +56,18 @@ void Parser::replyFinished(QNetworkReply* r) {
                 f.close();
 
                 emit fileFinished(f.fileName());
+                activeDownloads--;
 
-                if (0 != setCompleted(requestURI))
-                {
-//                    qDebug() << "Oh Oh!";
-                }
+                setCompleted(requestURI);
             }
 
-            QString imgURI;
+            for (int i=activeDownloads; i<maxDownloads; i++) {
+                QString imgURI;
 
-            if (0 != getNextImage(&imgURI)) {
-                manager->get(QNetworkRequest(QUrl(imgURI)));
+                if (0 != getNextImage(&imgURI)) {
+                    manager->get(QNetworkRequest(QUrl(imgURI)));
+                    activeDownloads++;
+                }
             }
         }
         else {
@@ -76,6 +79,8 @@ void Parser::replyFinished(QNetworkReply* r) {
             else
                 parseHTML();
         }
+
+        r->deleteLater();
     }
 }
 
@@ -89,6 +94,7 @@ void Parser::parseHTML() {
     int pos;
     _IMAGE i;
 
+    emit tabTitleChanged("parsing HTML");
     imagesAdded = false;
     pos = 0;
     i.downloaded = false;
@@ -120,6 +126,8 @@ void Parser::parseHTML() {
     if (!imagesAdded){
         emit finished();
         emit tabTitleChanged("finished");
+    } else {
+        emit downloadsAvailable(true);
     }
 }
 
@@ -133,16 +141,23 @@ void Parser::download(bool b) {
     if (b) {
         QString imgURI;
 
-        if (0 != getNextImage(&imgURI)) {
-            manager->get(QNetworkRequest(QUrl(imgURI)));
+        downloading = true;
+        emit tabTitleChanged("downloading");
+
+        for (int i=activeDownloads; i<maxDownloads; i++) {
+            if (0 != getNextImage(&imgURI)) {
+                manager->get(QNetworkRequest(QUrl(imgURI)));
+                activeDownloads++;
+            }
         }
 
-        downloading = true;
+    } else {
+        downloading = false;
     }
 }
 
 void Parser::stop(void) {
-
+    download(false);
 }
 
 bool Parser::addImage(_IMAGE img) {
@@ -158,9 +173,34 @@ bool Parser::addImage(_IMAGE img) {
     }
 
     if (!alreadyInList) {
+        // Check if already downloaded
+        QFile f;
+
+        if (useOriginalFilename)
+            f.setFileName(savePath+"/"+img.originalFilename);
+        else {
+            QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
+            QStringList res;
+            int pos;
+
+            pos = 0;
+
+            pos = rx.indexIn(img.largeURI);
+            res = rx.capturedTexts();
+
+            if (pos != -1) {
+                f.setFileName(savePath+"/"+res.at(1)+res.at(2));
+            }
+        }
+
+        if (f.exists()) {
+            img.downloaded = true;
+
+            emit downloadedCountChanged(getDownloadedCount());
+            emit fileFinished(f.fileName());
+        }
         images2dl.append(img);
 
-        emit downloadsAvailable(true);
         emit totalCountChanged(getTotalCount());
     }
 
@@ -172,33 +212,35 @@ int Parser::getNextImage(QString* s) {
     _IMAGE tmp;
     QFile f;
 
-    for (i=0; i<images2dl.length(); i++) {
-        if (!images2dl.at(i).downloaded && !images2dl.at(i).requested) {
-            tmp = images2dl.at(i);
-            tmp.requested = true;
-            images2dl.replace(i,tmp);
+    if (downloading) {
+        for (i=0; i<images2dl.length(); i++) {
+            if (!images2dl.at(i).downloaded && !images2dl.at(i).requested) {
+                tmp = images2dl.at(i);
+                tmp.requested = true;
+                images2dl.replace(i,tmp);
 
-            // Check if file already exists in destination dir
-            QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
-            QStringList res;
-            int pos;
+                // Check if file already exists in destination dir
+                QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
+                QStringList res;
+                int pos;
 
-            pos = 0;
+                pos = 0;
 
-            pos = rx.indexIn(tmp.largeURI);
-            res = rx.capturedTexts();
+                pos = rx.indexIn(tmp.largeURI);
+                res = rx.capturedTexts();
 
-            if (pos != -1) {
-                f.setFileName(savePath+res.at(0));
-            }
+                if (pos != -1) {
+                    f.setFileName(savePath+res.at(0));
+                }
 
-            if (f.exists()) {
-                tmp.downloaded = true;
-                images2dl.replace(i, tmp);
-            }
-            else {
-                *s = tmp.largeURI;
-                return 1;
+                if (f.exists()) {
+                    tmp.downloaded = true;
+                    images2dl.replace(i, tmp);
+                }
+                else {
+                    *s = tmp.largeURI;
+                    return 1;
+                }
             }
         }
     }
@@ -276,4 +318,8 @@ void Parser::setUseOriginalFilename(int i) {
         useOriginalFilename = true;
     else
         useOriginalFilename = false;
+}
+
+void Parser::setMaxDownloads(int i) {
+    maxDownloads = i;
 }

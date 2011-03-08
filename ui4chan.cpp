@@ -13,6 +13,7 @@ UI4chan::UI4chan(QWidget *parent) :
 
     iconSize.setHeight(200);
     iconSize.setWidth(200);
+    thumbnailsizeLocked = false;
 
     deleteFileAction = new QAction(QString("Delete File"), this);
     deleteFileAction->setIcon(QIcon(":/icons/resources/remove.png"));
@@ -31,12 +32,9 @@ UI4chan::UI4chan(QWidget *parent) :
     }
 
     ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(0);
+    ui->progressBar->setMaximum(-1);
     ui->progressBar->setValue(0);
     ui->progressBar->setEnabled(false);
-
-    ui->listWidget->setIconSize(iconSize);
-    ui->listWidget->setGridSize(QSize(iconSize.width()+10,iconSize.height()+10));
 
     if (clipboard->text().contains("http://boards.4chan.org"))
         ui->leURI->setText(clipboard->text());
@@ -64,6 +62,21 @@ UI4chan::~UI4chan()
     delete ui;
 }
 
+bool UI4chan::setThumbnailSize(QSize s) {
+    bool ret;
+
+    ret = false;
+
+    if (!thumbnailsizeLocked) {
+        iconSize = s;
+        ui->listWidget->setIconSize(iconSize);
+        ui->listWidget->setGridSize(QSize(iconSize.width()+10,iconSize.height()+10));
+        ret = true;
+    }
+
+    return ret;
+}
+
 void UI4chan::start(void) {
     QDir dir;
 
@@ -71,6 +84,13 @@ void UI4chan::start(void) {
         ui->leURI->setEnabled(false);
         p->setURI(ui->leURI->text());
         dir.setPath(ui->leSavepath->text());
+
+        if (!dir.exists()) {
+            QDir d;
+
+            d.mkpath(ui->leSavepath->text());
+        }
+
         if (dir.exists()) {
             ui->leSavepath->setEnabled(false);
             p->setSavePath(ui->leSavepath->text());
@@ -91,12 +111,13 @@ void UI4chan::start(void) {
         }
         else
         {
-            emit errorMessage("Directory does not exist");
+            emit errorMessage("Directory does not exist / Could not be created");
         }
     }
 }
 
 void UI4chan::stop(void) {
+    p->stop();
     timer->stop();
     ui->btnStart->setEnabled(true);
     ui->btnStop->setEnabled(false);
@@ -128,14 +149,24 @@ void UI4chan::addThumbnail(QString filename) {
     QPixmap pixmapLarge, pixmapSmall;
 
     pixmapLarge.load(filename);
-    pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
 
+    if (pixmapLarge.width()<iconSize.width()
+        && pixmapLarge.height()<iconSize.height()
+        && !(settings->value("options/enlarge_thumbnails", false).toBool())) {
+        pixmapSmall = pixmapLarge;
+    } else {
+        if (settings->value("options/hq_thumbnails", false).toBool())
+            pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+        else
+            pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio,Qt::FastTransformation);
+    }
     item = new QListWidgetItem(
             QIcon(pixmapSmall),
             filename,
             ui->listWidget);
 
     ui->listWidget->addItem(item);
+    thumbnailsizeLocked = true;
 }
 
 void UI4chan::downloadsFinished() {
@@ -204,8 +235,9 @@ void UI4chan::errorHandler(int err) {
         p->stop();
         stop();
 
-        emit errorMessage("404 - Page not found");
         setTabTitle("Thread 404'ed");
+        emit errorMessage("404 - Page not found");
+        emit closeRequest(this);
 
         break;
 
@@ -224,4 +256,47 @@ void UI4chan::labelDirectoryChanged(QString s) {
 
 void UI4chan::setDirectory(QString d) {
     ui->leSavepath->setText(d);
+}
+
+QString UI4chan::getValues(void) {
+    QString ret;
+    QStringList list;
+
+    list << ui->leURI->text();
+    list << ui->leSavepath->text();
+    list << QString("%1").arg(ui->cbRescan->checkState());
+    list << ui->comboBox->currentText();
+    list << QString("%1").arg(ui->cbOriginalFilename->checkState());
+
+    ret = list.join(";;");
+
+    return ret;
+}
+
+void UI4chan::setValues(QString s) {
+    QStringList list;
+
+    list = s.split(";;");
+
+    ui->leURI->setText(list.at(0));
+    ui->leSavepath->setText(list.at(1));
+    ui->comboBox->setCurrentIndex(ui->comboBox->findText(list.at(3)));
+
+    if (list.value(2).toInt() == 0) {
+        ui->cbRescan->setChecked(false);
+        ui->comboBox->setEnabled(false);
+    } else {
+        ui->cbRescan->setChecked(true);
+        ui->comboBox->setEnabled(true);
+    }
+
+    ui->cbOriginalFilename->setCheckState((Qt::CheckState)(list.value(4).toInt()));
+}
+
+void UI4chan::setMaxDownloads(int i) {
+    p->setMaxDownloads(i);
+}
+
+void UI4chan::setSettings(QSettings* s) {
+    settings = s;
 }

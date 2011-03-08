@@ -9,5 +9,6 @@
         <file>resources/4chan.png</file>
         <file>resources/about.png</file>
         <file>resources/about-large.png</file>
+        <file>resources/settings.png</file>
     </qresource>
 </RCC>

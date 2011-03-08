@@ -22,6 +22,7 @@ public:
     explicit Parser(QObject *parent = 0);
 
     void reloadFile(QString filename);
+    void setMaxDownloads(int);
 signals:
 
 private:
@@ -40,6 +41,8 @@ private:
 
     bool downloading;
     bool useOriginalFilename;
+    int activeDownloads;
+    int maxDownloads;
 
 private slots:
     void replyFinished(QNetworkReply*);
