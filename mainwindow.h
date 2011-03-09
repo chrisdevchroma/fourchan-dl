@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QList>
 #include <QSettings>
+#include <QMessageBox>
 #include "ui4chan.h"
 #include "uiinfo.h"
 #include "uiconfig.h"
@@ -26,6 +27,7 @@ private:
     QString defaultDirectory;
     QSettings* settings;
     UIConfig* uiConfig;
+    UIInfo* uiInfo;
     bool autoClose;
     QSize thumbnailSize;
     int maxDownloads;
@@ -45,6 +47,7 @@ private slots:
     void setDefaultDirectory(QString);
     void loadOptions(void);
     void processCloseRequest(UI4chan*);
+    void newVersionAvailable(QString);
 };
 
 #endif // MAINWINDOW_H

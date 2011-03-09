@@ -2,6 +2,8 @@
 #define UIINFO_H
 
 #include <QDialog>
+#include <QUrl>
+#include <QtNetwork>
 
 namespace Ui {
     class UIInfo;
@@ -16,7 +18,16 @@ public:
     ~UIInfo();
 
 private:
+    void checkVersion(QString ver);
+
     Ui::UIInfo *ui;
+    QNetworkAccessManager* manager;
+
+private slots:
+    void replyFinished(QNetworkReply*);
+
+signals:
+    void newerVersionAvailable(QString);
 };
 
 #endif // UIINFO_H

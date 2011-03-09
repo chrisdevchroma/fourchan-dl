@@ -1,5 +1,10 @@
 Release notes
 
+Version 0.9.3
+* Saving state of each tab so that it automatically starts if it was running the last time
+* Automatic checking if new version is available
+* Changed Progressbar text content (always showed one more)
+
 Version 0.9.2
 * Added Configuration Dialog with options to
  - resume from previous session
@@ -26,4 +31,3 @@ Version 0.9
 
 
 List of known bugs
-* All tabs are named "no name"

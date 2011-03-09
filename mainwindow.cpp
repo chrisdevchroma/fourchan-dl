@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     uiConfig = new UIConfig(this);
+    uiInfo = new UIInfo(this);
 
     ui->setupUi(this);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     connect(uiConfig, SIGNAL(configurationChanged()), this, SLOT(loadOptions()));
+    connect(uiInfo, SIGNAL(newerVersionAvailable(QString)), this, SLOT(newVersionAvailable(QString)));
 }
 
 int MainWindow::addTab() {
@@ -44,7 +46,7 @@ int MainWindow::addTab() {
 
     ui->tabWidget->setCurrentIndex(ci);
 
-    changeTabTitle(w, "idling");
+    changeTabTitle(w, "idle");
 
     return ci;
 }
@@ -61,13 +63,10 @@ void MainWindow::closeTab(int i) {
 }
 
 void MainWindow::displayError(QString s) {
-    ui->statusBar->showMessage(s, 3000);
+    ui->statusBar->showMessage(s, 5000);
 }
 
 void MainWindow::showInfo(void) {
-    UIInfo* uiInfo;
-
-    uiInfo = new UIInfo(this);
     uiInfo->show();
 }
 
@@ -130,7 +129,8 @@ void MainWindow::saveSettings(void) {
     // Window related stuff
     settings->beginGroup("window");
         settings->setValue("position", this->pos());
-        settings->setValue("size", this->size());
+        if (this->windowState() == Qt::WindowNoState)
+            settings->setValue("size", this->size());
         settings->setValue("state", QString("%1").arg(this->windowState()));
     settings->endGroup();
 
@@ -183,6 +183,11 @@ void MainWindow::updateMaxDownloads(void) {
     for (int i=0; i<ui->tabWidget->count(); i++) {
         ((UI4chan*)ui->tabWidget->widget(i))->setMaxDownloads(maxDownloads);
     }
+}
+
+void MainWindow::newVersionAvailable(QString v) {
+    QMessageBox::information(0,"New version available", QString("There is a new version (%1) available from sourceforge<br><a href=\"http://sourceforge.net/projects/fourchan-dl/files/\">sourceforge.net/projects/fourchan-dl</a>").arg(v),QMessageBox::Ok);
+    ui->statusBar->showMessage(QString("There is a new version (%1) available to download from sourceforge.").arg(v));
 }
 
 MainWindow::~MainWindow()

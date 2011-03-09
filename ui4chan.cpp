@@ -40,6 +40,7 @@ UI4chan::UI4chan(QWidget *parent) :
         ui->leURI->setText(clipboard->text());
 
     connect(p, SIGNAL(downloadedCountChanged(int)), ui->progressBar, SLOT(setValue(int)));
+    connect(p, SIGNAL(totalCountChanged(int)), this, SLOT(setMaxImageCount(int)));
     connect(p, SIGNAL(totalCountChanged(int)), ui->progressBar, SLOT(setMaximum(int)));
     connect(p, SIGNAL(finished()), this, SLOT(downloadsFinished()));
     connect(p, SIGNAL(fileFinished(QString)), this, SLOT(addThumbnail(QString)));
@@ -54,7 +55,7 @@ UI4chan::UI4chan(QWidget *parent) :
 
     connect(timer, SIGNAL(timeout()), this, SLOT(triggerRescan()));
 
-    setTabTitle("idling");
+    setTabTitle("idle");
 }
 
 UI4chan::~UI4chan()
@@ -79,6 +80,8 @@ bool UI4chan::setThumbnailSize(QSize s) {
 
 void UI4chan::start(void) {
     QDir dir;
+
+    running = true;
 
     if (ui->leURI->text() != "") {
         ui->leURI->setEnabled(false);
@@ -117,6 +120,7 @@ void UI4chan::start(void) {
 }
 
 void UI4chan::stop(void) {
+    running = false;
     p->stop();
     timer->stop();
     ui->btnStart->setEnabled(true);
@@ -267,6 +271,7 @@ QString UI4chan::getValues(void) {
     list << QString("%1").arg(ui->cbRescan->checkState());
     list << ui->comboBox->currentText();
     list << QString("%1").arg(ui->cbOriginalFilename->checkState());
+    list << QString("%1").arg(running);
 
     ret = list.join(";;");
 
@@ -291,6 +296,8 @@ void UI4chan::setValues(QString s) {
     }
 
     ui->cbOriginalFilename->setCheckState((Qt::CheckState)(list.value(4).toInt()));
+    if (list.value(5) == "1")
+        start();
 }
 
 void UI4chan::setMaxDownloads(int i) {
@@ -299,4 +306,8 @@ void UI4chan::setMaxDownloads(int i) {
 
 void UI4chan::setSettings(QSettings* s) {
     settings = s;
+}
+
+void UI4chan::setMaxImageCount(int i) {
+    ui->progressBar->setFormat(QString("%p% (%v/%1)").arg(i));
 }

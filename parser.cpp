@@ -275,7 +275,11 @@ int Parser::setCompleted(QString s) {
 }
 
 int Parser::getTotalCount(void) {
-    return images2dl.count();
+    int ret;
+
+    ret = images2dl.count();
+
+    return ret;
 }
 
 int Parser::getDownloadedCount(void) {

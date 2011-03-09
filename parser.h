@@ -23,6 +23,8 @@ public:
 
     void reloadFile(QString filename);
     void setMaxDownloads(int);
+    int getTotalCount(void);
+    int getDownloadedCount(void);
 signals:
 
 private:
@@ -36,8 +38,6 @@ private:
     void parseHTML(void);
     bool addImage(_IMAGE img);
     int getNextImage(QString* s);
-    int getTotalCount(void);
-    int getDownloadedCount(void);
 
     bool downloading;
     bool useOriginalFilename;

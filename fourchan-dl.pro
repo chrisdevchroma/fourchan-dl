@@ -31,7 +31,7 @@ RESOURCES += \
     resources.qrc
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.2\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.3\\\""
 
 OTHER_FILES += \
     readme.txt

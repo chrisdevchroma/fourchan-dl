@@ -41,6 +41,7 @@ private:
     QSettings* settings;
 
     bool thumbnailsizeLocked;
+    bool running;
 
 private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);
@@ -54,6 +55,7 @@ private slots:
     void errorHandler(int);
     void setTabTitle(QString);
     void labelDirectoryChanged(QString);
+    void setMaxImageCount(int);
 
 public slots:
     void start(void);

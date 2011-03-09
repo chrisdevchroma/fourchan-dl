@@ -113,19 +113,19 @@
    <item row="6" column="0">
     <widget class="QProgressBar" name="progressBar">
      <property name="enabled">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
-     <property name="maximum">
-      <number>1</number>
+     <property name="minimum">
+      <number>0</number>
      </property>
      <property name="value">
-      <number>-1</number>
+      <number>13</number>
      </property>
      <property name="textVisible">
       <bool>true</bool>
      </property>
      <property name="format">
-      <string>%v/%m</string>
+      <string>%v/%m (%p%)</string>
      </property>
     </widget>
    </item>
@@ -216,7 +216,7 @@
      <y>139</y>
     </hint>
     <hint type="destinationlabel">
-     <x>179</x>
+     <x>172</x>
      <y>140</y>
     </hint>
    </hints>
@@ -228,7 +228,7 @@
    <slot>start()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>340</x>
+     <x>259</x>
      <y>142</y>
     </hint>
     <hint type="destinationlabel">
@@ -244,7 +244,7 @@
    <slot>stop()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>421</x>
+     <x>340</x>
      <y>142</y>
     </hint>
     <hint type="destinationlabel">
