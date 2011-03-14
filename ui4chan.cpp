@@ -7,12 +7,14 @@ UI4chan::UI4chan(QWidget *parent) :
 {
     QClipboard *clipboard = QApplication::clipboard();
 
+    pendingThumbnails.clear();
+
     ui->setupUi(this);
     p = new Parser();
+    tnt = new ThumbnailThread();
     timer = new QTimer();
 
-    iconSize.setHeight(200);
-    iconSize.setWidth(200);
+    setThumbnailSize(QSize(100,100));
     thumbnailsizeLocked = false;
 
     deleteFileAction = new QAction(QString("Delete File"), this);
@@ -39,14 +41,19 @@ UI4chan::UI4chan(QWidget *parent) :
     if (clipboard->text().contains("http://boards.4chan.org"))
         ui->leURI->setText(clipboard->text());
 
-    connect(p, SIGNAL(downloadedCountChanged(int)), ui->progressBar, SLOT(setValue(int)));
+//    connect(p, SIGNAL(downloadedCountChanged(int)), ui->progressBar, SLOT(setValue(int)));
+    connect(p, SIGNAL(downloadedCountChanged(int)), this, SLOT(setDownloadedCount(int)));
     connect(p, SIGNAL(totalCountChanged(int)), this, SLOT(setMaxImageCount(int)));
     connect(p, SIGNAL(totalCountChanged(int)), ui->progressBar, SLOT(setMaximum(int)));
     connect(p, SIGNAL(finished()), this, SLOT(downloadsFinished()));
-    connect(p, SIGNAL(fileFinished(QString)), this, SLOT(addThumbnail(QString)));
+//    connect(p, SIGNAL(fileFinished(QString)), this, SLOT(addThumbnail(QString)));
+    connect(p, SIGNAL(fileFinished(QString)), this, SLOT(createThumbnail(QString)));
+    connect(tnt, SIGNAL(thumbnailCreated(QString,QImage)), this, SLOT(addThumbnail(QString,QImage)));
+
     connect(p, SIGNAL(error(int)), this, SLOT(errorHandler(int)));
     connect(p, SIGNAL(threadTitleChanged(QString)), ui->lTitle, SLOT(setText(QString)));
     connect(p, SIGNAL(tabTitleChanged(QString)), this, SLOT(setTabTitle(QString)));
+
     connect(ui->cbOriginalFilename, SIGNAL(stateChanged(int)), p, SLOT(setUseOriginalFilename(int)));
 
     connect(deleteFileAction, SIGNAL(triggered()), this, SLOT(deleteFile()));
@@ -71,7 +78,8 @@ bool UI4chan::setThumbnailSize(QSize s) {
     if (!thumbnailsizeLocked) {
         iconSize = s;
         ui->listWidget->setIconSize(iconSize);
-        ui->listWidget->setGridSize(QSize(iconSize.width()+10,iconSize.height()+10));
+        tnt->setIconSize(iconSize);
+        ui->listWidget->setGridSize(QSize(iconSize.width()+10,iconSize.height()+20));
         ret = true;
     }
 
@@ -138,7 +146,8 @@ void UI4chan::chooseLocation(void) {
 
     loc = QFileDialog::getExistingDirectory(this, "Choose storage directory", ui->leSavepath->text());
 
-    ui->leSavepath->setText(loc);
+    if (loc != "")
+        ui->leSavepath->setText(loc);
 }
 
 void UI4chan::triggerRescan(void) {
@@ -148,24 +157,39 @@ void UI4chan::triggerRescan(void) {
     setTabTitle("rescanning");
 }
 
-void UI4chan::addThumbnail(QString filename) {
+void UI4chan::setDownloadedCount(int i) {
+    if (ui->progressBar->value() < i)
+        ui->progressBar->setValue(i);
+}
+
+void UI4chan::createThumbnail(QString s) {
+    tnt->addToList(s);
+    tnt->createThumbnails();
+}
+
+//void UI4chan::addThumbnail(QString filename) {
+void UI4chan::addThumbnail(QString filename, QImage tn) {
     QListWidgetItem* item;
-    QPixmap pixmapLarge, pixmapSmall;
+    QPixmap pixmap;
 
-    pixmapLarge.load(filename);
+    pixmap.convertFromImage(tn);
+//    QPixmap pixmapLarge, pixmapSmall;
 
-    if (pixmapLarge.width()<iconSize.width()
-        && pixmapLarge.height()<iconSize.height()
-        && !(settings->value("options/enlarge_thumbnails", false).toBool())) {
-        pixmapSmall = pixmapLarge;
-    } else {
-        if (settings->value("options/hq_thumbnails", false).toBool())
-            pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
-        else
-            pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio,Qt::FastTransformation);
-    }
+//    pixmapLarge.load(filename);
+
+//    if (pixmapLarge.width()<iconSize.width()
+//        && pixmapLarge.height()<iconSize.height()
+//        && !(settings->value("options/enlarge_thumbnails", false).toBool())) {
+//        pixmapSmall = pixmapLarge;
+//    } else {
+//        if (settings->value("options/hq_thumbnails", false).toBool())
+//            pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+//        else
+//            pixmapSmall = pixmapLarge.scaled(iconSize,Qt::KeepAspectRatio,Qt::FastTransformation);
+//    }
     item = new QListWidgetItem(
-            QIcon(pixmapSmall),
+//            QIcon(pixmapSmall),
+            QIcon(pixmap),
             filename,
             ui->listWidget);
 
@@ -236,7 +260,6 @@ void UI4chan::openFile(void) {
 void UI4chan::errorHandler(int err) {
     switch (err) {
     case 404:
-        p->stop();
         stop();
 
         setTabTitle("Thread 404'ed");
@@ -306,8 +329,13 @@ void UI4chan::setMaxDownloads(int i) {
 
 void UI4chan::setSettings(QSettings* s) {
     settings = s;
+//    tnt->setSettings(s);
 }
 
 void UI4chan::setMaxImageCount(int i) {
     ui->progressBar->setFormat(QString("%p% (%v/%1)").arg(i));
+}
+
+void UI4chan::debugButton(void) {
+    tnt->createThumbnails();
 }

@@ -14,13 +14,15 @@ SOURCES += main.cpp\
     parser.cpp \
     ui4chan.cpp \
     uiinfo.cpp \
-    uiconfig.cpp
+    uiconfig.cpp \
+    thumbnailthread.cpp
 
 HEADERS  += mainwindow.h \
     parser.h \
     ui4chan.h \
     uiinfo.h \
-    uiconfig.h
+    uiconfig.h \
+    thumbnailthread.h
 
 FORMS    += mainwindow.ui \
     ui4chan.ui \
@@ -31,7 +33,8 @@ RESOURCES += \
     resources.qrc
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.3\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.4\\\""
 
 OTHER_FILES += \
-    readme.txt
+    readme.txt \
+    settings.ini

@@ -105,6 +105,7 @@ void Parser::parseHTML() {
         res = rx.capturedTexts();
 
         i.originalFilename = res.at(1);
+//        i.originalFilename = "testfilename.jpg";
         i.largeURI = "http://images.4chan.org/"+res.at(2);
         i.thumbURI = res.at(3);
 
@@ -161,21 +162,36 @@ void Parser::stop(void) {
 }
 
 bool Parser::addImage(_IMAGE img) {
-    int i;
+    int i,k;
     bool alreadyInList;
 
     alreadyInList = false;
+    k = 2;
     for (i=0; i<images2dl.length(); i++) {
         if (images2dl.at(i).largeURI == img.largeURI) {
             alreadyInList = true;
             break;
+        }
+
+        if (images2dl.at(i).originalFilename == img.originalFilename) {
+            QStringList tmp;
+
+            tmp = img.originalFilename.split(QRegExp("\\(\\d+\\)"));
+            if  (tmp.count() > 1) // Already has a number in brackets in filename
+                img.originalFilename = QString("%1(%2)%3").arg(tmp.at(0)).
+                                       arg(k++).
+                                       arg(tmp.at(1));
+            else
+                img.originalFilename = img.originalFilename.replace("."," (1).");
         }
     }
 
     if (!alreadyInList) {
         // Check if already downloaded
         QFile f;
+        bool fileExists;
 
+        fileExists = false;
         if (useOriginalFilename)
             f.setFileName(savePath+"/"+img.originalFilename);
         else {
@@ -195,13 +211,16 @@ bool Parser::addImage(_IMAGE img) {
 
         if (f.exists()) {
             img.downloaded = true;
+            fileExists = true;
+        }
 
+        images2dl.append(img);
+        emit totalCountChanged(getTotalCount());
+
+        if (fileExists) {
             emit downloadedCountChanged(getDownloadedCount());
             emit fileFinished(f.fileName());
         }
-        images2dl.append(img);
-
-        emit totalCountChanged(getTotalCount());
     }
 
     return !alreadyInList;

@@ -101,7 +101,7 @@ void MainWindow::restoreSettings(void) {
     if (p != QPoint(0,0))
         this->move(p);
 
-    if (s != QSize(0,0) && state != Qt::WindowNoState)
+    if (s != QSize(0,0))
         this->resize(s);
 
     if (state != Qt::WindowNoState)

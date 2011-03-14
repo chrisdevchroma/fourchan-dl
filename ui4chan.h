@@ -8,7 +8,9 @@
 #include <QDesktopServices>
 #include <QStyle>
 #include <QSettings>
+#include <QImage>
 #include "parser.h"
+#include "thumbnailthread.h"
 
 namespace Ui {
     class UI4chan;
@@ -32,6 +34,7 @@ public:
 private:
     Ui::UI4chan *ui;
     Parser* p;
+    ThumbnailThread* tnt;
     QTimer* timer;
     QList<int> timeoutValues;
     QSize iconSize;
@@ -39,6 +42,7 @@ private:
     QAction* reloadFileAction;
     QAction* openFileAction;
     QSettings* settings;
+    QStringList pendingThumbnails;
 
     bool thumbnailsizeLocked;
     bool running;
@@ -47,7 +51,9 @@ private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);
     void chooseLocation(void);
     void triggerRescan(void);
-    void addThumbnail(QString);
+//    void addThumbnail(QString);
+    void createThumbnail(QString);
+    void addThumbnail(QString, QImage);
     void downloadsFinished(void);
     void deleteFile(void);
     void reloadFile(void);
@@ -56,6 +62,8 @@ private slots:
     void setTabTitle(QString);
     void labelDirectoryChanged(QString);
     void setMaxImageCount(int);
+    void debugButton(void);
+    void setDownloadedCount(int);
 
 public slots:
     void start(void);
@@ -67,6 +75,9 @@ signals:
     void tabTitleChanged(UI4chan*,QString);
     void directoryChanged(QString);
     void closeRequest(UI4chan*);
+
+//protected:
+//    void keyPressEvent(QKeyEvent* ke);
 };
 
 #endif // UI4CHAN_H

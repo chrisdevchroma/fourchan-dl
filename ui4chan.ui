@@ -291,5 +291,6 @@
   <slot>stop()</slot>
   <slot>chooseLocation()</slot>
   <slot>labelDirectoryChanged(QString)</slot>
+  <slot>debugButton()</slot>
  </slots>
 </ui>
