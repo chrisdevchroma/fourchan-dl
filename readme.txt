@@ -2,6 +2,17 @@ If you find bugs and/or have feature requests, please use the tracking system pr
 
 Release notes
 
+Version 0.9.5
+* Automatic reloading of partially received images
+* Added freely configurable rescan timer values
+* Added option to select if directory values should be saved within the session (inheriting directory value when creating a new tab)
+* Added progress bar indicating how many thumbnails are in the queue to be rendered
+* Fixed bug, where reloading of files with option "Save with original filename" lead to reloading wrong image
+* Fixed wrong renaming of images when original filenames are equal due to elided text at 4chan post
+* Some smaller bugfixes
+
+- Storing of rescanning values have changed in settings.ini, so at the first start of this version the values have to be reset
+
 Version 0.9.4
 * Moved thumbnails creation into own thread to not block the UI
 * for each thread files with the same filename are saved with an appended counter

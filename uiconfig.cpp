@@ -6,12 +6,19 @@ UIConfig::UIConfig(QWidget *parent) :
     ui(new Ui::UIConfig)
 {
     ui->setupUi(this);
+    settings = new QSettings("settings.ini", QSettings::IniFormat);
+    timeoutValueEditor = new UIListEditor(this);
+    timeoutValueEditor->setModal(true);
+
+    loadSettings();
+
+    connect(timeoutValueEditor, SIGNAL(valuesChanged()), this, SLOT(loadSettings()));
 }
 
-void UIConfig::setSettings(QSettings* s) {
+void UIConfig::loadSettings(void) {
+    QStringList sl;
+    int index;
     bool b;
-
-    settings = s;
 
     settings->beginGroup("options");
     ui->leDefaultSavepath->setText(settings->value("default_directory","").toString());
@@ -41,11 +48,65 @@ void UIConfig::setSettings(QSettings* s) {
     else
         ui->cbHQThumbnail->setChecked(false);
 
+    b = settings->value("default_original_filename",false).toBool();
+    if (b)
+        ui->cbDefaultOriginalFilename->setChecked(true);
+    else
+        ui->cbDefaultOriginalFilename->setChecked(false);
+
+    b = settings->value("remember_directory",false).toBool();
+    if (b)
+        ui->cbRememberDirectory->setChecked(true);
+    else
+        ui->cbRememberDirectory->setChecked(false);
+
     ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",1).toInt());
     ui->sbThumbnailHeight->setValue(settings->value("thumbnail_height",200).toInt());
     ui->sbThumbnailWidth->setValue(settings->value("thumbnail_width",200).toInt());
 
+    sl = settings->value("timeout_values", (QStringList()<<"30"<<"60"<<"120"<<"300"<<"600")).toStringList();
+    ui->cbRescanInterval->clear();
+    ui->cbRescanInterval->addItem("Never", 0);
+    foreach (QString s, sl) {
+        int value;
+        int i;
+        bool ok;
+        QString text;
+
+        i = s.toInt(&ok);
+        if (ok) {
+            if (i > 60 && ((i%60) == 0)) {              // Display as minutes
+                if (i > 3600 && ((i%3600) == 0)) {      // Display as hours
+                    if (i > 86400 && ((i%86400)==0)) {  // Display as days
+                        value = i/86400;
+                        text = "days";
+                    }
+                    else {
+                        value = i/3600;
+                        text = "hours";
+                    }
+                }
+                else {
+                    value = i/60;
+                    text = "minutes";
+                }
+            }
+            else {
+                value = i;
+                text = "seconds";
+            }
+
+            ui->cbRescanInterval->addItem(QString("every %1 %2").arg(value).arg(text), i);
+        }
+    }
+
+    index = ui->cbRescanInterval->findData(settings->value("default_timeout", 0).toInt());
+    if (index != -1) ui->cbRescanInterval->setCurrentIndex(index);
+    else ui->cbRescanInterval->setCurrentIndex(0);
+
     settings->endGroup();
+
+    timeoutValueEditor->loadSettings();
 }
 
 void UIConfig::accept(void) {
@@ -72,9 +133,21 @@ void UIConfig::accept(void) {
         else
             settings->setValue("hq_thumbnails", false);
 
+        if (ui->cbDefaultOriginalFilename->isChecked())
+            settings->setValue("default_original_filename", true);
+        else
+            settings->setValue("default_original_filename", false);
+
+        if (ui->cbRememberDirectory->isChecked())
+            settings->setValue("remember_directory", true);
+        else
+            settings->setValue("remember_directory", false);
+
         settings->setValue("concurrent_downloads", ui->sbConcurrentDownloads->value());
         settings->setValue("thumbnail_width", ui->sbThumbnailWidth->value());
         settings->setValue("thumbnail_height", ui->sbThumbnailHeight->value());
+
+        settings->setValue("default_timeout", ui->cbRescanInterval->itemData(ui->cbRescanInterval->currentIndex()));
     settings->endGroup();
     settings->sync();
 
@@ -92,6 +165,10 @@ void UIConfig::chooseLocation(void) {
     loc = QFileDialog::getExistingDirectory(this, "Choose storage directory", ui->leDefaultSavepath->text());
 
     ui->leDefaultSavepath->setText(loc);
+}
+
+void UIConfig::editTimeoutValues(void) {
+    timeoutValueEditor->show();
 }
 
 UIConfig::~UIConfig()

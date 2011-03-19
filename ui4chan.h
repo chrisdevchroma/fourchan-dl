@@ -9,6 +9,7 @@
 #include <QStyle>
 #include <QSettings>
 #include <QImage>
+#include <QCloseEvent>
 #include "parser.h"
 #include "thumbnailthread.h"
 
@@ -29,7 +30,8 @@ public:
     void setValues(QString);
     bool setThumbnailSize(QSize s);
     void setMaxDownloads(int);
-    void setSettings(QSettings*);
+    void useOriginalFilenames(bool);
+    void updateSettings(void);
 
 private:
     Ui::UI4chan *ui;
@@ -47,11 +49,12 @@ private:
     bool thumbnailsizeLocked;
     bool running;
 
+    void loadSettings(void);
+
 private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);
     void chooseLocation(void);
     void triggerRescan(void);
-//    void addThumbnail(QString);
     void createThumbnail(QString);
     void addThumbnail(QString, QImage);
     void downloadsFinished(void);
@@ -59,11 +62,12 @@ private slots:
     void reloadFile(void);
     void openFile(void);
     void errorHandler(int);
+    void messageHandler(QString);
     void setTabTitle(QString);
-    void labelDirectoryChanged(QString);
     void setMaxImageCount(int);
     void debugButton(void);
     void setDownloadedCount(int);
+    void setPendingThumbnails(int);
 
 public slots:
     void start(void);
@@ -76,7 +80,8 @@ signals:
     void directoryChanged(QString);
     void closeRequest(UI4chan*);
 
-//protected:
+protected:
+    void closeEvent(QCloseEvent *);
 //    void keyPressEvent(QKeyEvent* ke);
 };
 

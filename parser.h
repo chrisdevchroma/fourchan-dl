@@ -48,6 +48,8 @@ private slots:
     void replyFinished(QNetworkReply*);
     void download(bool b);
     int setCompleted(QString s);
+    void dlProgress(qint64 b, qint64 t) {qDebug() << QString("%1 of %2").arg(b).arg(t);}
+    void replyError(QNetworkReply::NetworkError e) {qDebug() << "reply error " << e;}
 
 public slots:
     void setURI(QString pURI) { uri = QUrl(pURI); sURI = pURI;}
@@ -65,6 +67,7 @@ signals:
     void error(int);
     void threadTitleChanged(QString);
     void tabTitleChanged(QString);
+    void message(QString);
 };
 
 #endif // PARSER_H

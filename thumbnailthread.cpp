@@ -20,22 +20,29 @@ void ThumbnailThread::createThumbnails() {
 }
 
 void ThumbnailThread::run() {
+    QString currentFilename;
+    int iconWidth;
+    int iconHeight;
+    bool enlargeThumbnails;
+    bool hqRendering;
+
     forever {
         mutex.lock();
-        QStringList sl = list;
-        list.clear();
-        int iconWidth = iconSize->width();
-        int iconHeight = iconSize->height();
-        bool enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
-        bool hqRendering = settings->value("options/hq_thumbnails", false).toBool();
-//        qDebug()<<"List size:" << sl.count();
-        newImages = false;
+        if (list.count()>0) {
+            currentFilename = list.front();
+            list.pop_front();
+            newImages = true;
+        }
+        iconWidth = iconSize->width();
+        iconHeight = iconSize->height();
+        enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
+        hqRendering = settings->value("options/hq_thumbnails", false).toBool();
         mutex.unlock();
 
-        while (!sl.isEmpty()) {
+        if (newImages) {
             QImage original, tn;
 
-            original.load(sl.at(0));
+            original.load(currentFilename);
 
             if (original.width()<iconWidth
                 && original.height()<iconHeight
@@ -48,14 +55,20 @@ void ThumbnailThread::run() {
                     tn = original.scaled(*iconSize,Qt::KeepAspectRatio,Qt::FastTransformation);
             }
 
-            emit thumbnailCreated(sl.at(0), tn);
-            sl.pop_front();
+            emit thumbnailCreated(currentFilename, tn);
+            mutex.lock();
+            emit pendingThumbnails(list.count());
+            newImages = false;
+
+            if (list.count() == 0)
+                condition.wait(&mutex);
+            mutex.unlock();
         }
 
-        mutex.lock();
-        if (!newImages)
-        condition.wait(&mutex);
-        mutex.unlock();
+//        mutex.lock();
+//        if (!newImages)
+//        condition.wait(&mutex);
+//        mutex.unlock();
     }
 }
 

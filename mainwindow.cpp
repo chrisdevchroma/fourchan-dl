@@ -10,17 +10,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
-    qDebug()<< "Settings status" << settings->status();
-
     ui->tabWidget->removeTab(0);
 
-    uiConfig->setSettings(settings);
-
     loadOptions();
-    restoreSettings();
-
-    updateThumbnailSize();
-    updateMaxDownloads();
+    restoreWindowSettings();
+    updateWidgetSettings();
 
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     connect(uiConfig, SIGNAL(configurationChanged()), this, SLOT(loadOptions()));
@@ -34,10 +28,8 @@ int MainWindow::addTab() {
     w = new UI4chan(this);
 
     ci = ui->tabWidget->addTab(w, "no name");
-    w->setDirectory(defaultDirectory);
-    w->setSettings(settings);
-    w->setThumbnailSize(thumbnailSize);
-    w->setMaxDownloads(maxDownloads);
+    if (settings->value("options/remember_directory", false).toBool())
+        w->setDirectory(defaultDirectory);
 
     connect(w, SIGNAL(errorMessage(QString)), this, SLOT(displayError(QString)));
     connect(w, SIGNAL(tabTitleChanged(UI4chan*, QString)), this, SLOT(changeTabTitle(UI4chan*, QString)));
@@ -54,11 +46,15 @@ int MainWindow::addTab() {
 void MainWindow::closeTab(int i) {
     UI4chan* w;
 
-    if (ui->tabWidget->count()>1) {
-        ui->tabWidget->setCurrentIndex(i);
-        w = (UI4chan*)ui->tabWidget->widget(i);
-        w->close();
+    ui->tabWidget->setCurrentIndex(i);
+    w = (UI4chan*)ui->tabWidget->widget(i);
+    if (w->close())
         ui->tabWidget->removeTab(i);
+    else
+        qDebug() << "Close widget event not accepted";
+
+    if (ui->tabWidget->count() == 0) {
+        addTab();
     }
 }
 
@@ -75,7 +71,8 @@ void MainWindow::showConfiguration(void) {
 }
 
 void MainWindow::setDefaultDirectory(QString d) {
-    defaultDirectory = d;
+    if (settings->value("options/remember_directory", false).toBool())
+        defaultDirectory = d;
 }
 
 void MainWindow::changeTabTitle(UI4chan* w, QString s) {
@@ -85,7 +82,7 @@ void MainWindow::changeTabTitle(UI4chan* w, QString s) {
     ui->tabWidget->setTabText(i, s);
 }
 
-void MainWindow::restoreSettings(void) {
+void MainWindow::restoreWindowSettings(void) {
     // Restore window position
     QPoint p;
     QSize s;
@@ -158,8 +155,7 @@ void MainWindow::loadOptions(void) {
         thumbnailSize.setHeight(settings->value("thumbnail_height", 200).toInt());
         maxDownloads = settings->value("concurrent_downloads", 1).toInt();
 
-        updateThumbnailSize();
-        updateMaxDownloads();
+        updateWidgetSettings();
     settings->endGroup();
 }
 
@@ -168,20 +164,13 @@ void MainWindow::processCloseRequest(UI4chan* w) {
         int i;
 
         i = ui->tabWidget->indexOf((QWidget*)w);
-        w->close();
-        ui->tabWidget->removeTab(i);
+        closeTab(i);
     }
 }
 
-void MainWindow::updateThumbnailSize(void) {
+void MainWindow::updateWidgetSettings(void) {
     for (int i=0; i<ui->tabWidget->count(); i++) {
-        ((UI4chan*)ui->tabWidget->widget(i))->setThumbnailSize(thumbnailSize);
-    }
-}
-
-void MainWindow::updateMaxDownloads(void) {
-    for (int i=0; i<ui->tabWidget->count(); i++) {
-        ((UI4chan*)ui->tabWidget->widget(i))->setMaxDownloads(maxDownloads);
+        ((UI4chan*)ui->tabWidget->widget(i))->updateSettings();
     }
 }
 

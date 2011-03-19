@@ -92,7 +92,7 @@
  <connections>
   <connection>
    <sender>actionAdd_Tab</sender>
-   <signal>activated()</signal>
+   <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>addTab()</slot>
    <hints>

@@ -110,7 +110,7 @@
      </item>
     </layout>
    </item>
-   <item row="6" column="0">
+   <item row="7" column="0">
     <widget class="QProgressBar" name="progressBar">
      <property name="enabled">
       <bool>true</bool>
@@ -189,6 +189,19 @@
      </property>
     </widget>
    </item>
+   <item row="6" column="0">
+    <widget class="QProgressBar" name="pbPendingThumbnails">
+     <property name="value">
+      <number>24</number>
+     </property>
+     <property name="invertedAppearance">
+      <bool>false</bool>
+     </property>
+     <property name="format">
+      <string>Thumbnails to create %v</string>
+     </property>
+    </widget>
+   </item>
   </layout>
   <action name="actionDeleteFile">
    <property name="text">
@@ -228,7 +241,7 @@
    <slot>start()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>259</x>
+     <x>340</x>
      <y>142</y>
     </hint>
     <hint type="destinationlabel">
@@ -244,7 +257,7 @@
    <slot>stop()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>340</x>
+     <x>421</x>
      <y>142</y>
     </hint>
     <hint type="destinationlabel">
@@ -269,28 +282,11 @@
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>leSavepath</sender>
-   <signal>textChanged(QString)</signal>
-   <receiver>UI4chan</receiver>
-   <slot>labelDirectoryChanged(QString)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>95</x>
-     <y>86</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>127</x>
-     <y>50</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
  <slots>
   <slot>start()</slot>
   <slot>stop()</slot>
   <slot>chooseLocation()</slot>
-  <slot>labelDirectoryChanged(QString)</slot>
   <slot>debugButton()</slot>
  </slots>
 </ui>

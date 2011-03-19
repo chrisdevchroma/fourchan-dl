@@ -32,10 +32,9 @@ private:
     QSize thumbnailSize;
     int maxDownloads;
 
-    void restoreSettings(void);
+    void restoreWindowSettings(void);
     void saveSettings(void);
-    void updateThumbnailSize(void);
-    void updateMaxDownloads(void);
+    void updateWidgetSettings(void);
 
 private slots:
     int addTab(void);

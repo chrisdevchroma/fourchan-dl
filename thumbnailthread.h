@@ -34,6 +34,7 @@ public slots:
 
 signals:
     void thumbnailCreated(QString, QImage);
+    void pendingThumbnails(int);
 };
 
 #endif // THUMBNAILTHREAD_H

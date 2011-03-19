@@ -20,67 +20,81 @@ Parser::Parser(QObject *parent) :
 void Parser::replyFinished(QNetworkReply* r) {
     QString requestURI;
 
-    if (r->isFinished()) {
-        requestURI = r->request().url().toString();
+    if (r->bytesAvailable() < r->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
+        qDebug() << QString("Received only partial data of %1. Reinitiating download.").arg(r->url().toString());
+        emit message(QString("Received only partial data of %1. Reinitiating download.").arg(r->url().toString()));
 
-        if (requestURI.indexOf(QRegExp("(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive)) != -1) {
-            QFile f;
-            QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
-            QStringList res;
-            int pos;
+        manager->get(QNetworkRequest(r->url()));
+        r->deleteLater();
+    }
+    else {
+        if (r->isFinished()) {
+            requestURI = r->request().url().toString();
 
-            pos = 0;
+            if (requestURI.indexOf(QRegExp("(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive)) != -1) {
+                QFile f;
+                QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
+                QStringList res;
+                int pos;
 
-            pos = rx.indexIn(requestURI);
-            res = rx.capturedTexts();
+                pos = 0;
 
-            if (pos != -1) {
-                f.setFileName(savePath+"/"+res.at(1)+res.at(2));
+                pos = rx.indexIn(requestURI);
+                res = rx.capturedTexts();
 
-                if (useOriginalFilename) {
-                    _IMAGE tmp;
+                if (pos != -1) {
+                    f.setFileName(savePath+"/"+res.at(1)+res.at(2));
 
-                    for (int i=0; i<images2dl.count(); i++) {
-                        if (images2dl.at(i).largeURI.endsWith("/"+res.at(1)+res.at(2))) {
-                            tmp = images2dl.at(i);
+                    if (useOriginalFilename) {
+                        _IMAGE tmp;
 
-                            f.setFileName(savePath+"/"+tmp.originalFilename);
-                            break;
+                        for (int i=0; i<images2dl.count(); i++) {
+                            if (images2dl.at(i).largeURI.endsWith("/"+res.at(1)+res.at(2))) {
+                                tmp = images2dl.at(i);
+
+                                f.setFileName(savePath+"/"+tmp.originalFilename);
+                                break;
+                            }
+                        }
+                    }
+
+                    f.open(QIODevice::ReadWrite);
+
+                    f.write(r->readAll());
+                    f.close();
+
+                    emit fileFinished(f.fileName());
+                    activeDownloads--;
+
+                    setCompleted(requestURI);
+                }
+
+                if (activeDownloads<maxDownloads) {
+                    for (int i=activeDownloads; i<maxDownloads; i++) {
+                        QString imgURI;
+                        QNetworkReply* nr;
+
+                        if (0 != getNextImage(&imgURI)) {
+                            nr = manager->get(QNetworkRequest(QUrl(imgURI)));
+                            //                    connect(nr, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(dlProgress(qint64,qint64)));
+                            connect(nr,SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
+                            activeDownloads++;
                         }
                     }
                 }
-
-                f.open(QIODevice::ReadWrite);
-
-                f.write(r->readAll());
-                f.close();
-
-                emit fileFinished(f.fileName());
-                activeDownloads--;
-
-                setCompleted(requestURI);
             }
+            else {
+                html = r->readAll();
 
-            for (int i=activeDownloads; i<maxDownloads; i++) {
-                QString imgURI;
-
-                if (0 != getNextImage(&imgURI)) {
-                    manager->get(QNetworkRequest(QUrl(imgURI)));
-                    activeDownloads++;
+                if (html.contains("4chan - 404")) {
+                    emit error(404);
                 }
+                else
+                    parseHTML();
             }
-        }
-        else {
-            html = r->readAll();
 
-            if (html.contains("4chan - 404")) {
-                emit error(404);
-            }
-            else
-                parseHTML();
+            r->deleteLater();
         }
-
-        r->deleteLater();
     }
 }
 
@@ -111,7 +125,10 @@ void Parser::parseHTML() {
 
         if (pos != -1){
             if (addImage(i))
+            {
+                qDebug() << "Added image " << i.largeURI;
                 imagesAdded = true;
+            }
         }
     }
 
@@ -124,7 +141,8 @@ void Parser::parseHTML() {
             emit threadTitleChanged(res.at(1));
     }
 
-    if (!imagesAdded){
+    if (!imagesAdded && (getDownloadedCount() == getTotalCount())){
+        download(false);
         emit finished();
         emit tabTitleChanged("finished");
     } else {
@@ -141,13 +159,16 @@ void Parser::start(void) {
 void Parser::download(bool b) {
     if (b) {
         QString imgURI;
+        QNetworkReply* nr;
 
         downloading = true;
         emit tabTitleChanged("downloading");
 
         for (int i=activeDownloads; i<maxDownloads; i++) {
             if (0 != getNextImage(&imgURI)) {
-                manager->get(QNetworkRequest(QUrl(imgURI)));
+                nr = manager->get(QNetworkRequest(QUrl(imgURI)));
+//                connect(nr, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(dlProgress(qint64,qint64)));
+                connect(nr,SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
                 activeDownloads++;
             }
         }
@@ -164,8 +185,10 @@ void Parser::stop(void) {
 bool Parser::addImage(_IMAGE img) {
     int i,k;
     bool alreadyInList;
+    bool fileExists;
 
     alreadyInList = false;
+    fileExists = false;
     k = 2;
     for (i=0; i<images2dl.length(); i++) {
         if (images2dl.at(i).largeURI == img.largeURI) {
@@ -189,9 +212,6 @@ bool Parser::addImage(_IMAGE img) {
     if (!alreadyInList) {
         // Check if already downloaded
         QFile f;
-        bool fileExists;
-
-        fileExists = false;
         if (useOriginalFilename)
             f.setFileName(savePath+"/"+img.originalFilename);
         else {
@@ -223,7 +243,7 @@ bool Parser::addImage(_IMAGE img) {
         }
     }
 
-    return !alreadyInList;
+    return (!alreadyInList && !fileExists);
 }
 
 int Parser::getNextImage(QString* s) {
@@ -282,7 +302,7 @@ int Parser::setCompleted(QString s) {
             emit tabTitleChanged(QString("%1/%2").arg(getDownloadedCount()).arg(getTotalCount()));
 
             if (getDownloadedCount() == getTotalCount()) {
-                downloading = false;
+                download(false);
                 emit finished();
                 emit tabTitleChanged("finished");
             }
@@ -319,17 +339,24 @@ void Parser::reloadFile(QString filename) {
     QString f;
     _IMAGE tmp;
     int i;
+    bool checkOrgFilename;
+    bool checkLargeURI;
 
-    f = filename.right(filename.lastIndexOf("/"));
+    f = filename.right(filename.count()-filename.lastIndexOf("/")-1);
 
     for (i=0; i<images2dl.count(); i++) {
-        if (images2dl.at(i).largeURI.endsWith(f)) {
+        checkOrgFilename = images2dl.at(i).originalFilename.endsWith(f);
+        checkLargeURI = images2dl.at(i).largeURI.endsWith(f);
+        if ((useOriginalFilename && checkOrgFilename)
+            || (!useOriginalFilename && checkLargeURI)) {
             tmp = images2dl.at(i);
 
             tmp.downloaded = false;
             tmp.requested = false;
 
             images2dl.replace(i, tmp);
+
+            break;
         }
     }
 
