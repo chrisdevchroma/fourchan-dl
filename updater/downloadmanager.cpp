@@ -60,7 +60,8 @@ void DownloadManager::replyFinished(QNetworkReply* r) {
             }
             else if (mimeType.startsWith("text/html")) {
                 p("Received HTML content. Don't know what to do.");
-//                exit(1);
+                emit error("There is a problem downloading " + r->url().toString() + ". Exiting.");
+                exit(1);
             }
             else {
                 p("Finished download "+requestURI);
