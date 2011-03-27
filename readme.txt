@@ -1,6 +1,7 @@
 If you find bugs and/or have feature requests, please use the tracking system provided by sourceforge.
 
-As of version 0.9.6 each release is tested under Windows 7 professional (amd64) and Xubuntu 10.10 (amd64)
+As of version 0.9.6 each release is tested under Windows 7 professional (amd64) and Xubuntu 10.10 (amd64).
+When building from source make sure that you copy the "au" executable into the same folder as "fourchan-dl".
 
 Release notes
 
