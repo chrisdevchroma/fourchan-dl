@@ -18,7 +18,6 @@ SOURCES += main.cpp\
     thumbnailthread.cpp \
     uilisteditor.cpp \
     applicationupdateinterface.cpp \
-    applicationupdateinterface.cpp \
     updater/commands.cpp
 
 HEADERS  += mainwindow.h \
@@ -28,10 +27,7 @@ HEADERS  += mainwindow.h \
     uiconfig.h \
     thumbnailthread.h \
     uilisteditor.h \
-    applicationupdateinterface.h \
-    updater/commands.h \
     defines.h \
-    updater/commands.h \
     applicationupdateinterface.h \
     updater/commands.h
 
