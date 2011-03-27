@@ -27,6 +27,8 @@ void UIListEditor::reject() {
 
 void UIListEditor::addItem() {
     ui->listWidget->addItem("???");
+
+    editItem(ui->listWidget->item(ui->listWidget->count()-1));
 }
 
 void UIListEditor::removeItem() {

@@ -8,6 +8,8 @@
 #include "ui4chan.h"
 #include "uiinfo.h"
 #include "uiconfig.h"
+#include "applicationupdateinterface.h"
+#include "defines.h"
 
 namespace Ui {
     class MainWindow;
@@ -28,6 +30,7 @@ private:
     QSettings* settings;
     UIConfig* uiConfig;
     UIInfo* uiInfo;
+    ApplicationUpdateInterface* aui;
     bool autoClose;
     QSize thumbnailSize;
     int maxDownloads;
@@ -45,8 +48,9 @@ private slots:
     void showConfiguration(void);
     void setDefaultDirectory(QString);
     void loadOptions(void);
-    void processCloseRequest(UI4chan*);
+    void processCloseRequest(UI4chan*, int);
     void newVersionAvailable(QString);
+    void createTab(QString);
 };
 
 #endif // MAINWINDOW_H

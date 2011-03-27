@@ -68,6 +68,7 @@ private slots:
     void debugButton(void);
     void setDownloadedCount(int);
     void setPendingThumbnails(int);
+    void processCloseRequest();
 
 public slots:
     void start(void);
@@ -78,7 +79,8 @@ signals:
     void errorMessage(QString);
     void tabTitleChanged(UI4chan*,QString);
     void directoryChanged(QString);
-    void closeRequest(UI4chan*);
+    void closeRequest(UI4chan*, int);
+    void createTabRequest(QString);
 
 protected:
     void closeEvent(QCloseEvent *);

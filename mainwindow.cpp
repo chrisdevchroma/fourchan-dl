@@ -7,6 +7,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     uiConfig = new UIConfig(this);
     uiInfo = new UIInfo(this);
+    aui = new ApplicationUpdateInterface(this);
 
     ui->setupUi(this);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
@@ -33,14 +34,22 @@ int MainWindow::addTab() {
 
     connect(w, SIGNAL(errorMessage(QString)), this, SLOT(displayError(QString)));
     connect(w, SIGNAL(tabTitleChanged(UI4chan*, QString)), this, SLOT(changeTabTitle(UI4chan*, QString)));
-    connect(w, SIGNAL(closeRequest(UI4chan*)), this, SLOT(processCloseRequest(UI4chan*)));
+    connect(w, SIGNAL(closeRequest(UI4chan*, int)), this, SLOT(processCloseRequest(UI4chan*, int)));
     connect(w, SIGNAL(directoryChanged(QString)), this, SLOT(setDefaultDirectory(QString)));
+    connect(w, SIGNAL(createTabRequest(QString)), this, SLOT(createTab(QString)));
 
     ui->tabWidget->setCurrentIndex(ci);
 
     changeTabTitle(w, "idle");
 
     return ci;
+}
+
+void MainWindow::createTab(QString s) {
+    int index;
+
+    index = addTab();
+    ((UI4chan*)ui->tabWidget->widget(index))->setValues(s);
 }
 
 void MainWindow::closeTab(int i) {
@@ -159,11 +168,16 @@ void MainWindow::loadOptions(void) {
     settings->endGroup();
 }
 
-void MainWindow::processCloseRequest(UI4chan* w) {
-    if (settings->value("options/automatic_close", false).toBool()) {
-        int i;
+void MainWindow::processCloseRequest(UI4chan* w, int reason) {
+    int i;
+    i = ui->tabWidget->indexOf((QWidget*)w);
 
-        i = ui->tabWidget->indexOf((QWidget*)w);
+    if (reason == 404) {
+        if (settings->value("options/automatic_close", false).toBool()) {
+            closeTab(i);
+        }
+    }
+    else {
         closeTab(i);
     }
 }
@@ -175,8 +189,33 @@ void MainWindow::updateWidgetSettings(void) {
 }
 
 void MainWindow::newVersionAvailable(QString v) {
-    QMessageBox::information(0,"New version available", QString("There is a new version (%1) available from sourceforge<br><a href=\"http://sourceforge.net/projects/fourchan-dl/files/\">sourceforge.net/projects/fourchan-dl</a>").arg(v),QMessageBox::Ok);
     ui->statusBar->showMessage(QString("There is a new version (%1) available to download from sourceforge.").arg(v));
+#ifdef USE_UPDATER
+    switch (QMessageBox::question(0,"New version available",
+                                  QString("There is a new version (%1) available from sourceforge<br><a href=\"http://sourceforge.net/projects/fourchan-dl/files/\">sourceforge.net/projects/fourchan-dl</a><br />Do you want to update now?").arg(v),
+                                  QMessageBox::Yes | QMessageBox::No)) {
+    case QMessageBox::Ok:
+    case QMessageBox::Yes:
+        qDebug() << "Startet updater " << QString("%1/%2").arg(QDir::currentPath()).arg(UPDATER_NAME);
+        if (QProcess::startDetached(QString("%1/%2").arg(QDir::currentPath()).arg(UPDATER_NAME))) {
+            ui->statusBar->showMessage("Startet updater");
+        }
+        else {
+            ui->statusBar->showMessage("Unable to start process");
+        }
+        aui->startUpdate(v);
+        break;
+
+    case QMessageBox::No:
+    default:
+        break;
+    }
+#else
+    QMessageBox::information(0,
+                             "New version available",
+                             QString("There is a new version (%1) available from sourceforge<br><a href=\"http://sourceforge.net/projects/fourchan-dl/files/\">sourceforge.net/projects/fourchan-dl</a>").arg(v),
+                             QMessageBox::Ok);
+#endif
 }
 
 MainWindow::~MainWindow()

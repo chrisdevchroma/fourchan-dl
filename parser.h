@@ -32,6 +32,7 @@ private:
     QString sURI;
     QString savePath;
     QString html;
+    QString values;
     QNetworkAccessManager* manager;
     QList<_IMAGE> images2dl;
 
@@ -57,6 +58,7 @@ public slots:
     void start(void);
     void stop(void);
     void setUseOriginalFilename(int);
+    void setValues(QString s) {values = s;}
 
 signals:
     void finished(void);
@@ -68,6 +70,8 @@ signals:
     void threadTitleChanged(QString);
     void tabTitleChanged(QString);
     void message(QString);
+    void createTabRequest(QString);
+    void closeTabRequest();
 };
 
 #endif // PARSER_H

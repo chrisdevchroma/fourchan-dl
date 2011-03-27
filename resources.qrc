@@ -17,5 +17,6 @@
         <file>resources/go-down.png</file>
         <file>resources/go-top.png</file>
         <file>resources/go-up.png</file>
+        <file>resources/4chan.ico</file>
     </qresource>
 </RCC>

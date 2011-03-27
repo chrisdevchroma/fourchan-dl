@@ -198,7 +198,7 @@
       <bool>false</bool>
      </property>
      <property name="format">
-      <string>Thumbnails to create %v</string>
+      <string>Another %v thumbnails to create</string>
      </property>
     </widget>
    </item>

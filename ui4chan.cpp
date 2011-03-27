@@ -10,7 +10,7 @@ UI4chan::UI4chan(QWidget *parent) :
     pendingThumbnails.clear();
 
     ui->setupUi(this);
-    p = new Parser();
+    p = new Parser(this);
     tnt = new ThumbnailThread();
     timer = new QTimer();
     settings = new QSettings("settings.ini", QSettings::IniFormat);
@@ -29,12 +29,15 @@ UI4chan::UI4chan(QWidget *parent) :
     ui->progressBar->setMaximum(-1);
     ui->progressBar->setValue(0);
     ui->progressBar->setEnabled(false);
+    ui->progressBar->setVisible(false);
     ui->pbPendingThumbnails->setVisible(false);
+
 
     if (clipboard->text().contains("http://boards.4chan.org"))
         ui->leURI->setText(clipboard->text());
 
-    connect(p, SIGNAL(downloadedCountChanged(int)), ui->progressBar, SLOT(setValue(int)));
+//    connect(p, SIGNAL(downloadedCountChanged(int)), ui->progressBar, SLOT(setValue(int)));
+    connect(p, SIGNAL(downloadedCountChanged(int)), this, SLOT(setDownloadedCount(int)));
     connect(p, SIGNAL(totalCountChanged(int)), this, SLOT(setMaxImageCount(int)));
     connect(p, SIGNAL(totalCountChanged(int)), ui->progressBar, SLOT(setMaximum(int)));
     connect(p, SIGNAL(totalCountChanged(int)), ui->pbPendingThumbnails, SLOT(setMaximum(int)));
@@ -48,7 +51,11 @@ UI4chan::UI4chan(QWidget *parent) :
     connect(p, SIGNAL(threadTitleChanged(QString)), ui->lTitle, SLOT(setText(QString)));
     connect(p, SIGNAL(tabTitleChanged(QString)), this, SLOT(setTabTitle(QString)));
 
+    connect(p, SIGNAL(createTabRequest(QString)), this, SIGNAL(createTabRequest(QString)));
+    connect(p, SIGNAL(closeTabRequest()), this, SLOT(processCloseRequest()));
+
     connect(ui->cbOriginalFilename, SIGNAL(stateChanged(int)), p, SLOT(setUseOriginalFilename(int)));
+    connect(ui->leSavepath, SIGNAL(textChanged(QString)), this, SIGNAL(directoryChanged(QString)));
 
     connect(deleteFileAction, SIGNAL(triggered()), this, SLOT(deleteFile()));
     connect(reloadFileAction, SIGNAL(triggered()), this, SLOT(reloadFile()));
@@ -109,6 +116,7 @@ void UI4chan::start(void) {
         if (dir.exists()) {
             ui->leSavepath->setEnabled(false);
             p->setSavePath(savepath);
+            p->setValues(getValues());
             p->start();
 
             ui->btnStart->setEnabled(false);
@@ -166,6 +174,7 @@ void UI4chan::triggerRescan(void) {
 }
 
 void UI4chan::setDownloadedCount(int i) {
+    ui->progressBar->setVisible(true);
     if (ui->progressBar->value() < i)
         ui->progressBar->setValue(i);
 }
@@ -179,7 +188,11 @@ void UI4chan::addThumbnail(QString filename, QImage tn) {
     QListWidgetItem* item;
     QPixmap pixmap;
 
+#if QT_VERSION < 0x040700               // Prior to Qt4.7 convertFromImage needed Qt3 Support
     pixmap.convertFromImage(tn);
+#else                                   // so for these versions use fromImage instead
+    pixmap = QPixmap::fromImage(tn);
+#endif
     item = new QListWidgetItem(
             QIcon(pixmap),
             filename,
@@ -191,6 +204,7 @@ void UI4chan::addThumbnail(QString filename, QImage tn) {
 
 void UI4chan::downloadsFinished() {
     setTabTitle("idling");
+    ui->progressBar->setVisible(false);
 
     if (!ui->cbRescan->isChecked())
         stop();
@@ -256,7 +270,7 @@ void UI4chan::errorHandler(int err) {
 
         setTabTitle("Thread 404'ed");
         emit errorMessage("404 - Page not found");
-        emit closeRequest(this);
+        emit closeRequest(this, 404);
 
         break;
 
@@ -425,4 +439,9 @@ void UI4chan::setPendingThumbnails(int i) {
         ui->pbPendingThumbnails->setValue(i);
         ui->pbPendingThumbnails->setVisible(true);
     }
+}
+
+void UI4chan::processCloseRequest() {
+    stop();
+    emit closeRequest(this, 0);
 }

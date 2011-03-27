@@ -1,6 +1,15 @@
 If you find bugs and/or have feature requests, please use the tracking system provided by sourceforge.
 
+As of version 0.9.6 each release is tested under Windows 7 professional (amd64) and Xubuntu 10.10 (amd64)
+
 Release notes
+
+Version 0.9.6
+* Using different RegExp to retrieve files to get rid of "(...)" patterns - Thanks to Chris Moeller (kode54)
+* Added define which makes Qt3 support unnecessary when compiling with Qt versions < 4.7 - Thanks to Salvador Parra Camacho
+* Added ico file to resources that the application icon is displayed in taskbar
+* Supporting top level URIs e. g. http://www.4chan.org/wg/1 will download images of all threads on that page
+* Program now comes with an updater (au.exe) which replaces the executable once a new version is available (currently windows and linux only)
 
 Version 0.9.5
 * Automatic reloading of partially received images

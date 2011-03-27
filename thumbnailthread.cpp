@@ -28,15 +28,15 @@ void ThumbnailThread::run() {
 
     forever {
         mutex.lock();
-        if (list.count()>0) {
-            currentFilename = list.front();
-            list.pop_front();
-            newImages = true;
-        }
-        iconWidth = iconSize->width();
-        iconHeight = iconSize->height();
-        enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
-        hqRendering = settings->value("options/hq_thumbnails", false).toBool();
+            if (list.count()>0) {
+                currentFilename = list.front();
+                list.pop_front();
+                newImages = true;
+            }
+            iconWidth = iconSize->width();
+            iconHeight = iconSize->height();
+            enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
+            hqRendering = settings->value("options/hq_thumbnails", false).toBool();
         mutex.unlock();
 
         if (newImages) {
@@ -57,18 +57,20 @@ void ThumbnailThread::run() {
 
             emit thumbnailCreated(currentFilename, tn);
             mutex.lock();
-            emit pendingThumbnails(list.count());
-            newImages = false;
+                emit pendingThumbnails(list.count());
+                newImages = false;
 
-            if (list.count() == 0)
+                if (list.count() == 0)
+                    condition.wait(&mutex);
+            mutex.unlock();
+        }
+        else {
+            mutex.lock();
                 condition.wait(&mutex);
             mutex.unlock();
         }
 
-//        mutex.lock();
-//        if (!newImages)
-//        condition.wait(&mutex);
-//        mutex.unlock();
+
     }
 }
 
