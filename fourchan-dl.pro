@@ -19,8 +19,7 @@ SOURCES += main.cpp\
     uilisteditor.cpp \
     applicationupdateinterface.cpp \
     applicationupdateinterface.cpp \
-    updater/commands.cpp \
-    updater/applicationupdateinterface.cpp
+    updater/commands.cpp
 
 HEADERS  += mainwindow.h \
     parser.h \
