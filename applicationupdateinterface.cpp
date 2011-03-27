@@ -58,7 +58,7 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
         break;
 
     case ERROR:
-//        QMessageBox::critical(0, "Update Error", QString(payload));
+        QMessageBox::critical(0, "Update Error", QString(payload));
         break;
     default:
         qDebug() << "Don't know what to do with command "<<QString::number(command);
