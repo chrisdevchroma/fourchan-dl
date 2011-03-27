@@ -58,7 +58,8 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
         break;
 
     case ERROR:
-        QMessageBox::critical(0, "Update Error", QString(payload));
+//        QMessageBox::critical(0, "Update Error", QString(payload));
+        break;
     default:
         qDebug() << "Don't know what to do with command "<<QString::number(command);
         break;
@@ -79,7 +80,7 @@ void ApplicationUpdateInterface::init() {
             QDir dir;
             writeCommand(SET_EXE, QString("%1/%2").arg(dir.absolutePath()).arg(APP_NAME));
             writeCommand(SET_URI, QString("http://sourceforge.net/projects/fourchan-dl/files/v%1/%2/download").arg(version).arg(APP_NAME));
-            writeCommand(SET_TARGET, QString("fourchan-dl"));
+            writeCommand(SET_TARGET, QString(APP_NAME));
             writeCommand(ADD_SET);
             writeCommand(START);
         }

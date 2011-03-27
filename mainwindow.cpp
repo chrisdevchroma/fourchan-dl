@@ -189,6 +189,9 @@ void MainWindow::updateWidgetSettings(void) {
 }
 
 void MainWindow::newVersionAvailable(QString v) {
+    QProcess process;
+    QFileInfo fi;
+
     ui->statusBar->showMessage(QString("There is a new version (%1) available to download from sourceforge.").arg(v));
 #ifdef USE_UPDATER
     switch (QMessageBox::question(0,"New version available",
@@ -196,12 +199,16 @@ void MainWindow::newVersionAvailable(QString v) {
                                   QMessageBox::Yes | QMessageBox::No)) {
     case QMessageBox::Ok:
     case QMessageBox::Yes:
-        qDebug() << "Startet updater " << QString("%1/%2").arg(QDir::currentPath()).arg(UPDATER_NAME);
-        if (QProcess::startDetached(QString("%1/%2").arg(QDir::currentPath()).arg(UPDATER_NAME))) {
+
+        fi.setFile(UPDATER_NAME);
+
+        qDebug() << "Startet updater " << fi.absoluteFilePath();
+
+        if (process.startDetached(QString("\"%1\"").arg(fi.absoluteFilePath()))) {
             ui->statusBar->showMessage("Startet updater");
         }
         else {
-            ui->statusBar->showMessage("Unable to start process");
+            ui->statusBar->showMessage("Unable to start process "+fi.absoluteFilePath()+" ("+process.errorString()+")");
         }
         aui->startUpdate(v);
         break;

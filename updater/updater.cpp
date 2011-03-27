@@ -52,9 +52,12 @@ void Updater::startExchange(bool applicationClosed) {
 
 void Updater::exchangeFinished() {
     p("Update process finished");
-    p("Starting Executable file "+executable);
     if (executable != "") {
-        QProcess::startDetached(executable);
+        p("Starting Executable file "+executable);
+        QProcess::startDetached(QString("\"%1\"").arg(executable));
+    }
+    else {
+        p("Could not start application, because I don't know which one. Please start manually.");
     }
 
     ai->sendMessage("Update finished.");
@@ -67,8 +70,10 @@ void Updater::setExecutable(QString s) {
         executable = s;
         p("Executable set to "+s);
     }
-    else
+    else {
         p("Wanted to set Executable file '"+s+"', but it does not exist.");
+        ai->sendError("Wanted to set Executable file '"+s+"', but it does not exist.");
+    }
 
 }
 

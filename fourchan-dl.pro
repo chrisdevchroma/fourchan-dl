@@ -46,7 +46,7 @@ ICON = resources/fourchan-dl.icns
 #endif
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.0.0\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.6\\\""
 
 OTHER_FILES += \
     readme.txt \
