@@ -52,6 +52,7 @@ void BlackList::add(QString uri) {
     if (!contains(uri)) {
         list.append(uri);
         qDebug() << "Blacklisted image " << uri;
+        saveBlackList();
     }
 }
 
