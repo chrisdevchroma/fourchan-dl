@@ -5,12 +5,14 @@
 #include <QtDebug>
 #include <QUrl>
 #include <QtNetwork>
+#include "blacklist.h"
 
 struct _IMAGE
 {
     QString largeURI;
     QString thumbURI;
     QString originalFilename;
+    QString savedAs;
     bool downloaded;
     bool requested;
 };
@@ -25,6 +27,8 @@ public:
     void setMaxDownloads(int);
     int getTotalCount(void);
     int getDownloadedCount(void);
+    bool getUrlOfFilename(QString, QString*);
+    void setBlackList(BlackList* bl) {blackList = bl;}
 signals:
 
 private:
@@ -33,12 +37,18 @@ private:
     QString savePath;
     QString html;
     QString values;
+    QStringList rescheduled;
     QNetworkAccessManager* manager;
     QList<_IMAGE> images2dl;
+    QTimer* rescheduleTimer;
+    BlackList* blackList;
 
     void parseHTML(void);
     bool addImage(_IMAGE img);
     int getNextImage(QString* s);
+    void reschedule(QString);
+    void handleError(QNetworkReply*);
+    bool blacklisted(QString s) {return blackList->contains(s);}
 
     bool downloading;
     bool useOriginalFilename;
@@ -48,9 +58,10 @@ private:
 private slots:
     void replyFinished(QNetworkReply*);
     void download(bool b);
-    int setCompleted(QString s);
+    int setCompleted(QString, QString);
     void dlProgress(qint64 b, qint64 t) {qDebug() << QString("%1 of %2").arg(b).arg(t);}
     void replyError(QNetworkReply::NetworkError e) {qDebug() << "reply error " << e;}
+    void processSchedule();
 
 public slots:
     void setURI(QString pURI) { uri = QUrl(pURI); sURI = pURI;}

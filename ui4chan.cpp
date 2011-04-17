@@ -56,6 +56,7 @@ UI4chan::UI4chan(QWidget *parent) :
 
     connect(ui->cbOriginalFilename, SIGNAL(stateChanged(int)), p, SLOT(setUseOriginalFilename(int)));
     connect(ui->leSavepath, SIGNAL(textChanged(QString)), this, SIGNAL(directoryChanged(QString)));
+    connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(openFile()));
 
     connect(deleteFileAction, SIGNAL(triggered()), this, SLOT(deleteFile()));
     connect(reloadFileAction, SIGNAL(triggered()), this, SLOT(reloadFile()));
@@ -223,6 +224,7 @@ void UI4chan::on_listWidget_customContextMenuRequested(QPoint pos)
 void UI4chan::deleteFile(void) {
     QFile f;
     QString filename;
+    QString uri;
 
     filename = ui->listWidget->currentItem()->text();
     if (filename != "") {
@@ -233,6 +235,8 @@ void UI4chan::deleteFile(void) {
 
             ui->listWidget->takeItem(ui->listWidget->currentRow());
         }
+        if (p->getUrlOfFilename(filename, &uri))
+            blackList->add(uri);
     }
 }
 
@@ -444,4 +448,21 @@ void UI4chan::setPendingThumbnails(int i) {
 void UI4chan::processCloseRequest() {
     stop();
     emit closeRequest(this, 0);
+}
+
+void UI4chan::openURI() {
+    if (!ui->leURI->text().isEmpty())
+        QDesktopServices::openUrl(QUrl(ui->leURI->text()));
+}
+
+void UI4chan::openDownloadFolder() {
+//    qDebug() << "Opening " << QString("file://%1").arg(ui->leSavepath->text());
+//    QDesktopServices::openUrl(QUrl("file:///V:/4chan/s", QUrl::TolerantMode));
+    if (!ui->leSavepath->text().isEmpty())
+        QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(ui->leSavepath->text()), QUrl::TolerantMode));
+}
+
+void UI4chan::setBlackList(BlackList *bl) {
+    blackList = bl;
+    p->setBlackList(bl);
 }

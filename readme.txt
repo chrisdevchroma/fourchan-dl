@@ -4,6 +4,16 @@ As of version 0.9.6 each release is tested under Windows 7 professional (amd64) 
 When building from source make sure that you copy the "au" executable into the same folder as "fourchan-dl".
 
 Release notes
+Version 0.9.7
+* Added Error Handler for image download
+  - When an image is unavailable it will be rescheduled for download
+  - This should fix bug 3271618
+* Added buttons to open thread and download folder
+* Double click on image now opens it
+* Added a blacklist system
+  - When deleting a file the url is blacklisted and will not be downloaded again
+  - The blacklist can be turned of in the configuration dialog
+  - To keep the list as small as necessary it will check at a given interval if the images are still available (not 404ed)
 
 Version 0.9.6
 * Using different RegExp to retrieve files to get rid of "(...)" patterns - Thanks to Chris Moeller (kode54)

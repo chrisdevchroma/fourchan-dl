@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     thumbnailthread.cpp \
     uilisteditor.cpp \
     applicationupdateinterface.cpp \
-    updater/commands.cpp
+    updater/commands.cpp \
+    blacklist.cpp
 
 HEADERS  += mainwindow.h \
     parser.h \
@@ -29,7 +30,8 @@ HEADERS  += mainwindow.h \
     uilisteditor.h \
     defines.h \
     applicationupdateinterface.h \
-    updater/commands.h
+    updater/commands.h \
+    blacklist.h
 
 FORMS    += mainwindow.ui \
     ui4chan.ui \
@@ -39,14 +41,13 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     resources.qrc
-#if Q_OS_WIN32
-RC_FILE = fourchan-dl.rc
-#elsif Q_OS_MAC
-ICON = resources/fourchan-dl.icns
-#endif
+
+win32: RC_FILE = fourchan-dl-win.rc
+os2: RC_FILE = fourchan-dl-os2.rc
+macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.6\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.7rc\\\""
 
 OTHER_FILES += \
     readme.txt \

@@ -15,7 +15,6 @@ class ApplicationUpdateInterface : public QObject
 public:
     explicit ApplicationUpdateInterface(QObject *parent = 0);
     void startUpdate(QString);
-
 private:
     QUdpSocket* udpSocket;
     bool pinging;

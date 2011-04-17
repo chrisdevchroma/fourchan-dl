@@ -24,43 +24,25 @@ void UIConfig::loadSettings(void) {
     ui->leDefaultSavepath->setText(settings->value("default_directory","").toString());
     ui->cmbTabPosition->setCurrentIndex(settings->value("tab_position",3).toInt());
     b = settings->value("automatic_close",false).toBool();
-    if (b)
-        ui->cbAutoClose->setChecked(true);
-    else
-        ui->cbAutoClose->setChecked(false);
+        ui->cbAutoClose->setChecked(b);
 
     b = settings->value("resume_session",false).toBool();
-    if (b)
-        ui->cbReopenTabs->setChecked(true);
-    else
-        ui->cbReopenTabs->setChecked(false);
-
+        ui->cbReopenTabs->setChecked(b);
 
     b = settings->value("enlarge_thumbnails",false).toBool();
-    if (b)
-        ui->cbEnlargeThumbnails->setChecked(true);
-    else
-        ui->cbEnlargeThumbnails->setChecked(false);
+        ui->cbEnlargeThumbnails->setChecked(b);
 
     b = settings->value("hq_thumbnails",false).toBool();
-    if (b)
-        ui->cbHQThumbnail->setChecked(true);
-    else
-        ui->cbHQThumbnail->setChecked(false);
+        ui->cbHQThumbnail->setChecked(b);
 
     b = settings->value("default_original_filename",false).toBool();
-    if (b)
-        ui->cbDefaultOriginalFilename->setChecked(true);
-    else
-        ui->cbDefaultOriginalFilename->setChecked(false);
+        ui->cbDefaultOriginalFilename->setChecked(b);
 
     b = settings->value("remember_directory",false).toBool();
-    if (b)
-        ui->cbRememberDirectory->setChecked(true);
-    else
-        ui->cbRememberDirectory->setChecked(false);
+        ui->cbRememberDirectory->setChecked(b);
 
     ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",1).toInt());
+    ui->sbRescheduleInterval->setValue(settings->value("reschedule_interval", 60).toInt());
     ui->sbThumbnailHeight->setValue(settings->value("thumbnail_height",200).toInt());
     ui->sbThumbnailWidth->setValue(settings->value("thumbnail_width",200).toInt());
 
@@ -103,7 +85,12 @@ void UIConfig::loadSettings(void) {
     index = ui->cbRescanInterval->findData(settings->value("default_timeout", 0).toInt());
     if (index != -1) ui->cbRescanInterval->setCurrentIndex(index);
     else ui->cbRescanInterval->setCurrentIndex(0);
+    settings->endGroup();
 
+    settings->beginGroup("blacklist");
+    b = settings->value("use_blacklist",true).toBool();
+    ui->cbUseBlackList->setChecked(b);
+    ui->sbBlackListCheckInterval->setValue(settings->value("blacklist_check_interval", 600).toInt());
     settings->endGroup();
 
     timeoutValueEditor->loadSettings();
@@ -144,10 +131,19 @@ void UIConfig::accept(void) {
             settings->setValue("remember_directory", false);
 
         settings->setValue("concurrent_downloads", ui->sbConcurrentDownloads->value());
+        settings->setValue("reschedule_interval", ui->sbRescheduleInterval->value());
         settings->setValue("thumbnail_width", ui->sbThumbnailWidth->value());
         settings->setValue("thumbnail_height", ui->sbThumbnailHeight->value());
 
         settings->setValue("default_timeout", ui->cbRescanInterval->itemData(ui->cbRescanInterval->currentIndex()));
+    settings->endGroup();
+    settings->beginGroup("blacklist");
+        if (ui->cbUseBlackList->isChecked())
+            settings->setValue("use_blacklist", true);
+        else
+            settings->setValue("use_blacklist", false);
+
+        settings->setValue("blacklist_check_interval", ui->sbBlackListCheckInterval->value());
     settings->endGroup();
     settings->sync();
 

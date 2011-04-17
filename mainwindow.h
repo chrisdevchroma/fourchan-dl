@@ -10,6 +10,7 @@
 #include "uiconfig.h"
 #include "applicationupdateinterface.h"
 #include "defines.h"
+#include "blacklist.h"
 
 namespace Ui {
     class MainWindow;
@@ -31,13 +32,16 @@ private:
     UIConfig* uiConfig;
     UIInfo* uiInfo;
     ApplicationUpdateInterface* aui;
+    BlackList* blackList;
     bool autoClose;
     QSize thumbnailSize;
     int maxDownloads;
+    QNetworkAccessManager* manager;
 
     void restoreWindowSettings(void);
     void saveSettings(void);
     void updateWidgetSettings(void);
+    void checkVersion(QString ver);
 
 private slots:
     int addTab(void);
@@ -51,6 +55,7 @@ private slots:
     void processCloseRequest(UI4chan*, int);
     void newVersionAvailable(QString);
     void createTab(QString);
+    void replyFinished(QNetworkReply*);
 };
 
 #endif // MAINWINDOW_H

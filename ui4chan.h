@@ -12,6 +12,7 @@
 #include <QCloseEvent>
 #include "parser.h"
 #include "thumbnailthread.h"
+#include "blacklist.h"
 
 namespace Ui {
     class UI4chan;
@@ -32,6 +33,7 @@ public:
     void setMaxDownloads(int);
     void useOriginalFilenames(bool);
     void updateSettings(void);
+    void setBlackList(BlackList* bl);
 
 private:
     Ui::UI4chan *ui;
@@ -45,6 +47,7 @@ private:
     QAction* openFileAction;
     QSettings* settings;
     QStringList pendingThumbnails;
+    BlackList* blackList;
 
     bool thumbnailsizeLocked;
     bool running;
@@ -69,6 +72,8 @@ private slots:
     void setDownloadedCount(int);
     void setPendingThumbnails(int);
     void processCloseRequest();
+    void openURI();
+    void openDownloadFolder();
 
 public slots:
     void start(void);

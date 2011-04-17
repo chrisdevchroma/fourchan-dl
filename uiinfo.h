@@ -16,18 +16,12 @@ class UIInfo : public QDialog
 public:
     explicit UIInfo(QWidget *parent = 0);
     ~UIInfo();
+    void setCurrentVersion(QString);
 
 private:
-    void checkVersion(QString ver);
-
     Ui::UIInfo *ui;
-    QNetworkAccessManager* manager;
-
-private slots:
-    void replyFinished(QNetworkReply*);
 
 signals:
-    void newerVersionAvailable(QString);
 };
 
 #endif // UIINFO_H

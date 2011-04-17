@@ -13,26 +13,45 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>URL</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="leURI">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Thread</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLineEdit" name="leURI">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="btnOpenThread">
+        <property name="toolTip">
+         <string>Open thread in browser</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/icons/resources/open.png</normaloff>:/icons/resources/open.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLabel" name="lTitle">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
-   <item row="2" column="0">
+   <item row="1" column="0">
     <widget class="QGroupBox" name="group">
      <property name="title">
       <string>Save Images to</string>
@@ -48,7 +67,7 @@
       <item row="0" column="1">
        <widget class="QPushButton" name="btnChoosePath">
         <property name="toolTip">
-         <string>Choose directory</string>
+         <string>Choose download folder</string>
         </property>
         <property name="text">
          <string/>
@@ -59,10 +78,24 @@
         </property>
        </widget>
       </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="btnOpenDownloadFolder">
+        <property name="toolTip">
+         <string>Open download folder</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/icons/resources/open.png</normaloff>:/icons/resources/open.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="2" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QCheckBox" name="cbRescan">
@@ -110,26 +143,17 @@
      </item>
     </layout>
    </item>
-   <item row="7" column="0">
-    <widget class="QProgressBar" name="progressBar">
-     <property name="enabled">
-      <bool>true</bool>
+   <item row="3" column="0">
+    <widget class="QCheckBox" name="cbOriginalFilename">
+     <property name="text">
+      <string>Save with original filename</string>
      </property>
-     <property name="minimum">
-      <number>0</number>
-     </property>
-     <property name="value">
-      <number>13</number>
-     </property>
-     <property name="textVisible">
-      <bool>true</bool>
-     </property>
-     <property name="format">
-      <string>%v/%m (%p%)</string>
+     <property name="checked">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
-   <item row="5" column="0">
+   <item row="4" column="0">
     <widget class="QListWidget" name="listWidget">
      <property name="contextMenuPolicy">
       <enum>Qt::CustomContextMenu</enum>
@@ -172,24 +196,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="lTitle">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
-    <widget class="QCheckBox" name="cbOriginalFilename">
-     <property name="text">
-      <string>Save with original filename</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
+   <item row="5" column="0">
     <widget class="QProgressBar" name="pbPendingThumbnails">
      <property name="value">
       <number>24</number>
@@ -199,6 +206,25 @@
      </property>
      <property name="format">
       <string>Another %v thumbnails to create</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QProgressBar" name="progressBar">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="value">
+      <number>13</number>
+     </property>
+     <property name="textVisible">
+      <bool>true</bool>
+     </property>
+     <property name="format">
+      <string>%v/%m (%p%)</string>
      </property>
     </widget>
    </item>
@@ -225,12 +251,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>30</x>
-     <y>139</y>
+     <x>40</x>
+     <y>174</y>
     </hint>
     <hint type="destinationlabel">
-     <x>172</x>
-     <y>140</y>
+     <x>179</x>
+     <y>175</y>
     </hint>
    </hints>
   </connection>
@@ -242,7 +268,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>340</x>
-     <y>142</y>
+     <y>177</y>
     </hint>
     <hint type="destinationlabel">
      <x>247</x>
@@ -258,7 +284,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>421</x>
-     <y>142</y>
+     <y>177</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
@@ -273,12 +299,44 @@
    <slot>chooseLocation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>412</x>
-     <y>102</y>
+     <x>378</x>
+     <y>137</y>
     </hint>
     <hint type="destinationlabel">
      <x>428</x>
      <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnOpenThread</sender>
+   <signal>clicked()</signal>
+   <receiver>UI4chan</receiver>
+   <slot>openURI()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>396</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>426</x>
+     <y>11</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnOpenDownloadFolder</sender>
+   <signal>clicked()</signal>
+   <receiver>UI4chan</receiver>
+   <slot>openDownloadFolder()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>399</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>430</x>
+     <y>132</y>
     </hint>
    </hints>
   </connection>
@@ -288,5 +346,7 @@
   <slot>stop()</slot>
   <slot>chooseLocation()</slot>
   <slot>debugButton()</slot>
+  <slot>openURI()</slot>
+  <slot>openDownloadFolder()</slot>
  </slots>
 </ui>

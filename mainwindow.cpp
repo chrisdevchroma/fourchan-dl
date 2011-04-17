@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent) :
     uiConfig = new UIConfig(this);
     uiInfo = new UIInfo(this);
     aui = new ApplicationUpdateInterface(this);
+    manager = new QNetworkAccessManager();
+    blackList = new BlackList(this);
 
     ui->setupUi(this);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
@@ -17,9 +19,13 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreWindowSettings();
     updateWidgetSettings();
 
+    connect(manager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(replyFinished(QNetworkReply*)));
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     connect(uiConfig, SIGNAL(configurationChanged()), this, SLOT(loadOptions()));
-    connect(uiInfo, SIGNAL(newerVersionAvailable(QString)), this, SLOT(newVersionAvailable(QString)));
+    connect(uiConfig, SIGNAL(configurationChanged()), blackList, SLOT(loadSettings()));
+
+    manager->get(QNetworkRequest(QUrl("http://sourceforge.net/projects/fourchan-dl/files/")));
 }
 
 int MainWindow::addTab() {
@@ -27,6 +33,7 @@ int MainWindow::addTab() {
     UI4chan* w;
 
     w = new UI4chan(this);
+    w->setBlackList(blackList);
 
     ci = ui->tabWidget->addTab(w, "no name");
     if (settings->value("options/remember_directory", false).toBool())
@@ -182,9 +189,48 @@ void MainWindow::processCloseRequest(UI4chan* w, int reason) {
     }
 }
 
+void MainWindow::replyFinished(QNetworkReply* r) {
+    QString requestURI;
+    QRegExp rx("Current version ([0-9\\.]+)", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QString html;
+    QStringList res;
+    int pos;
+
+    if (r->isFinished()) {
+        requestURI = r->request().url().toString();
+
+        html = r->readAll();
+
+        pos = rx.indexIn(html);
+        res = rx.capturedTexts();
+
+        if (pos != -1) {
+           uiInfo->setCurrentVersion(res.at(1));
+           checkVersion(res.at(1));
+        }
+    }
+
+    r->deleteLater();
+}
+
+
 void MainWindow::updateWidgetSettings(void) {
     for (int i=0; i<ui->tabWidget->count(); i++) {
         ((UI4chan*)ui->tabWidget->widget(i))->updateSettings();
+    }
+}
+
+void MainWindow::checkVersion(QString ver) {
+    QStringList currVersion, thisVersion;
+
+    currVersion = ver.split(".");
+    thisVersion = QString(PROGRAM_VERSION).split(".");
+
+    for (int i=0; i<currVersion.count(); i++) {
+        if (currVersion.value(i).toInt() > thisVersion.at(i).toInt()) {
+            newVersionAvailable(ver);
+            break;
+        }
     }
 }
 

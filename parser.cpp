@@ -7,6 +7,7 @@ Parser::Parser(QObject *parent) :
     useOriginalFilename = false;
     activeDownloads = 0;
     maxDownloads = 2;
+    rescheduleTimer = new QTimer();
 
     manager = new QNetworkAccessManager();
 
@@ -15,6 +16,8 @@ Parser::Parser(QObject *parent) :
 
     connect(this, SIGNAL(downloadsAvailable(bool)),
             this, SLOT(download(bool)));
+
+    connect(rescheduleTimer, SIGNAL(timeout()), this, SLOT(processSchedule()));
 }
 
 void Parser::replyFinished(QNetworkReply* r) {
@@ -34,16 +37,20 @@ void Parser::replyFinished(QNetworkReply* r) {
             manager->get(QNetworkRequest(QUrl(redirect)));
             r->deleteLater();
         }
+        else if (r->error() != QNetworkReply::NoError) {
+            handleError(r);
+        }
         else {
             if (r->isFinished()) {
                 requestURI = r->request().url().toString();
-
                 if (requestURI.indexOf(QRegExp("(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive)) != -1) {
                     QFile f;
                     QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
                     QStringList res;
                     int pos;
+                    int resp;
 
+                    resp = r->error();
                     pos = 0;
 
                     pos = rx.indexIn(requestURI);
@@ -73,7 +80,7 @@ void Parser::replyFinished(QNetworkReply* r) {
                         emit fileFinished(f.fileName());
                         activeDownloads--;
 
-                        setCompleted(requestURI);
+                        setCompleted(requestURI, f.fileName());
                     }
 
                     if (activeDownloads<maxDownloads) {
@@ -93,10 +100,10 @@ void Parser::replyFinished(QNetworkReply* r) {
                 else {
                     html = r->readAll();
 
-                    if (html.contains("4chan - 404")) {
-                        emit error(404);
-                    }
-                    else
+//                    if (html.contains("4chan - 404")) {
+//                        emit error(404);
+//                    }
+//                    else
                         parseHTML();
                 }
 
@@ -141,7 +148,6 @@ void Parser::parseHTML() {
         res = rx.capturedTexts();
 
         i.originalFilename = res.at(1);
-//        i.originalFilename = "testfilename.jpg";
         i.largeURI = "http://images.4chan.org/"+res.at(2);
         i.thumbURI = res.at(3);
 
@@ -234,59 +240,66 @@ bool Parser::addImage(_IMAGE img) {
     bool alreadyInList;
     bool fileExists;
 
-    alreadyInList = false;
-    fileExists = false;
-    k = 2;
-    for (i=0; i<images2dl.length(); i++) {
-        if (images2dl.at(i).largeURI == img.largeURI) {
-            alreadyInList = true;
-            break;
-        }
-
-        if (images2dl.at(i).originalFilename == img.originalFilename) {
-            QStringList tmp;
-
-            tmp = img.originalFilename.split(QRegExp("\\(\\d+\\)"));
-            if  (tmp.count() > 1) // Already has a number in brackets in filename
-                img.originalFilename = QString("%1(%2)%3").arg(tmp.at(0)).
-                                       arg(k++).
-                                       arg(tmp.at(1));
-            else
-                img.originalFilename = img.originalFilename.replace("."," (1).");
-        }
+    if (blacklisted(img.largeURI)) {
+        qDebug() << "Preventing download of blacklisted image " << img.largeURI;
+        alreadyInList = true;
     }
+    else {
+        alreadyInList = false;
+        fileExists = false;
+        k = 2;
+        for (i=0; i<images2dl.length(); i++) {
+            if (images2dl.at(i).largeURI == img.largeURI) {
+                alreadyInList = true;
+                break;
+            }
 
-    if (!alreadyInList) {
-        // Check if already downloaded
-        QFile f;
-        if (useOriginalFilename)
-            f.setFileName(savePath+"/"+img.originalFilename);
-        else {
-            QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
-            QStringList res;
-            int pos;
+            if (images2dl.at(i).originalFilename == img.originalFilename) {
+                QStringList tmp;
 
-            pos = 0;
-
-            pos = rx.indexIn(img.largeURI);
-            res = rx.capturedTexts();
-
-            if (pos != -1) {
-                f.setFileName(savePath+"/"+res.at(1)+res.at(2));
+                tmp = img.originalFilename.split(QRegExp("\\(\\d+\\)"));
+                if  (tmp.count() > 1) // Already has a number in brackets in filename
+                    img.originalFilename = QString("%1(%2)%3").arg(tmp.at(0)).
+                                           arg(k++).
+                                           arg(tmp.at(1));
+                else
+                    img.originalFilename = img.originalFilename.replace("."," (1).");
             }
         }
 
-        if (f.exists()) {
-            img.downloaded = true;
-            fileExists = true;
-        }
+        if (!alreadyInList) {
+            // Check if already downloaded
+            QFile f;
+            if (useOriginalFilename)
+                f.setFileName(savePath+"/"+img.originalFilename);
+            else {
+                QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
+                QStringList res;
+                int pos;
 
-        images2dl.append(img);
-        emit totalCountChanged(getTotalCount());
+                pos = 0;
 
-        if (fileExists) {
-            emit downloadedCountChanged(getDownloadedCount());
-            emit fileFinished(f.fileName());
+                pos = rx.indexIn(img.largeURI);
+                res = rx.capturedTexts();
+
+                if (pos != -1) {
+                    f.setFileName(savePath+"/"+res.at(1)+res.at(2));
+                }
+            }
+
+            if (f.exists()) {
+                img.downloaded = true;
+                fileExists = true;
+                img.savedAs = f.fileName();
+            }
+
+            images2dl.append(img);
+            emit totalCountChanged(getTotalCount());
+
+            if (fileExists) {
+                emit downloadedCountChanged(getDownloadedCount());
+                emit fileFinished(f.fileName());
+            }
         }
     }
 
@@ -334,14 +347,15 @@ int Parser::getNextImage(QString* s) {
     return 0;
 }
 
-int Parser::setCompleted(QString s) {
+int Parser::setCompleted(QString uri, QString filename) {
     int i;
     _IMAGE tmp;
 
     for (i=0; i<images2dl.length(); i++) {
-        if (images2dl.at(i).largeURI == s) {
+        if (images2dl.at(i).largeURI == uri) {
             tmp = images2dl.at(i);
             tmp.downloaded = true;
+            tmp.savedAs = filename;
 
             images2dl.replace(i,tmp);
 
@@ -419,4 +433,67 @@ void Parser::setUseOriginalFilename(int i) {
 
 void Parser::setMaxDownloads(int i) {
     maxDownloads = i;
+}
+
+bool Parser::getUrlOfFilename(QString filename, QString * url) {
+    bool ret;
+    int i;
+
+    ret = false;
+
+    for (i=0; i<images2dl.count(); i++) {
+        if (images2dl.at(i).savedAs == filename) {
+            *url = images2dl.at(i).largeURI;
+            ret = true;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+void Parser::handleError(QNetworkReply* r) {
+    switch (r->error()) {
+    case 404:
+    case 203:
+        // Only emit signal on pagers not on images to prevent closing of tab just because one image is missing
+        if (r->header(QNetworkRequest::ContentTypeHeader).toString().contains("text/html"))
+            emit error(404);
+
+        break;
+
+    case 301:
+    case 205:
+    case 99:
+    case 299:
+        reschedule(r->url().toString());
+        emit message(QString("Rescheduled %1").arg(r->url().toString()));
+        break;
+
+    default:
+        break;
+    }
+}
+
+void Parser::reschedule(QString s) {
+    if (rescheduled.contains(s))
+        rescheduled.removeAll(s);
+
+    rescheduled.append(s);
+}
+
+void Parser::processSchedule() {
+    _IMAGE tmp;
+
+    for (int i=0; i<images2dl.count(); i++) {
+        if (rescheduled.contains(images2dl.at(i).largeURI)) {
+            tmp = images2dl.at(i);
+
+            tmp.requested = false;
+            tmp.downloaded = false;
+            images2dl.replace(i, tmp);
+            rescheduled.removeAll(tmp.largeURI);
+        }
+    }
+    download(true);
 }
