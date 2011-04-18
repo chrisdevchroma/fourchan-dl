@@ -429,8 +429,8 @@ void UI4chan::loadSettings() {
 void UI4chan::updateSettings() {
     setMaxDownloads(settings->value("options/concurrent_downloads",5).toInt());
     setThumbnailSize(QSize(settings->value("options/thumbnail_width",150).toInt(),settings->value("options/thumbnail_height",150).toInt()));
+    p->setTimerInterval(settings->value("options/reschedule_interval", 600).toInt()*1000);
 }
-
 
 void UI4chan::useOriginalFilenames(bool b) {
     ui->cbOriginalFilename->setChecked(b);

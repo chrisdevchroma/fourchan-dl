@@ -8,6 +8,8 @@ Parser::Parser(QObject *parent) :
     activeDownloads = 0;
     maxDownloads = 2;
     rescheduleTimer = new QTimer();
+    rescheduleTimer->setSingleShot(true);
+    setTimerInterval(600);
 
     manager = new QNetworkAccessManager();
 
@@ -26,10 +28,7 @@ void Parser::replyFinished(QNetworkReply* r) {
 
     redirect = r->header(QNetworkRequest::LocationHeader).toString();
     if (r->bytesAvailable() < r->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
-        qDebug() << QString("Received only partial data of %1. Reinitiating download.").arg(r->url().toString());
-        emit message(QString("Received only partial data of %1. Reinitiating download.").arg(r->url().toString()));
-
-        manager->get(QNetworkRequest(r->url()));
+        reschedule(r->url().toString());
         r->deleteLater();
     }
     else {
@@ -90,8 +89,7 @@ void Parser::replyFinished(QNetworkReply* r) {
 
                             if (0 != getNextImage(&imgURI)) {
                                 nr = manager->get(QNetworkRequest(QUrl(imgURI)));
-                                //                    connect(nr, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(dlProgress(qint64,qint64)));
-                                connect(nr,SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
+                                connect(nr, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
                                 activeDownloads++;
                             }
                         }
@@ -471,15 +469,35 @@ void Parser::handleError(QNetworkReply* r) {
         break;
 
     default:
+        qDebug() << "Unhandled error " << r->error() << ": " << r->errorString();
         break;
     }
 }
 
 void Parser::reschedule(QString s) {
-    if (rescheduled.contains(s))
-        rescheduled.removeAll(s);
+    QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QStringList res;
+    int pos;
 
-    rescheduled.append(s);
+    pos = rx.indexIn(s);
+    res = rx.capturedTexts();
+    qDebug() << "Rescheduling " << s;
+    emit message(QString("Rescheduling %1").arg(s));
+
+    if (pos != -1) {
+        if (rescheduled.contains(s))
+            rescheduled.removeAll(s);
+
+        rescheduled.append(s);
+
+        if (!rescheduleTimer->isActive())
+            rescheduleTimer->start();
+    }
+    else {
+        // Requested URL was no image -> reschedule immediately
+        manager->get(QNetworkRequest(QUrl(s)));
+    }
+
 }
 
 void Parser::processSchedule() {
@@ -496,4 +514,8 @@ void Parser::processSchedule() {
         }
     }
     download(true);
+}
+
+void Parser::setTimerInterval(int msec) {
+    rescheduleTimer->setInterval(msec);
 }

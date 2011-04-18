@@ -29,6 +29,7 @@ public:
     int getDownloadedCount(void);
     bool getUrlOfFilename(QString, QString*);
     void setBlackList(BlackList* bl) {blackList = bl;}
+    void setTimerInterval(int msec);
 signals:
 
 private:
@@ -60,7 +61,7 @@ private slots:
     void download(bool b);
     int setCompleted(QString, QString);
     void dlProgress(qint64 b, qint64 t) {qDebug() << QString("%1 of %2").arg(b).arg(t);}
-    void replyError(QNetworkReply::NetworkError e) {qDebug() << "reply error " << e;}
+    void replyError(QNetworkReply::NetworkError e) {/*qDebug() << "reply error " << e;*/}
     void processSchedule();
 
 public slots:
