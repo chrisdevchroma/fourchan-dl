@@ -37,8 +37,7 @@ FORMS    += mainwindow.ui \
     ui4chan.ui \
     uiinfo.ui \
     uiconfig.ui \
-    uilisteditor.ui \
-    imagepreview.ui
+    uilisteditor.ui
 
 RESOURCES += \
     resources.qrc
