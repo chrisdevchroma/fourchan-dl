@@ -73,11 +73,12 @@ void ApplicationUpdateInterface::startUpdate(QString v) {
 }
 
 void ApplicationUpdateInterface::init() {
+#ifdef USE_UPDATER
     if (startRequest) {
         startRequest = false;
 
         if (version != "") {
-            QDir dir;
+            QDir dir;            
             writeCommand(SET_EXE, QString("%1/%2").arg(dir.absolutePath()).arg(APP_NAME));
             writeCommand(SET_URI, QString("http://sourceforge.net/projects/fourchan-dl/files/v%1/%2/download").arg(version).arg(APP_NAME));
             writeCommand(SET_TARGET, QString(APP_NAME));
@@ -92,6 +93,7 @@ void ApplicationUpdateInterface::init() {
         // Updater was running because of previous update
         writeCommand(CLOSE_REQUEST);
     }
+#endif
 }
 
 void ApplicationUpdateInterface::writeCommand(int c, QByteArray a) {
