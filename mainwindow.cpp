@@ -75,7 +75,7 @@ void MainWindow::closeTab(int i) {
 }
 
 void MainWindow::displayError(QString s) {
-    ui->statusBar->showMessage(s, 5000);
+    ui->statusBar->showMessage(s, 10000);
 }
 
 void MainWindow::showInfo(void) {
@@ -172,6 +172,26 @@ void MainWindow::loadOptions(void) {
         maxDownloads = settings->value("concurrent_downloads", 1).toInt();
 
         updateWidgetSettings();
+    settings->endGroup();
+
+    settings->beginGroup("network");
+    QNetworkProxy proxy;
+
+    if (settings->value("use_proxy", false).toBool()) {
+        proxy.setType((QNetworkProxy::ProxyType)(settings->value("proxy_type", QNetworkProxy::HttpProxy).toInt()));
+        proxy.setHostName(settings->value("proxy_hostname", "").toString());
+        proxy.setPort(settings->value("proxy_port", 0).toUInt());
+        if (settings->value("proxy_auth", false).toBool()) {
+            proxy.setUser(settings->value("proxy_user", "").toString());
+            proxy.setPassword(settings->value("proxy_pass", "").toString());
+        }
+    }
+    else {
+        proxy.setType(QNetworkProxy::NoProxy);
+    }
+
+    QNetworkProxy::setApplicationProxy(proxy);
+
     settings->endGroup();
 }
 

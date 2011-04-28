@@ -277,6 +277,10 @@ void UI4chan::errorHandler(int err) {
         emit closeRequest(this, 404);
 
         break;
+    case 999:
+        setTabTitle("Banned");
+        emit errorMessage("You are banned");
+        break;
 
     default:
         break;

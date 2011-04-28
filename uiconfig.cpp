@@ -13,6 +13,7 @@ UIConfig::UIConfig(QWidget *parent) :
     loadSettings();
 
     connect(timeoutValueEditor, SIGNAL(valuesChanged()), this, SLOT(loadSettings()));
+    connect(ui->cbUseProxy, SIGNAL(toggled(bool)), this, SLOT(toggleProxy(bool)));
 }
 
 void UIConfig::loadSettings(void) {
@@ -93,6 +94,23 @@ void UIConfig::loadSettings(void) {
     ui->sbBlackListCheckInterval->setValue(settings->value("blacklist_check_interval", 600).toInt());
     settings->endGroup();
 
+    settings->beginGroup("network");
+        b = settings->value("use_proxy", false).toBool();
+        ui->cbUseProxy->setChecked(b);
+        ui->cbProxyAuth->setChecked(settings->value("proxy_auth", false).toBool());
+        toggleProxy(b);
+
+        ui->leProxyAddress->setText(settings->value("proxy_hostname", "").toString());
+        ui->sbProxyPort->setValue(settings->value("proxy_port", 0).toInt());
+        ui->leProxyUser->setText(settings->value("proxy_user", "").toString());
+        ui->leProxyPassword->setText(settings->value("proxy_pass", "").toString());
+
+        int proxyType;
+        proxyType = settings->value("proxy_type", 0).toInt();
+        if (proxyType>=2) proxyType--;
+        ui->cbProxyType->setCurrentIndex(proxyType);
+    settings->endGroup();
+
     timeoutValueEditor->loadSettings();
 }
 
@@ -145,6 +163,24 @@ void UIConfig::accept(void) {
 
         settings->setValue("blacklist_check_interval", ui->sbBlackListCheckInterval->value());
     settings->endGroup();
+
+    settings->beginGroup("network");
+        settings->setValue("use_proxy", ui->cbUseProxy->isChecked());
+        settings->setValue("proxy_auth", ui->cbProxyAuth->isChecked());
+        settings->setValue("proxy_hostname",  ui->leProxyAddress->text());
+        settings->setValue("proxy_port",  ui->sbProxyPort->value());
+        settings->setValue("proxy_user",  ui->leProxyUser->text());
+        settings->setValue("proxy_pass",  ui->leProxyPassword->text());
+
+        int proxyType;
+
+        proxyType = ui->cbProxyType->currentIndex();
+        if (proxyType >= 2) proxyType++;
+
+        settings->setValue("proxy_type", proxyType);
+    settings->endGroup();
+
+
     settings->sync();
 
     emit configurationChanged();
@@ -165,6 +201,24 @@ void UIConfig::chooseLocation(void) {
 
 void UIConfig::editTimeoutValues(void) {
     timeoutValueEditor->show();
+}
+
+void UIConfig::toggleProxy(bool b) {
+    ui->leProxyAddress->setEnabled(b);
+    ui->sbProxyPort->setEnabled(b);
+    ui->cbProxyType->setEnabled(b);
+    ui->cbProxyAuth->setEnabled(b);
+
+    if (b) {
+        if (ui->cbProxyAuth->isChecked()) {
+            ui->leProxyUser->setEnabled(b);
+            ui->leProxyPassword->setEnabled(b);
+        }
+    }
+    else {
+        ui->leProxyUser->setEnabled(b);
+        ui->leProxyPassword->setEnabled(b);
+    }
 }
 
 UIConfig::~UIConfig()

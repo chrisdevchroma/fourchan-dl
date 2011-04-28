@@ -6,6 +6,7 @@
 #include <QUrl>
 #include <QtNetwork>
 #include "blacklist.h"
+#include "defines.h"
 
 struct _IMAGE
 {

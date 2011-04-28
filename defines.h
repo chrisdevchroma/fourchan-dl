@@ -13,4 +13,6 @@
 #endif
 #endif
 
+#define debug_out(STRING, LEVEL)    qDebug() << STRING;
+
 #endif // DEFINES_H

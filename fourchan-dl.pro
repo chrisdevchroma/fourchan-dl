@@ -37,7 +37,8 @@ FORMS    += mainwindow.ui \
     ui4chan.ui \
     uiinfo.ui \
     uiconfig.ui \
-    uilisteditor.ui
+    uilisteditor.ui \
+    imagepreview.ui
 
 RESOURCES += \
     resources.qrc
@@ -47,7 +48,7 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.7\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.8.rc\\\""
 
 OTHER_FILES += \
     readme.txt \

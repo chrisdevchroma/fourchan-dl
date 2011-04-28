@@ -98,10 +98,9 @@ void Parser::replyFinished(QNetworkReply* r) {
                 else {
                     html = r->readAll();
 
-//                    if (html.contains("4chan - 404")) {
-//                        emit error(404);
-//                    }
-//                    else
+                    if (html.contains("<title>4chan - Banned</title>"))
+                        emit error(999);
+                    else
                         parseHTML();
                 }
 
@@ -468,6 +467,9 @@ void Parser::handleError(QNetworkReply* r) {
         emit message(QString("Rescheduled %1").arg(r->url().toString()));
         break;
 
+    case 202:
+        emit message(QString("Server replied: Access denied! - Maybe a Proxy issue."));
+        debug_out("202: Access denied", 1);
     default:
         qDebug() << "Unhandled error " << r->error() << ": " << r->errorString();
         break;

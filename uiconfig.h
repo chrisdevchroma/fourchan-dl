@@ -29,6 +29,7 @@ private slots:
     void chooseLocation(void);
     void editTimeoutValues(void);
     void loadSettings(void);
+    void toggleProxy(bool);
 
 signals:
     void configurationChanged(void);
