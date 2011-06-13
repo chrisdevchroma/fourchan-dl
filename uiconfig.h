@@ -27,6 +27,7 @@ private slots:
     void accept(void);
     void reject(void);
     void chooseLocation(void);
+    void chooseThumbnailCacheLocation(void);
     void editTimeoutValues(void);
     void loadSettings(void);
     void toggleProxy(bool);

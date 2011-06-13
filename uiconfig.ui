@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>310</width>
-    <height>311</height>
+    <height>364</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,6 +30,45 @@
     <normaloff>:/icons/resources/settings.png</normaloff>:/icons/resources/settings.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnAccept">
+       <property name="text">
+        <string>OK</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/yes.png</normaloff>:/icons/resources/yes.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCancel">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/no.png</normaloff>:/icons/resources/no.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -39,7 +78,7 @@
       <attribute name="title">
        <string>UI</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_4">
+      <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
@@ -47,7 +86,7 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="0" column="2">
         <widget class="QComboBox" name="cmbTabPosition">
          <item>
           <property name="text">
@@ -71,14 +110,14 @@
          </item>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="1" column="0" colspan="2">
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>Thumbnail size</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="1" column="2">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
           <widget class="QSpinBox" name="sbThumbnailWidth">
@@ -133,35 +172,100 @@
          </item>
         </layout>
        </item>
-       <item row="2" column="0" colspan="2">
+       <item row="2" column="0" colspan="3">
         <widget class="QCheckBox" name="cbHQThumbnail">
          <property name="text">
           <string>High quality thumbnail rendering</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="3" column="0" colspan="3">
         <widget class="QCheckBox" name="cbEnlargeThumbnails">
          <property name="text">
           <string>Enlarge thumbnails when they are smaller</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="0" colspan="2">
+       <item row="4" column="0" colspan="3">
         <widget class="QCheckBox" name="cbReopenTabs">
          <property name="text">
           <string>Reopen tabs from last time</string>
          </property>
         </widget>
        </item>
-       <item row="5" column="0" colspan="2">
+       <item row="5" column="0" colspan="3">
         <widget class="QCheckBox" name="cbRememberDirectory">
          <property name="text">
           <string>Remember directory during session</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0" colspan="2">
+       <item row="6" column="0" colspan="3">
+        <widget class="QCheckBox" name="cbUseThumbnailCache">
+         <property name="text">
+          <string>Use Thumbnail Cache</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="0" colspan="2">
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Thumbnail cache folder</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLineEdit" name="leThumbnailCacheFolder"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnSelectThumnailCacheFolder">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/search.png</normaloff>:/icons/resources/search.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_16">
+         <property name="toolTip">
+          <string>Thumbnail Time to live</string>
+         </property>
+         <property name="text">
+          <string>Thumbnail TTL</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QSpinBox" name="sbThumbnailTTL">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="suffix">
+            <string> days</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <number>999999</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="9" column="1" colspan="2">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -337,6 +441,9 @@ p, li { white-space: pre-wrap; }
          <property name="toolTip">
           <string>Interval for checking if blacklisted images still exist</string>
          </property>
+         <property name="suffix">
+          <string> seconds</string>
+         </property>
          <property name="maximum">
           <number>999999999</number>
          </property>
@@ -504,45 +611,6 @@ p, li { white-space: pre-wrap; }
      </widget>
     </widget>
    </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnAccept">
-       <property name="text">
-        <string>OK</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/icons/resources/yes.png</normaloff>:/icons/resources/yes.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnCancel">
-       <property name="text">
-        <string>Cancel</string>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/icons/resources/no.png</normaloff>:/icons/resources/no.png</iconset>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
   </layout>
  </widget>
  <resources>
@@ -589,7 +657,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>218</x>
-     <y>300</y>
+     <y>353</y>
     </hint>
     <hint type="destinationlabel">
      <x>107</x>
@@ -605,7 +673,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>299</x>
-     <y>300</y>
+     <y>353</y>
     </hint>
     <hint type="destinationlabel">
      <x>260</x>
@@ -620,12 +688,12 @@ p, li { white-space: pre-wrap; }
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>62</x>
-     <y>152</y>
+     <x>73</x>
+     <y>50</y>
     </hint>
     <hint type="destinationlabel">
-     <x>94</x>
-     <y>173</y>
+     <x>101</x>
+     <y>53</y>
     </hint>
    </hints>
   </connection>
@@ -636,12 +704,28 @@ p, li { white-space: pre-wrap; }
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>45</x>
-     <y>147</y>
+     <x>56</x>
+     <y>50</y>
     </hint>
     <hint type="destinationlabel">
-     <x>96</x>
-     <y>199</y>
+     <x>101</x>
+     <y>55</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnSelectThumnailCacheFolder</sender>
+   <signal>clicked()</signal>
+   <receiver>UIConfig</receiver>
+   <slot>chooseThumbnailCacheLocation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>276</x>
+     <y>222</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>307</x>
+     <y>220</y>
     </hint>
    </hints>
   </connection>
@@ -649,5 +733,6 @@ p, li { white-space: pre-wrap; }
  <slots>
   <slot>chooseLocation()</slot>
   <slot>editTimeoutValues()</slot>
+  <slot>chooseThumbnailCacheLocation()</slot>
  </slots>
 </ui>

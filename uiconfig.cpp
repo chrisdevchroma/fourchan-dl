@@ -42,10 +42,16 @@ void UIConfig::loadSettings(void) {
     b = settings->value("remember_directory",false).toBool();
         ui->cbRememberDirectory->setChecked(b);
 
+    b = settings->value("use_thumbnail_cache",true).toBool();
+        ui->cbUseThumbnailCache->setChecked(b);
+
     ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",1).toInt());
     ui->sbRescheduleInterval->setValue(settings->value("reschedule_interval", 60).toInt());
     ui->sbThumbnailHeight->setValue(settings->value("thumbnail_height",200).toInt());
     ui->sbThumbnailWidth->setValue(settings->value("thumbnail_width",200).toInt());
+    ui->leThumbnailCacheFolder->setText(settings->value("thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
+                                                        .arg("tncache")).toString());
+    ui->sbThumbnailTTL->setValue(settings->value("thumbnail_TTL", 60).toInt());
 
     sl = settings->value("timeout_values", (QStringList()<<"30"<<"60"<<"120"<<"300"<<"600")).toStringList();
     ui->cbRescanInterval->clear();
@@ -118,35 +124,14 @@ void UIConfig::accept(void) {
     settings->beginGroup("options");
         settings->setValue("default_directory", ui->leDefaultSavepath->text());
         settings->setValue("tab_position", ui->cmbTabPosition->currentIndex());
-        if (ui->cbAutoClose->isChecked())
-            settings->setValue("automatic_close", true);
-        else
-            settings->setValue("automatic_close", false);
 
-        if (ui->cbReopenTabs->isChecked())
-            settings->setValue("resume_session", true);
-        else
-            settings->setValue("resume_session", false);
-
-        if (ui->cbEnlargeThumbnails->isChecked())
-            settings->setValue("enlarge_thumbnails", true);
-        else
-            settings->setValue("enlarge_thumbnails", false);
-
-        if (ui->cbHQThumbnail->isChecked())
-            settings->setValue("hq_thumbnails", true);
-        else
-            settings->setValue("hq_thumbnails", false);
-
-        if (ui->cbDefaultOriginalFilename->isChecked())
-            settings->setValue("default_original_filename", true);
-        else
-            settings->setValue("default_original_filename", false);
-
-        if (ui->cbRememberDirectory->isChecked())
-            settings->setValue("remember_directory", true);
-        else
-            settings->setValue("remember_directory", false);
+        settings->setValue("automatic_close", ui->cbAutoClose->isChecked());
+        settings->setValue("resume_session", ui->cbReopenTabs->isChecked());
+        settings->setValue("enlarge_thumbnails", ui->cbEnlargeThumbnails->isChecked());
+        settings->setValue("hq_thumbnails", ui->cbHQThumbnail->isChecked());
+        settings->setValue("default_original_filename", ui->cbDefaultOriginalFilename->isChecked());
+        settings->setValue("remember_directory", ui->cbRememberDirectory->isChecked());
+        settings->setValue("use_thumbnail_cache", ui->cbUseThumbnailCache->isChecked());
 
         settings->setValue("concurrent_downloads", ui->sbConcurrentDownloads->value());
         settings->setValue("reschedule_interval", ui->sbRescheduleInterval->value());
@@ -154,6 +139,9 @@ void UIConfig::accept(void) {
         settings->setValue("thumbnail_height", ui->sbThumbnailHeight->value());
 
         settings->setValue("default_timeout", ui->cbRescanInterval->itemData(ui->cbRescanInterval->currentIndex()));
+
+        settings->setValue("thumbnail_cache_folder", ui->leThumbnailCacheFolder->text());
+        settings->setValue("thumbnail_TTL", ui->sbThumbnailTTL->value());
     settings->endGroup();
     settings->beginGroup("blacklist");
         if (ui->cbUseBlackList->isChecked())
@@ -195,8 +183,16 @@ void UIConfig::chooseLocation(void) {
     QString loc;
 
     loc = QFileDialog::getExistingDirectory(this, "Choose storage directory", ui->leDefaultSavepath->text());
+    if (!loc.isEmpty())
+        ui->leDefaultSavepath->setText(loc);
+}
 
-    ui->leDefaultSavepath->setText(loc);
+void UIConfig::chooseThumbnailCacheLocation(void) {
+    QString loc;
+
+    loc = QFileDialog::getExistingDirectory(this, "Choose storage directory", ui->leThumbnailCacheFolder->text());
+    if (!loc.isEmpty())
+        ui->leThumbnailCacheFolder->setText(loc);
 }
 
 void UIConfig::editTimeoutValues(void) {

@@ -10,6 +10,9 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QDebug>
+#include <QFile>
+#include <QCoreApplication>
+#include <QDir>
 
 class ThumbnailThread : public QThread
 {
@@ -27,6 +30,8 @@ private:
     QMutex mutex;
     QWaitCondition condition;
     bool newImages;
+    QString cacheFolder;
+    bool useCache;
 
 protected:
     void run();

@@ -4,6 +4,14 @@ As of version 0.9.6 each release is tested under Windows 7 professional (amd64) 
 When building from source make sure that you copy the "au" executable into the same folder as "fourchan-dl".
 
 Release notes
+
+Version 1.0.0
+* Added thumbnail cache
+* Fixed bug 3302967
+
+Version 0.9.8
+* Added support for proxies - I couldn't verify complete functionality with enabled proxy though, because all free proxies are banned
+
 Version 0.9.7
 * Added Error Handler for image download
   - When an image is unavailable it will be rescheduled for download

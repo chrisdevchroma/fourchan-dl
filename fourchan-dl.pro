@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     uilisteditor.cpp \
     applicationupdateinterface.cpp \
     updater/commands.cpp \
-    blacklist.cpp
+    blacklist.cpp \
+    thumbnailremoverthread.cpp
 
 HEADERS  += mainwindow.h \
     parser.h \
@@ -31,7 +32,8 @@ HEADERS  += mainwindow.h \
     defines.h \
     applicationupdateinterface.h \
     updater/commands.h \
-    blacklist.h
+    blacklist.h \
+    thumbnailremoverthread.h
 
 FORMS    += mainwindow.ui \
     ui4chan.ui \
@@ -47,7 +49,7 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"0.9.8\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.0.0rc\\\""
 
 OTHER_FILES += \
     readme.txt \

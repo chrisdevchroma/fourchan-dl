@@ -143,8 +143,9 @@ void Parser::parseHTML() {
     while (pos > -1) {
         pos = rx.indexIn(html, pos+1);
         res = rx.capturedTexts();
+        QUrl temp = QUrl::fromEncoded(res.at(1).toAscii());
 
-        i.originalFilename = res.at(1);
+        i.originalFilename = temp.toString();
         i.largeURI = "http://images.4chan.org/"+res.at(2);
         i.thumbURI = res.at(3);
 
