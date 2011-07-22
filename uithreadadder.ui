@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>747</width>
-    <height>676</height>
+    <width>599</width>
+    <height>653</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0" rowspan="8">
+   <item row="0" column="0" rowspan="9">
     <widget class="QListWidget" name="listWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
@@ -95,7 +95,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="4" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -108,7 +108,7 @@
      </property>
     </spacer>
    </item>
-   <item row="4" column="1">
+   <item row="5" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="btnSelectAll">
@@ -126,7 +126,7 @@
      </item>
     </layout>
    </item>
-   <item row="5" column="1">
+   <item row="6" column="1">
     <widget class="QPushButton" name="btnStartSelected">
      <property name="text">
       <string>Start selected</string>
@@ -137,7 +137,7 @@
      </property>
     </widget>
    </item>
-   <item row="6" column="1">
+   <item row="7" column="1">
     <widget class="QPushButton" name="btnStartAll">
      <property name="text">
       <string>Start all</string>
@@ -148,14 +148,36 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1">
-    <widget class="QPushButton" name="btnClearList">
+   <item row="8" column="1">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="btClearSelected">
+       <property name="text">
+        <string>Clear selected</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/close.png</normaloff>:/icons/resources/close.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClearList">
+       <property name="text">
+        <string>Clear all</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/no.png</normaloff>:/icons/resources/no.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="3" column="1">
+    <widget class="QCheckBox" name="cbStartImmediately">
      <property name="text">
-      <string>Clear List</string>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/icons/resources/no.png</normaloff>:/icons/resources/no.png</iconset>
+      <string>Start immediately</string>
      </property>
     </widget>
    </item>
@@ -172,8 +194,8 @@
    <slot>clear()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>370</x>
-     <y>312</y>
+     <x>588</x>
+     <y>642</y>
     </hint>
     <hint type="destinationlabel">
      <x>234</x>
@@ -181,5 +203,93 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btnSelectAll</sender>
+   <signal>clicked()</signal>
+   <receiver>UIThreadAdder</receiver>
+   <slot>selectAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>386</x>
+     <y>537</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>330</x>
+     <y>495</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnSelectNone</sender>
+   <signal>clicked()</signal>
+   <receiver>UIThreadAdder</receiver>
+   <slot>selectNone()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>510</x>
+     <y>536</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>493</x>
+     <y>514</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnStartSelected</sender>
+   <signal>clicked()</signal>
+   <receiver>UIThreadAdder</receiver>
+   <slot>startSelected()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>440</x>
+     <y>567</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>388</x>
+     <y>455</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnStartAll</sender>
+   <signal>clicked()</signal>
+   <receiver>UIThreadAdder</receiver>
+   <slot>startAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>461</x>
+     <y>595</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>505</x>
+     <y>468</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btClearSelected</sender>
+   <signal>clicked()</signal>
+   <receiver>UIThreadAdder</receiver>
+   <slot>clearSelected()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>381</x>
+     <y>627</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>416</x>
+     <y>492</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>startAll()</slot>
+  <slot>startSelected()</slot>
+  <slot>clearAll()</slot>
+  <slot>clearSelected()</slot>
+  <slot>selectAll()</slot>
+  <slot>selectNone()</slot>
+ </slots>
 </ui>
