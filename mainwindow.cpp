@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(uiConfig, SIGNAL(configurationChanged()), downloadManager, SLOT(loadSettings()));
     connect(ui->actionStart_all, SIGNAL(triggered()), this, SLOT(startAll()));
     connect(ui->actionStop_all, SIGNAL(triggered()), this, SLOT(stopAll()));
-
+    connect(threadAdder, SIGNAL(addTab(QString)), this, SLOT(createTab(QString)));
     connect(downloadManager, SIGNAL(error(QString)), ui->statusBar, SLOT(showMessage(QString)));
 
 //    if (tnt->isRunning()) {

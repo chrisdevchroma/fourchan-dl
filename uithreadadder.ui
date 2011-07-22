@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0" rowspan="9">
+   <item row="0" column="0" rowspan="8">
     <widget class="QListWidget" name="listWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
@@ -95,6 +95,16 @@
      </property>
     </widget>
    </item>
+   <item row="3" column="1">
+    <widget class="QCheckBox" name="cbStartImmediately">
+     <property name="text">
+      <string>Start immediately</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
    <item row="4" column="1">
     <spacer name="verticalSpacer">
      <property name="orientation">
@@ -127,28 +137,32 @@
     </layout>
    </item>
    <item row="6" column="1">
-    <widget class="QPushButton" name="btnStartSelected">
-     <property name="text">
-      <string>Start selected</string>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/icons/resources/yes.png</normaloff>:/icons/resources/yes.png</iconset>
-     </property>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QPushButton" name="btnStartSelected">
+       <property name="text">
+        <string>Start selected</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/yes.png</normaloff>:/icons/resources/yes.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnStartAll">
+       <property name="text">
+        <string>Start all</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/media-playback-start.png</normaloff>:/icons/resources/media-playback-start.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="7" column="1">
-    <widget class="QPushButton" name="btnStartAll">
-     <property name="text">
-      <string>Start all</string>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/icons/resources/media-playback-start.png</normaloff>:/icons/resources/media-playback-start.png</iconset>
-     </property>
-    </widget>
-   </item>
-   <item row="8" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QPushButton" name="btClearSelected">
@@ -173,13 +187,6 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item row="3" column="1">
-    <widget class="QCheckBox" name="cbStartImmediately">
-     <property name="text">
-      <string>Start immediately</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>
