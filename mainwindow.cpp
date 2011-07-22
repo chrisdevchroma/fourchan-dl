@@ -7,13 +7,24 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     uiConfig = new UIConfig(this);
     uiInfo = new UIInfo(this);
+    threadAdder = new UIThreadAdder(this);
     aui = new ApplicationUpdateInterface(this);
     manager = new QNetworkAccessManager();
     blackList = new BlackList(this);
+    thumbnailRemover = new ThumbnailRemoverThread(this);
+
+    thumbnailRemover->start(QThread::LowPriority);
+
+    connect(this, SIGNAL(removeFiles(QStringList)), thumbnailRemover, SLOT(removeFiles(QStringList)));
+
+//    downloadManager = new DownloadManager(this);
+//    downloadManager->start(QThread::NormalPriority);
 
     ui->setupUi(this);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     ui->tabWidget->removeTab(0);
+    oldActiveTabIndex = 0;
+    pendingThumbnailsChanged(0);
 
     loadOptions();
     restoreWindowSettings();
@@ -24,6 +35,18 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     connect(uiConfig, SIGNAL(configurationChanged()), this, SLOT(loadOptions()));
     connect(uiConfig, SIGNAL(configurationChanged()), blackList, SLOT(loadSettings()));
+    connect(uiConfig, SIGNAL(configurationChanged()), downloadManager, SLOT(loadSettings()));
+    connect(ui->actionStart_all, SIGNAL(triggered()), this, SLOT(startAll()));
+    connect(ui->actionStop_all, SIGNAL(triggered()), this, SLOT(stopAll()));
+
+    connect(downloadManager, SIGNAL(error(QString)), ui->statusBar, SLOT(showMessage(QString)));
+
+//    if (tnt->isRunning()) {
+        connect(tnt, SIGNAL(pendingThumbnails(int)), ui->pbPendingThumbnails, SLOT(setValue(int)));
+        connect(tnt, SIGNAL(pendingThumbnails(int)), this, SLOT(pendingThumbnailsChanged(int)));
+//    }
+//    connect(downloadManager, SIGNAL(totalRequestsChanged(int)), ui->pbOpenRequests, SLOT(setMaximum(int)));
+//    connect(downloadManager, SIGNAL(finishedRequestsChanged(int)), ui->pbOpenRequests, SLOT(setValue(int)));
 
     manager->get(QNetworkRequest(QUrl("http://sourceforge.net/projects/fourchan-dl/files/")));
 }
@@ -35,6 +58,8 @@ int MainWindow::addTab() {
     w = new UI4chan(this);
     w->setBlackList(blackList);
 
+//    w->setDownloadManager(downloadManager);
+
     ci = ui->tabWidget->addTab(w, "no name");
     if (settings->value("options/remember_directory", false).toBool())
         w->setDirectory(defaultDirectory);
@@ -44,6 +69,7 @@ int MainWindow::addTab() {
     connect(w, SIGNAL(closeRequest(UI4chan*, int)), this, SLOT(processCloseRequest(UI4chan*, int)));
     connect(w, SIGNAL(directoryChanged(QString)), this, SLOT(setDefaultDirectory(QString)));
     connect(w, SIGNAL(createTabRequest(QString)), this, SLOT(createTab(QString)));
+    connect(w, SIGNAL(removeFiles(QStringList)), this, SIGNAL(removeFiles(QStringList)));
 
     ui->tabWidget->setCurrentIndex(ci);
 
@@ -54,9 +80,12 @@ int MainWindow::addTab() {
 
 void MainWindow::createTab(QString s) {
     int index;
+    UI4chan* w;
 
     index = addTab();
-    ((UI4chan*)ui->tabWidget->widget(index))->setValues(s);
+    w = ((UI4chan*)ui->tabWidget->widget(index));
+    w->setValues(s);
+    w->setAttribute(Qt::WA_DeleteOnClose, true);
 }
 
 void MainWindow::closeTab(int i) {
@@ -64,8 +93,10 @@ void MainWindow::closeTab(int i) {
 
     ui->tabWidget->setCurrentIndex(i);
     w = (UI4chan*)ui->tabWidget->widget(i);
-    if (w->close())
+    if (w->close()) {
         ui->tabWidget->removeTab(i);
+        w->deleteLater();
+    }
     else
         qDebug() << "Close widget event not accepted";
 
@@ -103,7 +134,6 @@ void MainWindow::restoreWindowSettings(void) {
     QPoint p;
     QSize s;
     int state;
-    int tabCount;
 
     settings->beginGroup("window");
         p = settings->value("position",QPoint(0,0)).toPoint();
@@ -119,10 +149,17 @@ void MainWindow::restoreWindowSettings(void) {
 
     if (state != Qt::WindowNoState)
         this->setWindowState((Qt::WindowState) state);
+}
 
+void MainWindow::restoreTabs() {
+    int tabCount;
 
-    // tabs
     tabCount = settings->value("tabs/count",0).toInt();
+
+    ui->pbOpenRequests->setMaximum(tabCount);
+    ui->pbOpenRequests->setValue(0);
+    ui->pbOpenRequests->setFormat("Opening tab %v/%m");
+    ui->tabWidget->setVisible(false);
     if (settings->value("options/resume_session", false).toBool() && tabCount > 0) {
         int ci;
 
@@ -132,13 +169,22 @@ void MainWindow::restoreWindowSettings(void) {
             ((UI4chan*)ui->tabWidget->widget(ci))->setValues(
                     settings->value(QString("tabs/tab%1").arg(i), ";;;;0;;every 30 seconds;;0").toString()
                     );
+            ui->pbOpenRequests->setValue((i+1));
         }
     } else {
         addTab();
     }
+
+    ui->tabWidget->setVisible(true);
+    ui->pbOpenRequests->setVisible(false);
+//    ui->pbOpenRequests->setFormat("%v/%m (%p%) requests finished");
+//    ui->pbOpenRequests->setValue(0);
+//    ui->pbOpenRequests->setMaximum(0);
 }
 
 void MainWindow::saveSettings(void) {
+    int downloadedFiles;
+    float downloadedKB;
     // Window related stuff
     settings->beginGroup("window");
         settings->setValue("position", this->pos());
@@ -159,6 +205,13 @@ void MainWindow::saveSettings(void) {
             settings->setValue(QString("tab%1").arg(i), ((UI4chan*)ui->tabWidget->widget(i))->getValues());
         }
     settings->endGroup();
+
+    downloadManager->getStatistics(&downloadedFiles, &downloadedKB);
+    settings->beginGroup("statistics");
+        settings->setValue("downloaded_files", downloadedFiles);
+        settings->setValue("downloaded_kbytes", downloadedKB);
+    settings->endGroup();
+
     settings->sync();
 }
 
@@ -172,6 +225,7 @@ void MainWindow::loadOptions(void) {
         maxDownloads = settings->value("concurrent_downloads", 1).toInt();
 
         updateWidgetSettings();
+        tnt->setIconSize(QSize(settings->value("thumbnail_width",150).toInt(),settings->value("thumbnail_height",150).toInt()));
     settings->endGroup();
 
     settings->beginGroup("network");
@@ -296,4 +350,41 @@ MainWindow::~MainWindow()
     saveSettings();
 
     delete ui;
+}
+
+void MainWindow::startAll() {
+    ui->pbOpenRequests->setFormat("Starting Thread %v/%m (%p%)");
+    ui->pbOpenRequests->setMaximum(ui->tabWidget->count());
+
+    for (int i=0; i<ui->tabWidget->count(); i++) {
+        ((UI4chan*)ui->tabWidget->widget(i))->start();
+        ui->pbOpenRequests->setValue((i+1));
+    }
+}
+
+void MainWindow::stopAll() {
+    ui->pbOpenRequests->setFormat("Stopping Thread %v/%m (%p%)");
+    ui->pbOpenRequests->setMaximum(ui->tabWidget->count());
+
+    for (int i=0; i<ui->tabWidget->count(); i++) {
+        ((UI4chan*)ui->tabWidget->widget(i))->stop();
+        ui->pbOpenRequests->setValue((i+1));
+    }
+}
+
+void MainWindow::pendingThumbnailsChanged(int i) {
+    if (i > ui->pbPendingThumbnails->maximum())
+        ui->pbPendingThumbnails->setMaximum(i);
+
+    if (i == 0) {
+        ui->pbPendingThumbnails->setVisible(false);
+        ui->pbPendingThumbnails->setMaximum(0);
+    }
+    else if (ui->pbPendingThumbnails->maximum() > 4)
+        ui->pbPendingThumbnails->setVisible(true);
+
+}
+
+void MainWindow::addMultipleTabs() {
+    threadAdder->show();
 }

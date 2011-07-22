@@ -13,6 +13,9 @@
 #include <QFile>
 #include <QCoreApplication>
 #include <QDir>
+#include "ui4chan.h"
+
+class UI4chan;
 
 class ThumbnailThread : public QThread
 {
@@ -21,7 +24,8 @@ public:
     explicit ThumbnailThread(QObject *parent = 0);
     void setIconSize(QSize s);
     void createThumbnails(void);
-    void addToList(QString s);
+    void addToList(UI4chan* caller, QString s);
+    QString getCacheFile(QString);
 private:
     QStringList list;
     QSize* iconSize;
@@ -32,6 +36,7 @@ private:
     bool newImages;
     QString cacheFolder;
     bool useCache;
+    QMultiMap<QString,UI4chan*> callingUIs;
 
 protected:
     void run();

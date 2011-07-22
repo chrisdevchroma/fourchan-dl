@@ -8,7 +8,6 @@ ThumbnailRemoverThread::ThumbnailRemoverThread(QObject *parent) :
 
 void ThumbnailRemoverThread::run() {
     QDateTime date;
-    QFile f;
     mutex.lock();
     dirName = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
                           .arg("tncache")).toString();
@@ -21,9 +20,15 @@ void ThumbnailRemoverThread::run() {
     foreach (QFileInfo fi, fileInfoList) {
         date = fi.lastModified();
         if (date.addDays(ttl) < QDateTime::currentDateTime()) {
-            f.remove(fi.absoluteFilePath());
+            QFile::remove(fi.absoluteFilePath());
             qDebug() << "removed " << fi.absoluteFilePath();
             qDebug() << " because it was created on " << date;
         }
+    }
+}
+
+void ThumbnailRemoverThread::removeFiles(QStringList fileList) {
+    foreach (QString s, fileList) {
+        QFile::remove(s);
     }
 }

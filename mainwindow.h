@@ -11,6 +11,11 @@
 #include "applicationupdateinterface.h"
 #include "defines.h"
 #include "blacklist.h"
+#include "thumbnailremoverthread.h"
+#include "downloadmanager.h"
+#include "uithreadadder.h"
+
+extern DownloadManager* downloadManager;
 
 namespace Ui {
     class MainWindow;
@@ -23,6 +28,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    void restoreTabs();
 
 private:
     Ui::MainWindow *ui;
@@ -31,12 +37,15 @@ private:
     QSettings* settings;
     UIConfig* uiConfig;
     UIInfo* uiInfo;
+    UIThreadAdder* threadAdder;
     ApplicationUpdateInterface* aui;
     BlackList* blackList;
     bool autoClose;
     QSize thumbnailSize;
     int maxDownloads;
     QNetworkAccessManager* manager;
+    ThumbnailRemoverThread* thumbnailRemover;
+    int oldActiveTabIndex;
 
     void restoreWindowSettings(void);
     void saveSettings(void);
@@ -45,6 +54,7 @@ private:
 
 private slots:
     int addTab(void);
+    void addMultipleTabs();
     void closeTab(int);
     void displayError(QString);
     void changeTabTitle(UI4chan*, QString);
@@ -56,6 +66,12 @@ private slots:
     void newVersionAvailable(QString);
     void createTab(QString);
     void replyFinished(QNetworkReply*);
+    void startAll(void);
+    void stopAll(void);
+    void pendingThumbnailsChanged(int);
+
+signals:
+    void removeFiles(QStringList);
 };
 
 #endif // MAINWINDOW_H

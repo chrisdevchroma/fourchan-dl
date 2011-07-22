@@ -17,7 +17,6 @@ class ThumbnailRemoverThread : public QThread
     Q_OBJECT
 public:
     explicit ThumbnailRemoverThread(QObject *parent = 0);
-
 private:
     QSettings* settings;
     int ttl;
@@ -31,6 +30,7 @@ protected:
 signals:
 
 public slots:
+    void removeFiles(QStringList fileList);
 
 };
 

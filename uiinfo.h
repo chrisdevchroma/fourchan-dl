@@ -4,6 +4,9 @@
 #include <QDialog>
 #include <QUrl>
 #include <QtNetwork>
+#include "downloadmanager.h"
+//class DownloadManager;
+extern DownloadManager* downloadManager;
 
 namespace Ui {
     class UIInfo;
@@ -20,6 +23,10 @@ public:
 
 private:
     Ui::UIInfo *ui;
+    QTimer* timer;
+
+private slots:
+    void updateStatistics();
 
 signals:
 };

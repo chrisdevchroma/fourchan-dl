@@ -2,38 +2,60 @@
 
 Parser::Parser(QObject *parent) :
     QObject(parent)
+//    QThread(parent)
 {
+    manager = new QNetworkAccessManager(this);
+    rescheduleTimer = new QTimer();
+//}
+
+//void Parser::run() {
+    requestHandler = new RequestHandler(this);
+
+    connect(requestHandler, SIGNAL(response(QUrl,QByteArray)),
+            this, SLOT(processRequestResponse(QUrl,QByteArray)));
+
+    connect(requestHandler, SIGNAL(responseError(QUrl,int)),
+            this, SLOT(handleError(QUrl,int)));
+
     downloading = false;
     useOriginalFilename = false;
     activeDownloads = 0;
+
     maxDownloads = 2;
-    rescheduleTimer = new QTimer();
     rescheduleTimer->setSingleShot(true);
-    setTimerInterval(600);
-
-    manager = new QNetworkAccessManager();
-
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(replyFinished(QNetworkReply*)));
+    setTimerInterval(30000);
+//    connect(manager, SIGNAL(finished(QNetworkReply*)),
+//            this, SLOT(replyFinished(QNetworkReply*)));
 
     connect(this, SIGNAL(downloadsAvailable(bool)),
             this, SLOT(download(bool)));
 
     connect(rescheduleTimer, SIGNAL(timeout()), this, SLOT(processSchedule()));
+
+//    exec();
 }
 
+/*
 void Parser::replyFinished(QNetworkReply* r) {
     QString requestURI;
     QString redirect;
 
+    removeSupervisedDownload(r->url());
+
     redirect = r->header(QNetworkRequest::LocationHeader).toString();
     if (r->bytesAvailable() < r->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
+        qDebug() << QString("%1 - received only partial data.").arg(r->url().toString());
         reschedule(r->url().toString());
         r->deleteLater();
     }
     else {
         if (!redirect.isEmpty()) {
-            manager->get(QNetworkRequest(QUrl(redirect)));
+//            QNetworkRequest nr;
+//            nr = QNetworkRequest(QUrl(redirect));
+//            nr.setRawHeader("User-Agent", "Wget/1.12");
+//            manager->get(nr);
+            removeSupervisedDownload(r->url());
+            createSupervisedDownload(QUrl(redirect));
             r->deleteLater();
         }
         else if (r->error() != QNetworkReply::NoError) {
@@ -85,12 +107,9 @@ void Parser::replyFinished(QNetworkReply* r) {
                     if (activeDownloads<maxDownloads) {
                         for (int i=activeDownloads; i<maxDownloads; i++) {
                             QString imgURI;
-                            QNetworkReply* nr;
 
                             if (0 != getNextImage(&imgURI)) {
-                                nr = manager->get(QNetworkRequest(QUrl(imgURI)));
-                                connect(nr, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
-                                activeDownloads++;
+                                createSupervisedDownload(imgURI);
                             }
                         }
                     }
@@ -109,6 +128,86 @@ void Parser::replyFinished(QNetworkReply* r) {
         }
     }
 }
+*/
+
+
+void Parser::processRequestResponse(QUrl url, QByteArray ba) {
+    QString requestURI;
+
+    requestURI = url.toString();
+    if (requestURI.indexOf(QRegExp("(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive)) != -1) {
+        QFile f;
+        QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
+        QStringList res;
+        int pos;
+//        int resp;
+
+//        resp = r->error();
+        pos = 0;
+
+        pos = rx.indexIn(requestURI);
+        res = rx.capturedTexts();
+
+        if (pos != -1) {
+            f.setFileName(savePath+"/"+res.at(1)+res.at(2));
+
+            if (useOriginalFilename) {
+                _IMAGE tmp;
+
+                for (int i=0; i<images2dl.count(); i++) {
+                    if (images2dl.at(i).largeURI.endsWith("/"+res.at(1)+res.at(2))) {
+                        tmp = images2dl.at(i);
+
+                        f.setFileName(savePath+"/"+tmp.originalFilename);
+                        break;
+                    }
+                }
+            }
+
+            f.open(QIODevice::ReadWrite);
+
+            f.write(ba);
+            f.close();
+
+            emit fileFinished(f.fileName());
+            activeDownloads--;
+
+            setCompleted(requestURI, f.fileName());
+        }
+
+//        if (activeDownloads<maxDownloads) {
+//            for (int i=activeDownloads; i<maxDownloads; i++) {
+//                QString imgURI;
+//                QNetworkReply* nr;
+
+//                if (0 != getNextImage(&imgURI)) {
+//                    nr = manager->get(QNetworkRequest(QUrl(imgURI)));
+//                    connect(nr, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
+//                    activeDownloads++;
+//                }
+//            }
+//        }
+    }
+    else {
+        html = ba;
+
+        if (ba.contains("<title>4chan - Banned</title>"))
+            emit error(999);
+        else
+            parseHTML();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 void Parser::parseHTML() {
     QStringList res;
@@ -152,7 +251,7 @@ void Parser::parseHTML() {
         if (pos != -1){
             if (addImage(i))
             {
-                qDebug() << "Added image " << i.largeURI;
+//                qDebug() << "Added image " << i.largeURI;
                 imagesAdded = true;
             }
         }
@@ -184,53 +283,112 @@ void Parser::parseHTML() {
     else {
         if (!imagesAdded && (getDownloadedCount() == getTotalCount())){
             download(false);
-            emit finished();
+            emit downloadFinished();
             emit tabTitleChanged("finished");
         } else {
             emit downloadsAvailable(true);
+            emit tabTitleChanged(QString("%1/%2").arg(getDownloadedCount()).arg(getTotalCount()));
         }
+    }
+
+    html.clear();
+}
+
+
+void Parser::createSupervisedDownload(QUrl url) {
+/* Version without DownloadManager
+    if (url.isValid() && manager != 0) {
+        QNetworkRequest req;
+        SupervisedNetworkReply* snr;
+
+        req = QNetworkRequest(QUrl(url));
+//        req.setRawHeader("User-Agent", "Wget/1.12");
+        req.setRawHeader("User-Agent", "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.9.168 Version/11.50");
+        snr = new SupervisedNetworkReply();
+        snr->setNetworkReply(manager->get(req));
+//        manager->get(req);
+        connect(snr, SIGNAL(timeout(QString)), this, SLOT(downloadAborted(QString)));
+        connect(snr->getReply(), SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
+        supervisedReplies.append(snr);
+
+        activeDownloads++;
+    }
+*/
+
+    if (url.isValid()) {
+        requestHandler->request(url);
     }
 }
 
-void Parser::start(void) {
-    if (uri.isValid()) {
-        manager->get(QNetworkRequest(uri));
+
+
+void Parser::removeSupervisedDownload(QUrl url) {
+    /* Version without Download Manager
+    for (int i=0; i<supervisedReplies.count(); i++) {
+        if (supervisedReplies.at(i)->getUrl() == url.toString()) {
+            disconnect(supervisedReplies.at(i), SIGNAL(timeout(QString)), this, SLOT(reschedule(QString)));
+//            if (supervisedReplies.at(i)->getReply() != 0)
+//                supervisedReplies.at(i)->getReply()->abort();
+            supervisedReplies.at(i)->deleteLater();
+            supervisedReplies.removeAt(i);
+
+            break;
+        }
     }
+    activeDownloads--;
+    */
+
+    requestHandler->cancel(url);
+}
+
+void Parser::startDownload(void) {
+    createSupervisedDownload(uri);
 }
 
 void Parser::download(bool b) {
     if (b) {
         QString imgURI;
-        QNetworkReply* nr;
 
         downloading = true;
-        emit tabTitleChanged("downloading");
+//        emit tabTitleChanged("downloading");
 
-        for (int i=activeDownloads; i<maxDownloads; i++) {
-            if (0 != getNextImage(&imgURI)) {
-                nr = manager->get(QNetworkRequest(QUrl(imgURI)));
-//                connect(nr, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(dlProgress(qint64,qint64)));
-                connect(nr,SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
-                activeDownloads++;
-            }
+//        for (int i=activeDownloads; i<maxDownloads; i++) {
+//            if (0 != getNextImage(&imgURI)) {
+        while (getNextImage(&imgURI) != 0)
+                createSupervisedDownload(QUrl(imgURI));
+                //                connect(nr, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(dlProgress(qint64,qint64)));
+//                connect(nr,SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
+//                connect(snr, SIGNAL(timeout(QString)), this, SLOT(reschedule(QString)));
+//                activeDownloads++;
+//            }
+//        }
+
+
+// Make usage of RequestManager
+/*
+        while (getNextImage(&imgURI)) {
+            requestHandler->request(QUrl(imgURI));
         }
-
+*/
     } else {
         downloading = false;
-
-        _IMAGE tmp;
-        for (int i=0; i<images2dl.length(); i++) {
-            if ((images2dl.at(i).downloaded==false) && (images2dl.at(i).requested == true)) {
-                tmp = images2dl.at(i);
-                tmp.requested = false;
-                images2dl.replace(i, tmp);
-            }
-        }
     }
 }
 
-void Parser::stop(void) {
-    download(false);
+void Parser::stopDownload(void) {
+    _IMAGE tmp;
+
+    download(false);                // Prevent new requests
+    requestHandler->cancelAll();    // Cancel pending downloads
+
+    // Reset requested, yet not finished, downloads
+    for (int i=0; i<images2dl.length(); i++) {
+        if ((images2dl.at(i).downloaded==false) && (images2dl.at(i).requested == true)) {
+            tmp = images2dl.at(i);
+            tmp.requested = false;
+            images2dl.replace(i, tmp);
+        }
+    }
 }
 
 bool Parser::addImage(_IMAGE img) {
@@ -360,9 +518,9 @@ int Parser::setCompleted(QString uri, QString filename) {
             emit downloadedCountChanged(getDownloadedCount());
             emit tabTitleChanged(QString("%1/%2").arg(getDownloadedCount()).arg(getTotalCount()));
 
-            if (getDownloadedCount() == getTotalCount()) {
+            if (isFinished()) {
                 download(false);
-                emit finished();
+                emit downloadFinished();
                 emit tabTitleChanged("finished");
             }
             return 0;
@@ -450,29 +608,40 @@ bool Parser::getUrlOfFilename(QString filename, QString * url) {
     return ret;
 }
 
-void Parser::handleError(QNetworkReply* r) {
-    switch (r->error()) {
+//void Parser::handleError(QNetworkReply* r) {
+void Parser::handleError(QUrl url, int err) {
+/*
+    QString sUrl;
+    QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QStringList res;
+    int pos;
+
+    sUrl = url.toString();
+*/
+//    switch (r->error()) {
+    switch (err) {
     case 404:
     case 203:
-        // Only emit signal on pagers not on images to prevent closing of tab just because one image is missing
-        if (r->header(QNetworkRequest::ContentTypeHeader).toString().contains("text/html"))
+        // Only emit signal on pages not on images to prevent closing of tab just because one image is missing
+         if (url.toString().indexOf(QRegExp("(\\.jpg|\\.gif|\\.jpeg|\\.png)", Qt::CaseInsensitive)) == -1)
             emit error(404);
-
         break;
-
     case 301:
-    case 205:
-    case 99:
-    case 299:
-        reschedule(r->url().toString());
-        emit message(QString("Rescheduled %1").arg(r->url().toString()));
+        qDebug() << QString("%1 - service unavailable").arg(url.toString());
+        reschedule(url.toString());
         break;
-
     case 202:
         emit message(QString("Server replied: Access denied! - Maybe a Proxy issue."));
         debug_out("202: Access denied", 1);
+        break;
+    case 5:
+        // Download was aborted -> reschedule
+        qDebug() << QString("%1 - timed out").arg(url.toString());
+        reschedule(url.toString());
+
+        break;
     default:
-        qDebug() << "Unhandled error " << r->error() << ": " << r->errorString();
+        qDebug() << url.toString() << "- Unhandled error " << err;
         break;
     }
 }
@@ -484,7 +653,7 @@ void Parser::reschedule(QString s) {
 
     pos = rx.indexIn(s);
     res = rx.capturedTexts();
-    qDebug() << "Rescheduling " << s;
+//    qDebug() << "Rescheduling " << s;
     emit message(QString("Rescheduling %1").arg(s));
 
     if (pos != -1) {
@@ -495,17 +664,24 @@ void Parser::reschedule(QString s) {
 
         if (!rescheduleTimer->isActive())
             rescheduleTimer->start();
+
+        removeSupervisedDownload(QUrl(s));
     }
     else {
         // Requested URL was no image -> reschedule immediately
-        manager->get(QNetworkRequest(QUrl(s)));
+        createSupervisedDownload(QUrl(s));
     }
 
 }
 
+void Parser::downloadAborted(QString uri) {
+    removeSupervisedDownload(uri);
+    createSupervisedDownload(uri);
+}
+
 void Parser::processSchedule() {
     _IMAGE tmp;
-
+//    qDebug() << "triggering download";
     for (int i=0; i<images2dl.count(); i++) {
         if (rescheduled.contains(images2dl.at(i).largeURI)) {
             tmp = images2dl.at(i);
@@ -520,5 +696,32 @@ void Parser::processSchedule() {
 }
 
 void Parser::setTimerInterval(int msec) {
-    rescheduleTimer->setInterval(msec);
+    if (rescheduleTimer == 0)
+        qDebug() << "OhOh!";
+    else
+        rescheduleTimer->setInterval(msec);
+}
+
+QStringList Parser::getDownloadedFiles() {
+    QStringList ret;
+
+    ret.empty();
+
+    for (int i=0; i<images2dl.count(); i++) {
+        if (images2dl.at(i).downloaded)
+            ret << images2dl.at(i).savedAs;
+    }
+
+    return ret;
+}
+
+bool Parser::isFinished() {
+    bool ret;
+
+    ret = false;
+
+    if (getDownloadedCount() == getTotalCount())
+        ret=true;
+
+    return ret;
 }

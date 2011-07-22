@@ -11,12 +11,15 @@ UI4chan::UI4chan(QWidget *parent) :
 
     ui->setupUi(this);
     p = new Parser(this);
-    tnt = new ThumbnailThread();
-    timer = new QTimer();
+//    p->start();
+//    tnt = new ThumbnailThread(this);
+    timer = new QTimer(this);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
 
-    setThumbnailSize(QSize(100,100));
+//    setThumbnailSize(QSize(100,100));
     thumbnailsizeLocked = false;
+
+    closeWhenFinished = false;
 
     deleteFileAction = new QAction(QString("Delete File"), this);
     deleteFileAction->setIcon(QIcon(":/icons/resources/remove.png"));
@@ -41,10 +44,11 @@ UI4chan::UI4chan(QWidget *parent) :
     connect(p, SIGNAL(totalCountChanged(int)), this, SLOT(setMaxImageCount(int)));
     connect(p, SIGNAL(totalCountChanged(int)), ui->progressBar, SLOT(setMaximum(int)));
     connect(p, SIGNAL(totalCountChanged(int)), ui->pbPendingThumbnails, SLOT(setMaximum(int)));
-    connect(p, SIGNAL(finished()), this, SLOT(downloadsFinished()));
+    connect(p, SIGNAL(downloadFinished()), this, SLOT(downloadsFinished()));
     connect(p, SIGNAL(fileFinished(QString)), this, SLOT(createThumbnail(QString)));
-    connect(tnt, SIGNAL(thumbnailCreated(QString,QImage)), this, SLOT(addThumbnail(QString,QImage)));
-    connect(tnt, SIGNAL(pendingThumbnails(int)), this, SLOT(setPendingThumbnails(int)));
+
+//    connect(tnt, SIGNAL(thumbnailCreated(QString,QImage)), this, SLOT(addThumbnail(QString,QImage)));
+//    connect(tnt, SIGNAL(pendingThumbnails(int)), this, SLOT(setPendingThumbnails(int)));
 
     connect(p, SIGNAL(error(int)), this, SLOT(errorHandler(int)));
     connect(p, SIGNAL(message(QString)), this, SLOT(messageHandler(QString)));
@@ -78,13 +82,15 @@ bool UI4chan::setThumbnailSize(QSize s) {
     bool ret;
 
     ret = false;
-
+        /*
+        tnt->setIconSize(iconSize);
+        ret = true;
+*/
     if (!thumbnailsizeLocked) {
         iconSize = s;
         ui->listWidget->setIconSize(iconSize);
-        tnt->setIconSize(iconSize);
         ui->listWidget->setGridSize(QSize(iconSize.width()+10,iconSize.height()+20));
-        ret = true;
+        thumbnailsizeLocked = true;
     }
 
     return ret;
@@ -97,7 +103,8 @@ void UI4chan::start(void) {
     running = true;
 
     if (ui->leURI->text() != "") {
-        ui->leURI->setEnabled(false);
+//        ui->leURI->setEnabled(false);
+        ui->leURI->setReadOnly(true);
         p->setURI(ui->leURI->text());
         savepath = ui->leSavepath->text();
 
@@ -118,7 +125,7 @@ void UI4chan::start(void) {
             ui->leSavepath->setEnabled(false);
             p->setSavePath(savepath);
             p->setValues(getValues());
-            p->start();
+            p->startDownload();
 
             ui->btnStart->setEnabled(false);
             ui->btnStop->setEnabled(true);
@@ -126,32 +133,44 @@ void UI4chan::start(void) {
             ui->comboBox->setEnabled(false);
             ui->progressBar->setEnabled(true);
             ui->cbOriginalFilename->setEnabled(false);
+            ui->btnChoosePath->setEnabled(false);
 
             if (ui->cbRescan->isChecked()) {
                 timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
 
                 timer->start();
             }
+            // Hide thread settings
+            if ((ui->btnToggleView->isChecked()))
+                ui->btnToggleView->setChecked(false);
         }
         else
         {
             emit errorMessage("Directory does not exist / Could not be created");
+            stop();
         }
     }
+
 }
 
 void UI4chan::stop(void) {
     running = false;
-    p->stop();
+    p->stopDownload();
     timer->stop();
     ui->btnStart->setEnabled(true);
     ui->btnStop->setEnabled(false);
-    ui->leURI->setEnabled(true);
+//    ui->leURI->setEnabled(true);
+    ui->leURI->setReadOnly(false);
     ui->leSavepath->setEnabled(true);
     ui->cbRescan->setEnabled(true);
     ui->comboBox->setEnabled(true);
     ui->progressBar->setEnabled(false);
     ui->cbOriginalFilename->setEnabled(true);
+    ui->btnChoosePath->setEnabled(true);
+
+    // Bring up thread settings
+    if (!(ui->btnToggleView->isChecked()))
+        ui->btnToggleView->setChecked(true);
 }
 
 void UI4chan::chooseLocation(void) {
@@ -168,7 +187,7 @@ void UI4chan::chooseLocation(void) {
 }
 
 void UI4chan::triggerRescan(void) {
-    p->start();
+    p->startDownload();
     timer->start();
 
     setTabTitle("rescanning");
@@ -181,8 +200,8 @@ void UI4chan::setDownloadedCount(int i) {
 }
 
 void UI4chan::createThumbnail(QString s) {
-    tnt->addToList(s);
-    tnt->createThumbnails();
+        tnt->addToList(this, s);
+        tnt->createThumbnails();
 }
 
 void UI4chan::addThumbnail(QString filename, QImage tn) {
@@ -190,25 +209,44 @@ void UI4chan::addThumbnail(QString filename, QImage tn) {
     QPixmap pixmap;
 
 #if QT_VERSION < 0x040700               // Prior to Qt4.7 convertFromImage needed Qt3 Support
-    pixmap.convertFromImage(tn);
+        pixmap.convertFromImage(tn);
 #else                                   // so for these versions use fromImage instead
-    pixmap = QPixmap::fromImage(tn);
+        pixmap = QPixmap::fromImage(tn);
 #endif
-    item = new QListWidgetItem(
-            QIcon(pixmap),
-            filename,
-            ui->listWidget);
+        item = new QListWidgetItem(
+                    QIcon(pixmap),
+                    filename,
+                    ui->listWidget);
 
-    ui->listWidget->addItem(item);
-    thumbnailsizeLocked = true;
+        ui->listWidget->addItem(item);
+        thumbnailsizeLocked = true;
 }
 
 void UI4chan::downloadsFinished() {
-    setTabTitle("idling");
+    QStringList fileList;
+
+    setTabTitle("finished");
     ui->progressBar->setVisible(false);
 
     if (!ui->cbRescan->isChecked())
         stop();
+
+    if (closeWhenFinished) {
+        stop();
+
+        setTabTitle("Thread 404'ed");
+        emit errorMessage("404 - Page not found");
+        emit closeRequest(this, 404);
+
+        // Delete all thumbnails
+        for (int i=0; i<ui->listWidget->count(); i++) {
+            fileList.append(tnt->getCacheFile(
+                                ui->listWidget->item(i)->text()
+                                )
+                            );
+        }
+        emit removeFiles(fileList);
+    }
 }
 
 void UI4chan::on_listWidget_customContextMenuRequested(QPoint pos)
@@ -225,6 +263,7 @@ void UI4chan::deleteFile(void) {
     QFile f;
     QString filename;
     QString uri;
+    QString cacheFile;
 
     filename = ui->listWidget->currentItem()->text();
     if (filename != "") {
@@ -238,6 +277,10 @@ void UI4chan::deleteFile(void) {
         if (p->getUrlOfFilename(filename, &uri))
             blackList->add(uri);
     }
+
+    cacheFile = tnt->getCacheFile(filename);
+
+    emit removeFiles(QStringList(cacheFile));
 }
 
 void UI4chan::reloadFile(void) {
@@ -268,13 +311,31 @@ void UI4chan::openFile(void) {
 }
 
 void UI4chan::errorHandler(int err) {
+    QStringList fileList;
+
     switch (err) {
     case 404:
-        stop();
+        // If there are still images in the list, wait until they finished (maybe they still exist)
+        // else close immediately
+        if (p->isFinished()) {
+            stop();
 
-        setTabTitle("Thread 404'ed");
-        emit errorMessage("404 - Page not found");
-        emit closeRequest(this, 404);
+            setTabTitle("Thread 404'ed");
+            emit errorMessage("404 - Page not found");
+            emit closeRequest(this, 404);
+
+            // Delete all thumbnails
+            for (int i=0; i<ui->listWidget->count(); i++) {
+                fileList.append(tnt->getCacheFile(
+                                    ui->listWidget->item(i)->text()
+                                    )
+                            );
+            }
+            emit removeFiles(fileList);
+        }
+        else {
+            closeWhenFinished = true;
+        }
 
         break;
     case 999:
@@ -360,8 +421,15 @@ void UI4chan::closeEvent(QCloseEvent *event)
     if (running)
         stop();
 
-    if (tnt->isRunning())
-        tnt->terminate();
+    // Delete all thumbnails
+    QStringList fileList;
+    for (int i=0; i<ui->listWidget->count(); i++) {
+        fileList.append(tnt->getCacheFile(
+                            ui->listWidget->item(i)->text()
+                            )
+                    );
+    }
+    emit removeFiles(fileList);
 
     p->deleteLater();
 

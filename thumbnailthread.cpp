@@ -20,8 +20,11 @@ void ThumbnailThread::createThumbnails() {
 }
 
 void ThumbnailThread::run() {
+    QImage original, tn;
+    QString cacheFile;
     QString currentFilename;
     QDir dir;
+    QList<UI4chan*> uis;
     int iconWidth;
     int iconHeight;
     bool enlargeThumbnails;
@@ -34,28 +37,23 @@ void ThumbnailThread::run() {
                 list.pop_front();
                 newImages = true;
             }
-            iconWidth = iconSize->width();
-            iconHeight = iconSize->height();
-            enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
-            hqRendering = settings->value("options/hq_thumbnails", false).toBool();
-            useCache = settings->value("options/use_thumbnail_cache", true).toBool();
-            cacheFolder = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
-                                          .arg("tncache")).toString();
         mutex.unlock();
+        iconWidth = iconSize->width();
+        iconHeight = iconSize->height();
+        enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
+        hqRendering = settings->value("options/hq_thumbnails", false).toBool();
+        useCache = settings->value("options/use_thumbnail_cache", true).toBool();
+        cacheFolder = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
+                                      .arg("tncache")).toString();
 
         if (useCache && !(dir.exists(cacheFolder)))
             dir.mkpath(cacheFolder);
 
         if (newImages) {
-            QImage original, tn;
-            QString cacheFile;
-            QString tmp;
             bool useCachedThumbnail;
 
             useCachedThumbnail = false;
-            tmp = currentFilename;
-            tmp.replace( QRegExp( "[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]" ), QString( "_" ) );
-            cacheFile = QString("%1/%2").arg(cacheFolder).arg(tmp);
+            cacheFile = getCacheFile(currentFilename);
             // Check if thumbnail exists
             if (useCache && QFile::exists(cacheFile)) {
                 tn.load(cacheFile);
@@ -82,7 +80,13 @@ void ThumbnailThread::run() {
                     tn.save(cacheFile);
             }
 
-            emit thumbnailCreated(currentFilename, tn);
+            uis = callingUIs.values(currentFilename);
+
+            foreach(UI4chan* ui, uis) {
+                ui->addThumbnail(currentFilename, tn);
+                callingUIs.remove(currentFilename, ui);
+            }
+//            emit thumbnailCreated(currentFilename, tn);
 
             mutex.lock();
                 emit pendingThumbnails(list.count());
@@ -97,8 +101,6 @@ void ThumbnailThread::run() {
                 condition.wait(&mutex);
             mutex.unlock();
         }
-
-
     }
 }
 
@@ -109,9 +111,20 @@ void ThumbnailThread::setIconSize(QSize s) {
     mutex.unlock();
 }
 
-void ThumbnailThread::addToList(QString s) {
+void ThumbnailThread::addToList(UI4chan* caller, QString s) {
     mutex.lock();
     list.append(s);
+    callingUIs.insertMulti(s, caller);
     newImages = true;
     mutex.unlock();
+}
+
+QString ThumbnailThread::getCacheFile(QString filename) {
+    QString tmp, ret;
+
+    tmp = filename;
+    tmp.replace( QRegExp( "[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]" ), QString( "_" ) );
+    ret= QString("%1/%2").arg(cacheFolder).arg(tmp);
+
+    return ret;
 }

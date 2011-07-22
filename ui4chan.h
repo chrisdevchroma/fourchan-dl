@@ -13,6 +13,10 @@
 #include "parser.h"
 #include "thumbnailthread.h"
 #include "blacklist.h"
+#include "downloadmanager.h"
+
+class ThumbnailThread;
+extern ThumbnailThread* tnt;
 
 namespace Ui {
     class UI4chan;
@@ -34,11 +38,11 @@ public:
     void useOriginalFilenames(bool);
     void updateSettings(void);
     void setBlackList(BlackList* bl);
-
+//    void setDownloadManager(DownloadManager*);
 private:
     Ui::UI4chan *ui;
     Parser* p;
-    ThumbnailThread* tnt;
+//    ThumbnailThread* tnt;
     QTimer* timer;
     QList<int> timeoutValues;
     QSize iconSize;
@@ -51,6 +55,7 @@ private:
 
     bool thumbnailsizeLocked;
     bool running;
+    bool closeWhenFinished;
 
     void loadSettings(void);
 
@@ -59,7 +64,6 @@ private slots:
     void chooseLocation(void);
     void triggerRescan(void);
     void createThumbnail(QString);
-    void addThumbnail(QString, QImage);
     void downloadsFinished(void);
     void deleteFile(void);
     void reloadFile(void);
@@ -76,6 +80,7 @@ private slots:
     void openDownloadFolder();
 
 public slots:
+    void addThumbnail(QString, QImage);
     void start(void);
     void stop(void);
 
@@ -86,7 +91,7 @@ signals:
     void directoryChanged(QString);
     void closeRequest(UI4chan*, int);
     void createTabRequest(QString);
-
+    void removeFiles(QStringList);
 protected:
     void closeEvent(QCloseEvent *);
 //    void keyPressEvent(QKeyEvent* ke);

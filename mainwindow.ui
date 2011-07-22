@@ -19,7 +19,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
+    <item row="2" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabPosition">
        <enum>QTabWidget::East</enum>
@@ -43,6 +43,32 @@
       </widget>
      </widget>
     </item>
+    <item row="0" column="0">
+     <widget class="QProgressBar" name="pbOpenRequests">
+      <property name="maximum">
+       <number>999999999</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+      <property name="format">
+       <string>%v/%m (%p%) requests finished</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QProgressBar" name="pbPendingThumbnails">
+      <property name="maximum">
+       <number>0</number>
+      </property>
+      <property name="value">
+       <number>0</number>
+      </property>
+      <property name="format">
+       <string>Another %v thumbnails to create</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -53,6 +79,9 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionAdd_Tab"/>
+   <addaction name="actionAddMultipleTabs"/>
+   <addaction name="actionStart_all"/>
+   <addaction name="actionStop_all"/>
    <addaction name="actionOpen_Configuration"/>
    <addaction name="actionShowInfo"/>
   </widget>
@@ -60,10 +89,13 @@
   <action name="actionAdd_Tab">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/add.png</normaloff>:/icons/resources/add.png</iconset>
+     <normaloff>:/icons/resources/tab-new.png</normaloff>:/icons/resources/tab-new.png</iconset>
    </property>
    <property name="text">
     <string>Add Tab</string>
+   </property>
+   <property name="toolTip">
+    <string>Add single tab</string>
    </property>
   </action>
   <action name="actionShowInfo">
@@ -82,6 +114,36 @@
    </property>
    <property name="text">
     <string>Open Configuration</string>
+   </property>
+  </action>
+  <action name="actionStart_all">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/media-playback-start.png</normaloff>:/icons/resources/media-playback-start.png</iconset>
+   </property>
+   <property name="text">
+    <string>Start all</string>
+   </property>
+  </action>
+  <action name="actionStop_all">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/media-playback-stop.png</normaloff>:/icons/resources/media-playback-stop.png</iconset>
+   </property>
+   <property name="text">
+    <string>Stop all</string>
+   </property>
+  </action>
+  <action name="actionAddMultipleTabs">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/tab-++.png</normaloff>:/icons/resources/tab-++.png</iconset>
+   </property>
+   <property name="text">
+    <string>addMultipleTabs</string>
+   </property>
+   <property name="toolTip">
+    <string>Add multiple tabs</string>
    </property>
   </action>
  </widget>
@@ -138,11 +200,28 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAddMultipleTabs</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>addMultipleTabs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>269</x>
+     <y>304</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addTab()</slot>
   <slot>closeTab()</slot>
   <slot>showInfo()</slot>
   <slot>showConfiguration()</slot>
+  <slot>addMultipleTabs()</slot>
  </slots>
 </ui>

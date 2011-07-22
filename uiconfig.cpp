@@ -117,6 +117,12 @@ void UIConfig::loadSettings(void) {
         ui->cbProxyType->setCurrentIndex(proxyType);
     settings->endGroup();
 
+    settings->beginGroup("download_manager");
+        ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",20).toInt());
+        ui->sbDownloadTimeoutInitial->setValue(settings->value("initial_timeout",30).toInt());
+        ui->sbDownloadTimeoutInbetween->setValue(settings->value("running_timeout",2).toInt());
+    settings->endGroup();
+
     timeoutValueEditor->loadSettings();
 }
 
@@ -168,6 +174,11 @@ void UIConfig::accept(void) {
         settings->setValue("proxy_type", proxyType);
     settings->endGroup();
 
+    settings->beginGroup("download_manager");
+        settings->setValue("concurrent_downloads", ui->sbConcurrentDownloads->value());
+        settings->setValue("initial_timeout", ui->sbDownloadTimeoutInitial->value());
+        settings->setValue("running_timeout", ui->sbDownloadTimeoutInbetween->value());
+    settings->endGroup();
 
     settings->sync();
 
