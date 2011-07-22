@@ -6,6 +6,8 @@
 #include <QMimeData>
 #include <QUrl>
 #include <QtDebug>
+#include <QFileDialog>
+#include <QSettings>
 
 namespace Ui {
     class UIThreadAdder;
@@ -22,17 +24,28 @@ public:
 private:
     Ui::UIThreadAdder *ui;
     QClipboard* clipboard;
+    QSettings* settings;
+    QList<int> timeoutValues;
 
     void addLinks(QStringList links);
     QStringList parseText(QString text);
     QStringList parseHTML(QString html);
     QStringList parseURLList(QList<QUrl> urls);
+    void loadSettings();
 
 private slots:
     void checkClipboard();
     void selectAll();
     void selectNone();
+    void startSelected();
+    void startAll();
+    bool readyToStart();
+    void chooseLocation();
+    void clearSelected();
 
+signals:
+    void directoryChanged(QString);
+    void addTab(QString);
 };
 
 #endif // UITHREADADDER_H

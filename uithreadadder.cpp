@@ -7,11 +7,12 @@ UIThreadAdder::UIThreadAdder(QWidget *parent) :
 {
     ui->setupUi(this);
     clipboard = QApplication::clipboard();
+    settings = new QSettings("settings.ini", QSettings::IniFormat);
 
 //    connect(clipboard, SIGNAL(changed(QClipboard::Mode))), this, SLOT(checkClipboard(QClipboard::Mode));
     connect(clipboard, SIGNAL(dataChanged()), this, SLOT(checkClipboard()));
-    connect(ui->btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
-    connect(ui->btnSelectNone, SIGNAL(clicked()), this, SLOT(selectNone()));
+
+    loadSettings();
 }
 
 UIThreadAdder::~UIThreadAdder()
@@ -26,7 +27,6 @@ void UIThreadAdder::checkClipboard() {
     QClipboard::Mode mode;
 
     mode = QClipboard::Clipboard;
-    ui->listWidget->clear();
 //    switch(mode) {
 //    case QClipboard::Clipboard:     // Look only in global clipboard
         if (clipboard->mimeData(mode)->hasText() || clipboard->mimeData(mode)->hasHtml()) {
@@ -112,4 +112,137 @@ void UIThreadAdder::selectNone() {
     for (int i=0; i<ui->listWidget->count(); i++) {
         ui->listWidget->item(i)->setCheckState(Qt::Unchecked);
     }
+}
+
+void UIThreadAdder::startAll() {
+    selectAll();
+    startSelected();
+}
+
+void UIThreadAdder::startSelected() {
+    QStringList threadSettings;
+
+    threadSettings << "";
+    threadSettings << ui->leSavepath->text();
+    threadSettings << QString("%1").arg(ui->cbRescan->checkState());
+    threadSettings << QString("%1").arg(ui->comboBox->itemData(ui->comboBox->currentIndex()).toInt());
+    threadSettings << QString("%1").arg(ui->cbOriginalFilename->checkState() == Qt::Checked);
+    threadSettings << QString("%1").arg(ui->cbStartImmediately->checkState() == Qt::Checked);
+
+    if (readyToStart()) {
+        for (int i=0; i<ui->listWidget->count(); i++) {
+            if (ui->listWidget->item(i)->checkState() == Qt::Checked) {
+                threadSettings.replace(0, ui->listWidget->item(i)->text());
+
+                emit addTab(threadSettings.join(";;"));
+            }
+        }
+    }
+
+    clearSelected();
+    this->hide();
+}
+
+void UIThreadAdder::clearSelected() {
+    for (int i=0; i<ui->listWidget->count(); i++) {
+        if (ui->listWidget->item(i)->checkState()==Qt::Checked) {
+            ui->listWidget->takeItem(i--);
+        }
+    }
+
+}
+
+bool UIThreadAdder::readyToStart() {
+    bool ret;
+
+    ret = false;
+
+    if (!ui->leSavepath->text().isEmpty()) {
+        ret = true;
+    }
+    else {
+        ret = false;
+    }
+
+    ui->btnStartAll->setEnabled(ret);
+    ui->btnStartSelected->setEnabled(ret);
+
+    return ret;
+}
+
+void UIThreadAdder::chooseLocation(void) {
+    QString loc;
+
+    loc = QFileDialog::getExistingDirectory(this, "Choose storage directory", ui->leSavepath->text());
+
+    if (loc != "") {
+        if (loc.endsWith("\\"))
+            loc.chop(1);
+        ui->leSavepath->setText(loc);
+
+        readyToStart();
+
+        emit directoryChanged(loc);
+    }
+}
+
+void UIThreadAdder::loadSettings() {
+    QStringList sl;
+    int index, defaultTimeout;
+
+    sl = settings->value("options/timeout_values", (QStringList()<<"30"<<"60"<<"120"<<"300"<<"600")).toStringList();
+
+    ui->comboBox->clear();
+
+    foreach (QString s, sl) {
+        int i;
+        bool ok;
+
+        i = s.toInt(&ok);
+        if (ok) timeoutValues<<i;
+    }
+
+    foreach (int i, timeoutValues) {
+        int value;
+        QString text;
+
+        if (i > 60 && ((i%60) == 0)) {              // Display as minutes
+            if (i > 3600 && ((i%3600) == 0)) {      // Display as hours
+                if (i > 86400 && ((i%86400)==0)) {  // Display as days
+                    value = i/86400;
+                    text = "days";
+                }
+                else {
+                    value = i/3600;
+                    text = "hours";
+                }
+            }
+            else {
+                value = i/60;
+                text = "minutes";
+            }
+        }
+        else {
+            value = i;
+            text = "seconds";
+        }
+
+        ui->comboBox->addItem(QString("every %1 %2").arg(value).arg(text), i);
+    }
+
+    defaultTimeout = settings->value("options/default_timeout",0).toInt();
+    index = ui->comboBox->findData(defaultTimeout);
+    if (index != -1) ui->comboBox->setCurrentIndex(index);
+
+    if (defaultTimeout == 0) {
+        ui->comboBox->setEnabled(false);
+        ui->cbRescan->setChecked(false);
+    }
+    else {
+        ui->comboBox->setEnabled(true);
+        ui->cbRescan->setChecked(true);
+    }
+
+    ui->leSavepath->setText(settings->value("options/default_directory","").toString());
+    ui->cbOriginalFilename->setChecked(settings->value("options/default_original_filename", false).toBool());
 }

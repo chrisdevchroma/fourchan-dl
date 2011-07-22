@@ -75,7 +75,8 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
             if (!redirect.isEmpty()) {
                 if (dr != 0) {
                     dr->setUrl(QUrl(redirect));
-                    // TODO: Restart
+                    dr->setProcessing(false);
+                    priorities.insertMulti(-1, uid);
                 }
             }
             else if (reply->error() != QNetworkReply::NoError) {
