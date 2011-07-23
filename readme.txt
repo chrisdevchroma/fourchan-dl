@@ -5,6 +5,19 @@ When building from source make sure that you copy the "au" executable into the s
 
 Release notes
 
+Version 1.1.0
+* Fixed program crash when a lots of tabs were open
+* Some UI enhancements
+* Added a dialogue to open multiple threads
+ - It watches the clipboard, so copying a link or HTML source code with 4chan links will make them appear in this list
+* To fix the mentioned code there is now only _one_ download thread. This means that the overall download with lots of images may appear slower,
+  since it is only downloading the images tabwise and not all tabs at the same
+* There is also only one thread which creates thumbnails, so this will also may appear slower than before. All CPU is used though.
+* This leads to less memory usage, which is worth all the waiting though
+* The thumbnail cache is enabled per default and it cannot be changed anymore due to a bug in the linux version
+  - The linux version still complains about using QPixmap outside the UI thread, but I am not using it outside. So at the moment I will generously ignore that.
+* I updated my Qt framework so you may download the complete package for the latest Qt libraries
+
 Version 1.0.0
 * Added thumbnail cache
 * Fixed bug 3302967
