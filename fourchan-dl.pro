@@ -60,7 +60,7 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.1.0test\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.1.0\\\""
 
 OTHER_FILES += \
     readme.txt \

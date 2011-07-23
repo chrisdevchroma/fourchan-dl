@@ -43,7 +43,8 @@ void ThumbnailThread::run() {
         iconHeight = iconSize->height();
         enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
         hqRendering = settings->value("options/hq_thumbnails", false).toBool();
-        useCache = settings->value("options/use_thumbnail_cache", true).toBool();
+//        useCache = settings->value("options/use_thumbnail_cache", true).toBool();
+        useCache = true;
         cacheFolder = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
                                       .arg("tncache")).toString();
 
