@@ -204,22 +204,16 @@ void UI4chan::createThumbnail(QString s) {
         tnt->createThumbnails();
 }
 
-void UI4chan::addThumbnail(QString filename, QImage tn) {
+void UI4chan::addThumbnail(QString filename, QString tnFilename) {
     QListWidgetItem* item;
-    QPixmap pixmap;
 
-#if QT_VERSION < 0x040700               // Prior to Qt4.7 convertFromImage needed Qt3 Support
-        pixmap.convertFromImage(tn);
-#else                                   // so for these versions use fromImage instead
-        pixmap = QPixmap::fromImage(tn);
-#endif
-        item = new QListWidgetItem(
-                    QIcon(pixmap),
-                    filename,
-                    ui->listWidget);
+    item = new QListWidgetItem(
+                QIcon(tnFilename),
+                filename,
+                ui->listWidget);
 
-        ui->listWidget->addItem(item);
-        thumbnailsizeLocked = true;
+    ui->listWidget->addItem(item);
+    thumbnailsizeLocked = true;
 }
 
 void UI4chan::downloadsFinished() {
@@ -432,6 +426,8 @@ void UI4chan::closeEvent(QCloseEvent *event)
     emit removeFiles(fileList);
 
     p->deleteLater();
+
+    while (!tnt->cancelAll(this));
 
     event->accept();
 }

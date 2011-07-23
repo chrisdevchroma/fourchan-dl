@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="0" column="0" rowspan="8">
+   <item row="0" column="0" rowspan="6">
     <widget class="QListWidget" name="listWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
@@ -119,24 +119,6 @@
     </spacer>
    </item>
    <item row="5" column="1">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="btnSelectAll">
-       <property name="text">
-        <string>Select all</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnSelectNone">
-       <property name="text">
-        <string>Select none</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="6" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
       <widget class="QPushButton" name="btnStartSelected">
@@ -145,7 +127,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/icons/resources/yes.png</normaloff>:/icons/resources/yes.png</iconset>
+         <normaloff>:/icons/resources/dialog-ok.png</normaloff>:/icons/resources/dialog-ok.png</iconset>
        </property>
       </widget>
      </item>
@@ -156,13 +138,13 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/icons/resources/media-playback-start.png</normaloff>:/icons/resources/media-playback-start.png</iconset>
+         <normaloff>:/icons/resources/yes.png</normaloff>:/icons/resources/yes.png</iconset>
        </property>
       </widget>
      </item>
     </layout>
    </item>
-   <item row="7" column="1">
+   <item row="6" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QPushButton" name="btClearSelected">
@@ -183,6 +165,24 @@
        <property name="icon">
         <iconset resource="resources.qrc">
          <normaloff>:/icons/resources/no.png</normaloff>:/icons/resources/no.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="6" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="btnSelectAll">
+       <property name="text">
+        <string>Select all</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnSelectNone">
+       <property name="text">
+        <string>Select none</string>
        </property>
       </widget>
      </item>

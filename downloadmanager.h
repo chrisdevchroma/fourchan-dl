@@ -53,7 +53,7 @@ private:
 private slots:
     void replyFinished(QNetworkReply*);
     void startRequest(qint64);
-    void dlProgress(qint64 b, qint64 t) {/*qDebug() << QString("%1 of %2").arg(b).arg(t);*/}
+//    void dlProgress(qint64 b, qint64 t) {/*qDebug() << QString("%1 of %2").arg(b).arg(t);*/}
     void replyError(QNetworkReply::NetworkError e) {qDebug() << "reply error " << e;}
     void downloadTimeout(qint64);
     void resumeDownloads();

@@ -25,18 +25,20 @@ public:
     void setIconSize(QSize s);
     void createThumbnails(void);
     void addToList(UI4chan* caller, QString s);
+    bool cancelAll(UI4chan* caller);
     QString getCacheFile(QString);
 private:
     QStringList list;
     QSize* iconSize;
     bool hq;
+    volatile bool canceled;
     QSettings* settings;
     QMutex mutex;
     QWaitCondition condition;
     bool newImages;
     QString cacheFolder;
     bool useCache;
-    QMultiMap<QString,UI4chan*> callingUIs;
+    QMultiMap<QString, UI4chan*> callingUIs;
 
 protected:
     void run();

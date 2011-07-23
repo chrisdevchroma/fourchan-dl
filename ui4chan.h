@@ -80,7 +80,7 @@ private slots:
     void openDownloadFolder();
 
 public slots:
-    void addThumbnail(QString, QImage);
+    void addThumbnail(QString, QString);
     void start(void);
     void stop(void);
 

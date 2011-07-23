@@ -169,8 +169,14 @@
        </item>
        <item row="6" column="0" colspan="3">
         <widget class="QCheckBox" name="cbUseThumbnailCache">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="text">
           <string>Use Thumbnail Cache</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

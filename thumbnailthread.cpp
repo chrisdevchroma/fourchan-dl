@@ -36,6 +36,7 @@ void ThumbnailThread::run() {
                 currentFilename = list.front();
                 list.pop_front();
                 newImages = true;
+                canceled = false;
             }
         mutex.unlock();
         iconWidth = iconSize->width();
@@ -76,14 +77,15 @@ void ThumbnailThread::run() {
                     else
                         tn = original.scaled(*iconSize,Qt::KeepAspectRatio,Qt::FastTransformation);
                 }
-                if (useCache)
-                    tn.save(cacheFile);
+//                if (useCache)
+                tn.save(cacheFile, "PNG");
             }
 
             uis = callingUIs.values(currentFilename);
 
             foreach(UI4chan* ui, uis) {
-                ui->addThumbnail(currentFilename, tn);
+                if (!canceled)
+                    ui->addThumbnail(currentFilename, cacheFile);
                 callingUIs.remove(currentFilename, ui);
             }
 //            emit thumbnailCreated(currentFilename, tn);
@@ -124,7 +126,22 @@ QString ThumbnailThread::getCacheFile(QString filename) {
 
     tmp = filename;
     tmp.replace( QRegExp( "[" + QRegExp::escape( "\\/:*?\"<>|" ) + "]" ), QString( "_" ) );
-    ret= QString("%1/%2").arg(cacheFolder).arg(tmp);
+    ret= QString("%1/%2.tn").arg(cacheFolder).arg(tmp);
+
+    return ret;
+}
+
+bool ThumbnailThread::cancelAll(UI4chan *caller) {
+    bool ret;
+    QList<QString> filenames;
+
+    mutex.lock();
+    ret = true;
+    filenames = callingUIs.keys(caller);
+    foreach(QString key, filenames)
+        callingUIs.remove(key, caller);
+
+    mutex.unlock();
 
     return ret;
 }
