@@ -217,8 +217,8 @@
    <slot>selectAll()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>386</x>
-     <y>537</y>
+     <x>149</x>
+     <y>641</y>
     </hint>
     <hint type="destinationlabel">
      <x>330</x>
@@ -233,8 +233,8 @@
    <slot>selectNone()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>510</x>
-     <y>536</y>
+     <x>295</x>
+     <y>641</y>
     </hint>
     <hint type="destinationlabel">
      <x>493</x>
@@ -249,8 +249,8 @@
    <slot>startSelected()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>440</x>
-     <y>567</y>
+     <x>443</x>
+     <y>610</y>
     </hint>
     <hint type="destinationlabel">
      <x>388</x>
@@ -290,6 +290,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btnChoosePath</sender>
+   <signal>clicked()</signal>
+   <receiver>UIThreadAdder</receiver>
+   <slot>chooseLocation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>559</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>567</x>
+     <y>91</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>startAll()</slot>
@@ -298,5 +314,6 @@
   <slot>clearSelected()</slot>
   <slot>selectAll()</slot>
   <slot>selectNone()</slot>
+  <slot>chooseLocation()</slot>
  </slots>
 </ui>
