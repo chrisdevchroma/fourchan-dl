@@ -29,8 +29,6 @@ Version 1.2.0
    R            Reload image
 * Preventing opening an already opened thread
 * Not available images will not cause the thread to be closed
-* In case anyone cares:
-  I will not provide source code packages anymore. If you want the source, please use git.
 
 Version 1.1.0
 * Fixed program crash when a lots of tabs were open

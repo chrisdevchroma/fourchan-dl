@@ -29,6 +29,8 @@ int main(int argc, char *argv[])
     mainWindow = new MainWindow();
     mainWindow->show();
     mainWindow->restoreTabs();
+
+    a.connect(&a, SIGNAL(lastWindowClosed()), mainWindow, SLOT(saveSettings()));
 //    MainWindow w;
 //    w.show();
 

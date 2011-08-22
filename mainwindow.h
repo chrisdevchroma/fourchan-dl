@@ -55,7 +55,6 @@ private:
     bool _updateOverview;
 
     void restoreWindowSettings(void);
-    void saveSettings(void);
     void updateWidgetSettings(void);
     void checkVersion(QString ver);
     void addToHistory(QString s, QString title);
@@ -63,6 +62,7 @@ private:
 protected:
     void keyPressEvent(QKeyEvent *event);
 private slots:
+    void saveSettings(void);
     int addTab(void);
     void addMultipleTabs();
     void closeTab(int);

@@ -257,6 +257,8 @@ void MainWindow::saveSettings(void) {
 
     // Active tabs
     settings->remove("tabs");   // Clean up
+    settings->sync();
+
     settings->beginGroup("tabs");
         settings->setValue("count", ui->tabWidget->count());
 
