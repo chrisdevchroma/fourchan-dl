@@ -15,16 +15,43 @@ MainWindow::MainWindow(QWidget *parent) :
 
     thumbnailRemover->start(QThread::LowPriority);
 
+    overviewUpdateTimer = new QTimer(this);
+    overviewUpdateTimer->setInterval(1000);
+    overviewUpdateTimer->setSingleShot(true);
+    _updateOverview = false;
+
     connect(this, SIGNAL(removeFiles(QStringList)), thumbnailRemover, SLOT(removeFiles(QStringList)));
 
 //    downloadManager = new DownloadManager(this);
 //    downloadManager->start(QThread::NormalPriority);
 
     ui->setupUi(this);
+
+    // Adding actions to menu bar
+    /*
+    ui->menuBar->addAction(ui->actionAdd_Tab);
+    ui->menuBar->addAction(ui->actionAddMultipleTabs);
+    ui->menuBar->addAction(ui->actionTabOverview);
+
+    historyMenu->setTitle("History");
+    historyMenu->setIcon(QIcon(":/icons/resources/remove.png"));
+    ui->menuBar->addMenu(historyMenu);
+
+    ui->menuBar->addAction(ui->actionStart_all);
+    ui->menuBar->addAction(ui->actionStop_all);
+
+    ui->menuBar->addAction(ui->actionOpen_Configuration);
+    */
+    ui->menuBar->addAction(ui->actionShowInfo);
+
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     ui->tabWidget->removeTab(0);
     oldActiveTabIndex = 0;
     pendingThumbnailsChanged(0);
+
+    // Thread overview
+    connect(ui->dockWidget, SIGNAL(visibilityChanged(bool)), ui->actionTabOverview, SLOT(setChecked(bool)));
+    connect(ui->actionTabOverview, SIGNAL(triggered()), this, SLOT(scheduleOverviewUpdate()));
 
     loadOptions();
     restoreWindowSettings();
@@ -36,10 +63,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(uiConfig, SIGNAL(configurationChanged()), this, SLOT(loadOptions()));
     connect(uiConfig, SIGNAL(configurationChanged()), blackList, SLOT(loadSettings()));
     connect(uiConfig, SIGNAL(configurationChanged()), downloadManager, SLOT(loadSettings()));
+    connect(uiConfig, SIGNAL(deleteAllThumbnails()), thumbnailRemover, SLOT(removeAll()));
     connect(ui->actionStart_all, SIGNAL(triggered()), this, SLOT(startAll()));
     connect(ui->actionStop_all, SIGNAL(triggered()), this, SLOT(stopAll()));
     connect(threadAdder, SIGNAL(addTab(QString)), this, SLOT(createTab(QString)));
     connect(downloadManager, SIGNAL(error(QString)), ui->statusBar, SLOT(showMessage(QString)));
+
+    connect(overviewUpdateTimer, SIGNAL(timeout()), this, SLOT(overviewTimerTimeout()));
+    connect(ui->menuHistory, SIGNAL(triggered(QAction*)), this, SLOT(restoreFromHistory(QAction*)));
 
 //    if (tnt->isRunning()) {
         connect(tnt, SIGNAL(pendingThumbnails(int)), ui->pbPendingThumbnails, SLOT(setValue(int)));
@@ -49,6 +80,14 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connect(downloadManager, SIGNAL(finishedRequestsChanged(int)), ui->pbOpenRequests, SLOT(setValue(int)));
 
     manager->get(QNetworkRequest(QUrl("http://sourceforge.net/projects/fourchan-dl/files/")));
+    ui->mainToolBar->setVisible(false);
+}
+
+MainWindow::~MainWindow()
+{
+    saveSettings();
+
+    delete ui;
 }
 
 int MainWindow::addTab() {
@@ -70,6 +109,7 @@ int MainWindow::addTab() {
     connect(w, SIGNAL(directoryChanged(QString)), this, SLOT(setDefaultDirectory(QString)));
     connect(w, SIGNAL(createTabRequest(QString)), this, SLOT(createTab(QString)));
     connect(w, SIGNAL(removeFiles(QStringList)), this, SIGNAL(removeFiles(QStringList)));
+    connect(w, SIGNAL(changed()), this, SLOT(scheduleOverviewUpdate()));
 
     ui->tabWidget->setCurrentIndex(ci);
 
@@ -93,6 +133,9 @@ void MainWindow::closeTab(int i) {
 
     ui->tabWidget->setCurrentIndex(i);
     w = (UI4chan*)ui->tabWidget->widget(i);
+
+    addToHistory(w->getValues(), w->getTitle());
+
     if (w->close()) {
         ui->tabWidget->removeTab(i);
         w->deleteLater();
@@ -133,12 +176,14 @@ void MainWindow::restoreWindowSettings(void) {
     // Restore window position
     QPoint p;
     QSize s;
+    QByteArray ba;
     int state;
 
     settings->beginGroup("window");
         p = settings->value("position",QPoint(0,0)).toPoint();
         state = settings->value("state",0).toInt();
         s = settings->value("size",QSize(0,0)).toSize();
+        ba = settings->value("widgetstate", QByteArray()).toByteArray();
     settings->endGroup();
 
     if (p != QPoint(0,0))
@@ -149,6 +194,9 @@ void MainWindow::restoreWindowSettings(void) {
 
     if (state != Qt::WindowNoState)
         this->setWindowState((Qt::WindowState) state);
+
+    if (!ba.isEmpty())
+        this->restoreState(ba);
 }
 
 void MainWindow::restoreTabs() {
@@ -191,6 +239,16 @@ void MainWindow::saveSettings(void) {
         if (this->windowState() == Qt::WindowNoState)
             settings->setValue("size", this->size());
         settings->setValue("state", QString("%1").arg(this->windowState()));
+        settings->setValue("widgetstate", this->saveState());
+    settings->endGroup();
+
+    // Dock widget
+    settings->beginGroup("thread_overview");
+//    settings->setValue("size", ui->dockWidget->size());
+    settings->setValue("col_uri_width", ui->threadOverview->columnWidth(0));
+    settings->setValue("col_name_width", ui->threadOverview->columnWidth(1));
+    settings->setValue("col_images_width", ui->threadOverview->columnWidth(2));
+    settings->setValue("col_status_width", ui->threadOverview->columnWidth(3));
     settings->endGroup();
 
     // Options
@@ -198,6 +256,7 @@ void MainWindow::saveSettings(void) {
     settings->endGroup();
 
     // Active tabs
+    settings->remove("tabs");   // Clean up
     settings->beginGroup("tabs");
         settings->setValue("count", ui->tabWidget->count());
 
@@ -247,6 +306,17 @@ void MainWindow::loadOptions(void) {
     QNetworkProxy::setApplicationProxy(proxy);
 
     settings->endGroup();
+
+    // Dock widget
+    settings->beginGroup("thread_overview");
+//    ui->dockWidget->resize();
+//    settings->setValue("width", ui->dockWidget->width());
+    ui->threadOverview->setColumnWidth(0, settings->value("col_uri_width", 170).toInt());
+    ui->threadOverview->setColumnWidth(1, settings->value("col_name_width", 190).toInt());
+    ui->threadOverview->setColumnWidth(2, settings->value("col_images_width", 60).toInt());
+    ui->threadOverview->setColumnWidth(3, settings->value("col_status_width", 70).toInt());
+    settings->endGroup();
+
 }
 
 void MainWindow::processCloseRequest(UI4chan* w, int reason) {
@@ -322,10 +392,10 @@ void MainWindow::newVersionAvailable(QString v) {
 
         fi.setFile(UPDATER_NAME);
 
-        qDebug() << "Startet updater " << fi.absoluteFilePath();
+        qDebug() << "Starting updater " << fi.absoluteFilePath();
 
         if (process.startDetached(QString("\"%1\"").arg(fi.absoluteFilePath()))) {
-            ui->statusBar->showMessage("Startet updater");
+            ui->statusBar->showMessage("Starting updater");
         }
         else {
             ui->statusBar->showMessage("Unable to start process "+fi.absoluteFilePath()+" ("+process.errorString()+")");
@@ -343,13 +413,6 @@ void MainWindow::newVersionAvailable(QString v) {
                              QString("There is a new version (%1) available from sourceforge<br><a href=\"http://sourceforge.net/projects/fourchan-dl/files/\">sourceforge.net/projects/fourchan-dl</a>").arg(v),
                              QMessageBox::Ok);
 #endif
-}
-
-MainWindow::~MainWindow()
-{
-    saveSettings();
-
-    delete ui;
 }
 
 void MainWindow::startAll() {
@@ -387,4 +450,144 @@ void MainWindow::pendingThumbnailsChanged(int i) {
 
 void MainWindow::addMultipleTabs() {
     threadAdder->show();
+}
+
+void MainWindow::showTab(QTreeWidgetItem* item, int column) {
+    int index;
+
+    index = ui->threadOverview->indexOfTopLevelItem(item);
+
+    if (index != -1) {
+        ui->tabWidget->setCurrentIndex(index);
+    }
+}
+
+void MainWindow::scheduleOverviewUpdate() {
+    if (!overviewUpdateTimer->isActive()) {
+        updateThreadOverview();
+        overviewUpdateTimer->start();
+    }
+    else {
+         _updateOverview = true;
+    }
+}
+
+void MainWindow::overviewTimerTimeout() {
+    updateThreadOverview();
+    if (_updateOverview) {
+        _updateOverview = false;
+        overviewUpdateTimer->start();
+    }
+}
+
+void MainWindow::updateThreadOverview() {
+//    QList<QTreeWidgetItem *> items;
+    QStringList sl;
+
+    if (ui->threadOverview->isVisible()) {
+//        qDebug() << "updating thread overview";
+//        ui->threadOverview->clear();
+
+        for (int i=0; i<ui->tabWidget->count(); i++) {
+            UI4chan* tab;
+            QTreeWidgetItem* item;
+            sl.clear();
+
+            tab = (UI4chan*)(ui->tabWidget->widget(i));
+            sl << tab->getURI();
+            sl << tab->getTitle();
+            sl << QString("%1/%2").arg(tab->getDownloadedCount()).arg(tab->getTotalCount());
+            sl << tab->getStatus();
+
+            if (ui->threadOverview->topLevelItemCount() > i) {                   // If there is an entry for the i-th tab
+                item = ui->threadOverview->topLevelItem(i);     //  change its content
+                for (int k=0; k<4; k++)
+                    item->setText(k, sl.at(k));
+            }
+            else {                                              // Otherwise create a new one and append it
+                ui->threadOverview->addTopLevelItem(new QTreeWidgetItem(ui->threadOverview, sl));
+            }
+        }
+
+        // Remove obsolete rows of overview (if any)
+        if (ui->threadOverview->topLevelItemCount() > ui->tabWidget->count()) {
+            for (int i=ui->threadOverview->topLevelItemCount(); i>=ui->tabWidget->count(); --i) {
+                ui->threadOverview->takeTopLevelItem(i);
+            }
+        }
+//        ui->threadOverview->insertTopLevelItems(0, items);
+    }
+}
+
+void MainWindow::debugButton() {
+    updateThreadOverview();
+}
+
+bool MainWindow::threadExists(QString url) {
+    bool ret;
+    int count;
+
+    ret = false;
+    count = 0;
+
+    for (int i=0; i<ui->tabWidget->count(); i++) {
+        if (((UI4chan*)ui->tabWidget->widget(i))->getURI() == url)
+            count++;
+    }
+
+    if (count > 1)      // Check if url was found more than 1 time, because requesting thread is also counted
+        ret = true;
+
+    return ret;
+}
+
+void MainWindow::addToHistory(QString s, QString title="") {
+    QStringList sl;
+    QString key;
+    QString actionTitle;
+    QAction* a;
+
+    sl = s.split(";;");
+    if (sl.count() > 0) {
+        key = sl.at(0);
+        if (!key.isEmpty()) {
+            historyList.insert(key, s);
+
+            if (title.isEmpty())
+                actionTitle = QString("%1 -> %2").arg(key).arg(sl.at(1));
+            else
+                actionTitle = QString("%1 (%2) -> %3").arg(key).arg(title).arg(sl.at(1));
+
+            a = ui->menuHistory->addAction(actionTitle);
+            a->setIcon(QIcon(":/icons/resources/reload.png"));
+            a->setStatusTip(QString("Reopen thread %1").arg(key));
+            a->setToolTip(key); // Abusing the tooltip for saving the historyList key
+            //        qDebug() << QString("Adding (%1, %2) to history").arg(key).arg(s);
+        }
+    }
+}
+
+void MainWindow::removeFromHistory(QString key) {
+    historyList.remove(key);
+//    qDebug() << QString("Removing (%1) from history").arg(key);
+}
+
+void MainWindow::restoreFromHistory(QAction* a) {
+    QString key;
+
+    key = a->toolTip();
+
+    if (historyList.count(key) > 0)
+        createTab(historyList.value(key, ""));
+
+    removeFromHistory(key);
+    ui->menuHistory->removeAction(a);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event) {
+    QMainWindow::keyPressEvent(event);
+
+    if (event->key() == Qt::Key_W && (event->modifiers() & Qt::ControlModifier) == Qt::ControlModifier) {
+        closeTab(ui->tabWidget->currentIndex());
+    }
 }

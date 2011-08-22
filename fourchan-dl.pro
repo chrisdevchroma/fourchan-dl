@@ -25,7 +25,10 @@ SOURCES += main.cpp\
     requesthandler.cpp \
     supervisednetworkreply.cpp \
     downloadrequest.cpp \
-    uithreadadder.cpp
+    uithreadadder.cpp \
+    dialogfoldershortcut.cpp \
+    foldershortcuts.cpp \
+    thumbnailview.cpp
 
 HEADERS  += mainwindow.h \
     parser.h \
@@ -43,14 +46,18 @@ HEADERS  += mainwindow.h \
     requesthandler.h \
     supervisednetworkreply.h \
     downloadrequest.h \
-    uithreadadder.h
+    uithreadadder.h \
+    dialogfoldershortcut.h \
+    foldershortcuts.h \
+    thumbnailview.h
 
 FORMS    += mainwindow.ui \
     ui4chan.ui \
     uiinfo.ui \
     uiconfig.ui \
     uilisteditor.ui \
-    uithreadadder.ui
+    uithreadadder.ui \
+    dialogfoldershortcut.ui
 
 RESOURCES += \
     resources.qrc
@@ -60,7 +67,7 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.1.0\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.2.test\\\""
 
 OTHER_FILES += \
     readme.txt \

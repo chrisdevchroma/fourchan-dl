@@ -10,10 +10,24 @@ UIConfig::UIConfig(QWidget *parent) :
     timeoutValueEditor = new UIListEditor(this);
     timeoutValueEditor->setModal(true);
 
+    dialogFolderShortcut = new DialogFolderShortcut(this);
+    dialogFolderShortcut->setModal(true);
+
     loadSettings();
+    loadShortcuts();
 
     connect(timeoutValueEditor, SIGNAL(valuesChanged()), this, SLOT(loadSettings()));
     connect(ui->cbUseProxy, SIGNAL(toggled(bool)), this, SLOT(toggleProxy(bool)));
+    connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(editShortcutItem(QListWidgetItem*)));
+    connect(folderShortcuts, SIGNAL(shortcutsChanged()), this, SLOT(loadShortcuts()));
+    connect(dialogFolderShortcut, SIGNAL(shortcutChanged(QString,QString)), folderShortcuts, SLOT(updateShortcut(QString,QString)));
+    connect(dialogFolderShortcut, SIGNAL(editCanceled()), this, SLOT(loadShortcuts()));
+    connect(ui->btnDeleteAllThumbnails, SIGNAL(clicked()), this, SIGNAL(deleteAllThumbnails()));
+}
+
+UIConfig::~UIConfig()
+{
+    delete ui;
 }
 
 void UIConfig::loadSettings(void) {
@@ -228,7 +242,36 @@ void UIConfig::toggleProxy(bool b) {
     }
 }
 
-UIConfig::~UIConfig()
-{
-    delete ui;
+void UIConfig::addShortcut() {
+//    ui->listWidget->addItem("???");
+//    editShortcutItem(ui->listWidget->item(ui->listWidget->count()-1));
+    editShortcut("");
+}
+
+void UIConfig::editShortcut(QString name) {
+    dialogFolderShortcut->clear();
+    dialogFolderShortcut->edit(name);
+
+    dialogFolderShortcut->show();
+}
+
+void UIConfig::editShortcutItem(QListWidgetItem* item) {
+    editShortcut(item->text());
+}
+
+void UIConfig::loadShortcuts() {
+    ui->listWidget->clear();
+
+    ui->listWidget->addItems(folderShortcuts->shortcuts());
+}
+
+void UIConfig::deleteShortcut() {
+    QString name;
+
+    name = ui->listWidget->currentItem()->text();
+
+    if (name != "???")
+        folderShortcuts->deleteShortcut(name);
+    else
+        ui->listWidget->removeItemWidget(ui->listWidget->currentItem());
 }

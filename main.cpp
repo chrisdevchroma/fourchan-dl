@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include "downloadmanager.h"
 #include "thumbnailthread.h"
+#include "foldershortcuts.h"
 
 #if QT_VERSION < 0x040000
  #error "Sorry mate, this application needs Qt4.x.x to run properly."
@@ -11,6 +12,8 @@
 
 DownloadManager* downloadManager;
 ThumbnailThread* tnt;
+FolderShortcuts* folderShortcuts;
+MainWindow* mainWindow;
 
 int main(int argc, char *argv[])
 {
@@ -21,10 +24,15 @@ int main(int argc, char *argv[])
     tnt = new ThumbnailThread();
     tnt->start(QThread::NormalPriority);
 
-    MainWindow w;
-    w.show();
+    folderShortcuts = new FolderShortcuts();
 
-    w.restoreTabs();
+    mainWindow = new MainWindow();
+    mainWindow->show();
+    mainWindow->restoreTabs();
+//    MainWindow w;
+//    w.show();
+
+//    w.restoreTabs();
 
     return a.exec();
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>539</width>
+    <width>686</width>
     <height>609</height>
    </rect>
   </property>
@@ -19,7 +19,20 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="2" column="0">
+    <item row="0" column="0" colspan="2">
+     <widget class="QProgressBar" name="pbOpenRequests">
+      <property name="maximum">
+       <number>999999999</number>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+      <property name="format">
+       <string>%v/%m (%p%) requests finished</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabPosition">
        <enum>QTabWidget::East</enum>
@@ -43,20 +56,7 @@
       </widget>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QProgressBar" name="pbOpenRequests">
-      <property name="maximum">
-       <number>999999999</number>
-      </property>
-      <property name="value">
-       <number>24</number>
-      </property>
-      <property name="format">
-       <string>%v/%m (%p%) requests finished</string>
-      </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
+    <item row="2" column="0" colspan="2">
      <widget class="QProgressBar" name="pbPendingThumbnails">
       <property name="maximum">
        <number>0</number>
@@ -72,6 +72,15 @@
    </layout>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="movable">
+    <bool>true</bool>
+   </property>
+   <property name="toolButtonStyle">
+    <enum>Qt::ToolButtonIconOnly</enum>
+   </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
    </attribute>
@@ -80,22 +89,109 @@
    </attribute>
    <addaction name="actionAdd_Tab"/>
    <addaction name="actionAddMultipleTabs"/>
+   <addaction name="actionTabOverview"/>
+   <addaction name="separator"/>
+   <addaction name="actionHistory"/>
+   <addaction name="separator"/>
    <addaction name="actionStart_all"/>
    <addaction name="actionStop_all"/>
+   <addaction name="separator"/>
    <addaction name="actionOpen_Configuration"/>
    <addaction name="actionShowInfo"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="features">
+    <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="windowTitle">
+    <string>Thread overview</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QTreeWidget" name="threadOverview">
+       <column>
+        <property name="text">
+         <string>URI</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Name</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Images</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Status</string>
+        </property>
+       </column>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>686</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/icons/resources/4chan.png</normaloff>:/icons/resources/4chan.png</iconset>
+    </property>
+    <addaction name="actionAdd_Tab"/>
+    <addaction name="actionAddMultipleTabs"/>
+    <addaction name="actionTabOverview"/>
+    <addaction name="separator"/>
+    <addaction name="actionStart_all"/>
+    <addaction name="actionStop_all"/>
+    <addaction name="separator"/>
+    <addaction name="actionOpen_Configuration"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuHistory">
+    <property name="title">
+     <string>History</string>
+    </property>
+    <property name="icon">
+     <iconset resource="resources.qrc">
+      <normaloff>:/icons/resources/remove.png</normaloff>:/icons/resources/remove.png</iconset>
+    </property>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuHistory"/>
+  </widget>
   <action name="actionAdd_Tab">
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/tab-new.png</normaloff>:/icons/resources/tab-new.png</iconset>
    </property>
    <property name="text">
-    <string>Add Tab</string>
+    <string>&amp;Add thread</string>
    </property>
-   <property name="toolTip">
-    <string>Add single tab</string>
+   <property name="statusTip">
+    <string>Add single thread</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
    </property>
   </action>
   <action name="actionShowInfo">
@@ -104,7 +200,13 @@
      <normaloff>:/icons/resources/about.png</normaloff>:/icons/resources/about.png</iconset>
    </property>
    <property name="text">
-    <string>Program Info</string>
+    <string>Program info</string>
+   </property>
+   <property name="statusTip">
+    <string>Display program information</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
    </property>
   </action>
   <action name="actionOpen_Configuration">
@@ -113,7 +215,13 @@
      <normaloff>:/icons/resources/settings.png</normaloff>:/icons/resources/settings.png</iconset>
    </property>
    <property name="text">
-    <string>Open Configuration</string>
+    <string>&amp;Configuration</string>
+   </property>
+   <property name="statusTip">
+    <string>Open configuration dialog</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionStart_all">
@@ -122,7 +230,13 @@
      <normaloff>:/icons/resources/media-playback-start.png</normaloff>:/icons/resources/media-playback-start.png</iconset>
    </property>
    <property name="text">
-    <string>Start all</string>
+    <string>&amp;Start all</string>
+   </property>
+   <property name="statusTip">
+    <string>Start all threads at once</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionStop_all">
@@ -131,7 +245,13 @@
      <normaloff>:/icons/resources/media-playback-stop.png</normaloff>:/icons/resources/media-playback-stop.png</iconset>
    </property>
    <property name="text">
-    <string>Stop all</string>
+    <string>S&amp;top all</string>
+   </property>
+   <property name="statusTip">
+    <string>Stop all threads at once</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
    </property>
   </action>
   <action name="actionAddMultipleTabs">
@@ -140,10 +260,74 @@
      <normaloff>:/icons/resources/tab-++.png</normaloff>:/icons/resources/tab-++.png</iconset>
    </property>
    <property name="text">
-    <string>addMultipleTabs</string>
+    <string>Add &amp;multiple threads</string>
+   </property>
+   <property name="statusTip">
+    <string>Add multiple threads</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionTabOverview">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/list.png</normaloff>:/icons/resources/list.png</iconset>
+   </property>
+   <property name="text">
+    <string>Tab &amp;overview</string>
    </property>
    <property name="toolTip">
-    <string>Add multiple tabs</string>
+    <string>Thread Overview</string>
+   </property>
+   <property name="statusTip">
+    <string>Toggle thread overview window</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="text">
+    <string>Debug</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionHistory">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/remove.png</normaloff>:/icons/resources/remove.png</iconset>
+   </property>
+   <property name="text">
+    <string>History</string>
+   </property>
+   <property name="statusTip">
+    <string>History of closed threads</string>
+   </property>
+   <property name="softKeyRole">
+    <enum>QAction::PositiveSoftKey</enum>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>&amp;Exit</string>
+   </property>
+   <property name="statusTip">
+    <string>Close program</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>
@@ -216,6 +400,70 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>threadOverview</sender>
+   <signal>itemDoubleClicked(QTreeWidgetItem*,int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showTab(QTreeWidgetItem*,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>646</x>
+     <y>325</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>593</x>
+     <y>440</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTabOverview</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dockWidget</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>641</x>
+     <y>311</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDebug</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>debugButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>304</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>304</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addTab()</slot>
@@ -223,5 +471,7 @@
   <slot>showInfo()</slot>
   <slot>showConfiguration()</slot>
   <slot>addMultipleTabs()</slot>
+  <slot>showTab(QTreeWidgetItem*,int)</slot>
+  <slot>debugButton()</slot>
  </slots>
 </ui>

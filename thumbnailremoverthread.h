@@ -31,6 +31,7 @@ signals:
 
 public slots:
     void removeFiles(QStringList fileList);
+    void removeAll();
 
 };
 

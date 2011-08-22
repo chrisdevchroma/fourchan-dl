@@ -2,13 +2,10 @@
 
 Parser::Parser(QObject *parent) :
     QObject(parent)
-//    QThread(parent)
 {
     manager = new QNetworkAccessManager(this);
     rescheduleTimer = new QTimer();
-//}
 
-//void Parser::run() {
     requestHandler = new RequestHandler(this);
 
     connect(requestHandler, SIGNAL(response(QUrl,QByteArray)),
@@ -24,112 +21,12 @@ Parser::Parser(QObject *parent) :
     maxDownloads = 2;
     rescheduleTimer->setSingleShot(true);
     setTimerInterval(30000);
-//    connect(manager, SIGNAL(finished(QNetworkReply*)),
-//            this, SLOT(replyFinished(QNetworkReply*)));
 
     connect(this, SIGNAL(downloadsAvailable(bool)),
             this, SLOT(download(bool)));
 
     connect(rescheduleTimer, SIGNAL(timeout()), this, SLOT(processSchedule()));
-
-//    exec();
 }
-
-/*
-void Parser::replyFinished(QNetworkReply* r) {
-    QString requestURI;
-    QString redirect;
-
-    removeSupervisedDownload(r->url());
-
-    redirect = r->header(QNetworkRequest::LocationHeader).toString();
-    if (r->bytesAvailable() < r->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
-        qDebug() << QString("%1 - received only partial data.").arg(r->url().toString());
-        reschedule(r->url().toString());
-        r->deleteLater();
-    }
-    else {
-        if (!redirect.isEmpty()) {
-//            QNetworkRequest nr;
-//            nr = QNetworkRequest(QUrl(redirect));
-//            nr.setRawHeader("User-Agent", "Wget/1.12");
-//            manager->get(nr);
-            removeSupervisedDownload(r->url());
-            createSupervisedDownload(QUrl(redirect));
-            r->deleteLater();
-        }
-        else if (r->error() != QNetworkReply::NoError) {
-            handleError(r);
-        }
-        else {
-            if (r->isFinished()) {
-                requestURI = r->request().url().toString();
-                if (requestURI.indexOf(QRegExp("(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive)) != -1) {
-                    QFile f;
-                    QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
-                    QStringList res;
-                    int pos;
-                    int resp;
-
-                    resp = r->error();
-                    pos = 0;
-
-                    pos = rx.indexIn(requestURI);
-                    res = rx.capturedTexts();
-
-                    if (pos != -1) {
-                        f.setFileName(savePath+"/"+res.at(1)+res.at(2));
-
-                        if (useOriginalFilename) {
-                            _IMAGE tmp;
-
-                            for (int i=0; i<images2dl.count(); i++) {
-                                if (images2dl.at(i).largeURI.endsWith("/"+res.at(1)+res.at(2))) {
-                                    tmp = images2dl.at(i);
-
-                                    f.setFileName(savePath+"/"+tmp.originalFilename);
-                                    break;
-                                }
-                            }
-                        }
-
-                        f.open(QIODevice::ReadWrite);
-
-                        f.write(r->readAll());
-                        f.close();
-
-                        emit fileFinished(f.fileName());
-                        activeDownloads--;
-
-                        setCompleted(requestURI, f.fileName());
-                    }
-
-                    if (activeDownloads<maxDownloads) {
-                        for (int i=activeDownloads; i<maxDownloads; i++) {
-                            QString imgURI;
-
-                            if (0 != getNextImage(&imgURI)) {
-                                createSupervisedDownload(imgURI);
-                            }
-                        }
-                    }
-                }
-                else {
-                    html = r->readAll();
-
-                    if (html.contains("<title>4chan - Banned</title>"))
-                        emit error(999);
-                    else
-                        parseHTML();
-                }
-
-                r->deleteLater();
-            }
-        }
-    }
-}
-*/
-
 
 void Parser::processRequestResponse(QUrl url, QByteArray ba) {
     QString requestURI;
@@ -140,9 +37,7 @@ void Parser::processRequestResponse(QUrl url, QByteArray ba) {
         QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
         QStringList res;
         int pos;
-//        int resp;
 
-//        resp = r->error();
         pos = 0;
 
         pos = rx.indexIn(requestURI);
@@ -170,23 +65,10 @@ void Parser::processRequestResponse(QUrl url, QByteArray ba) {
             f.close();
 
             emit fileFinished(f.fileName());
-            activeDownloads--;
 
             setCompleted(requestURI, f.fileName());
         }
 
-//        if (activeDownloads<maxDownloads) {
-//            for (int i=activeDownloads; i<maxDownloads; i++) {
-//                QString imgURI;
-//                QNetworkReply* nr;
-
-//                if (0 != getNextImage(&imgURI)) {
-//                    nr = manager->get(QNetworkRequest(QUrl(imgURI)));
-//                    connect(nr, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
-//                    activeDownloads++;
-//                }
-//            }
-//        }
     }
     else {
         html = ba;
@@ -197,17 +79,6 @@ void Parser::processRequestResponse(QUrl url, QByteArray ba) {
             parseHTML();
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 void Parser::parseHTML() {
     QStringList res;
@@ -248,10 +119,8 @@ void Parser::parseHTML() {
         i.largeURI = "http://images.4chan.org/"+res.at(2);
         i.thumbURI = res.at(3);
 
-        if (pos != -1){
-            if (addImage(i))
-            {
-//                qDebug() << "Added image " << i.largeURI;
+        if (pos != -1) {
+            if (addImage(i)) {
                 imagesAdded = true;
             }
         }
@@ -296,48 +165,12 @@ void Parser::parseHTML() {
 
 
 void Parser::createSupervisedDownload(QUrl url) {
-/* Version without DownloadManager
-    if (url.isValid() && manager != 0) {
-        QNetworkRequest req;
-        SupervisedNetworkReply* snr;
-
-        req = QNetworkRequest(QUrl(url));
-//        req.setRawHeader("User-Agent", "Wget/1.12");
-        req.setRawHeader("User-Agent", "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.9.168 Version/11.50");
-        snr = new SupervisedNetworkReply();
-        snr->setNetworkReply(manager->get(req));
-//        manager->get(req);
-        connect(snr, SIGNAL(timeout(QString)), this, SLOT(downloadAborted(QString)));
-        connect(snr->getReply(), SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
-        supervisedReplies.append(snr);
-
-        activeDownloads++;
-    }
-*/
-
     if (url.isValid()) {
         requestHandler->request(url);
     }
 }
 
-
-
 void Parser::removeSupervisedDownload(QUrl url) {
-    /* Version without Download Manager
-    for (int i=0; i<supervisedReplies.count(); i++) {
-        if (supervisedReplies.at(i)->getUrl() == url.toString()) {
-            disconnect(supervisedReplies.at(i), SIGNAL(timeout(QString)), this, SLOT(reschedule(QString)));
-//            if (supervisedReplies.at(i)->getReply() != 0)
-//                supervisedReplies.at(i)->getReply()->abort();
-            supervisedReplies.at(i)->deleteLater();
-            supervisedReplies.removeAt(i);
-
-            break;
-        }
-    }
-    activeDownloads--;
-    */
-
     requestHandler->cancel(url);
 }
 
@@ -350,26 +183,9 @@ void Parser::download(bool b) {
         QString imgURI;
 
         downloading = true;
-//        emit tabTitleChanged("downloading");
 
-//        for (int i=activeDownloads; i<maxDownloads; i++) {
-//            if (0 != getNextImage(&imgURI)) {
         while (getNextImage(&imgURI) != 0)
                 createSupervisedDownload(QUrl(imgURI));
-                //                connect(nr, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(dlProgress(qint64,qint64)));
-//                connect(nr,SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(replyError(QNetworkReply::NetworkError)));
-//                connect(snr, SIGNAL(timeout(QString)), this, SLOT(reschedule(QString)));
-//                activeDownloads++;
-//            }
-//        }
-
-
-// Make usage of RequestManager
-/*
-        while (getNextImage(&imgURI)) {
-            requestHandler->request(QUrl(imgURI));
-        }
-*/
     } else {
         downloading = false;
     }
@@ -397,7 +213,7 @@ bool Parser::addImage(_IMAGE img) {
     bool fileExists;
 
     if (blacklisted(img.largeURI)) {
-        qDebug() << "Preventing download of blacklisted image " << img.largeURI;
+//        qDebug() << "Preventing download of blacklisted image " << img.largeURI;
         alreadyInList = true;
     }
     else {
@@ -608,23 +424,15 @@ bool Parser::getUrlOfFilename(QString filename, QString * url) {
     return ret;
 }
 
-//void Parser::handleError(QNetworkReply* r) {
 void Parser::handleError(QUrl url, int err) {
-/*
-    QString sUrl;
-    QRegExp rx("\\/(\\w+)(\\.jpg|\\.gif|\\.png)", Qt::CaseInsensitive, QRegExp::RegExp2);
-    QStringList res;
-    int pos;
-
-    sUrl = url.toString();
-*/
-//    switch (r->error()) {
     switch (err) {
     case 404:
     case 203:
         // Only emit signal on pages not on images to prevent closing of tab just because one image is missing
          if (url.toString().indexOf(QRegExp("(\\.jpg|\\.gif|\\.jpeg|\\.png)", Qt::CaseInsensitive)) == -1)
             emit error(404);
+          else
+             setCompleted(url.toString(),"");   // 404'ed images are set "completed"
         break;
     case 301:
         qDebug() << QString("%1 - service unavailable").arg(url.toString());

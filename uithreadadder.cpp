@@ -11,8 +11,11 @@ UIThreadAdder::UIThreadAdder(QWidget *parent) :
 
 //    connect(clipboard, SIGNAL(changed(QClipboard::Mode))), this, SLOT(checkClipboard(QClipboard::Mode));
     connect(clipboard, SIGNAL(dataChanged()), this, SLOT(checkClipboard()));
+    connect(folderShortcuts, SIGNAL(shortcutsChanged()), this, SLOT(fillShortcutComboBox()));
+    connect(ui->cbFolderShortcuts, SIGNAL(currentIndexChanged(QString)), this, SLOT(selectShortcut(QString)));
 
     loadSettings();
+    fillShortcutComboBox();
 }
 
 UIThreadAdder::~UIThreadAdder()
@@ -245,4 +248,25 @@ void UIThreadAdder::loadSettings() {
 
     ui->leSavepath->setText(settings->value("options/default_directory","").toString());
     ui->cbOriginalFilename->setChecked(settings->value("options/default_original_filename", false).toBool());
+}
+
+void UIThreadAdder::selectShortcutIndex(int idx) {
+    selectShortcut(ui->cbFolderShortcuts->itemText(idx));
+}
+
+void UIThreadAdder::selectShortcut(QString name) {
+    QString path;
+
+    if (path != "-----") {
+        path = folderShortcuts->getPath(name);
+
+        if (!path.isEmpty())
+            ui->leSavepath->setText(path);
+    }
+}
+
+void UIThreadAdder::fillShortcutComboBox() {
+    ui->cbFolderShortcuts->clear();
+    ui->cbFolderShortcuts->addItem("-----");
+    ui->cbFolderShortcuts->addItems(folderShortcuts->shortcuts());
 }

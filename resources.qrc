@@ -23,5 +23,6 @@
         <file>resources/tab-new.png</file>
         <file>resources/tab-++.png</file>
         <file>resources/dialog-ok.png</file>
+        <file>resources/list.png</file>
     </qresource>
 </RCC>

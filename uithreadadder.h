@@ -8,6 +8,9 @@
 #include <QtDebug>
 #include <QFileDialog>
 #include <QSettings>
+#include "foldershortcuts.h"
+
+extern FolderShortcuts* folderShortcuts;
 
 namespace Ui {
     class UIThreadAdder;
@@ -42,6 +45,9 @@ private slots:
     bool readyToStart();
     void chooseLocation();
     void clearSelected();
+    void selectShortcutIndex(int idx);
+    void selectShortcut(QString name);
+    void fillShortcutComboBox();
 
 signals:
     void directoryChanged(QString);

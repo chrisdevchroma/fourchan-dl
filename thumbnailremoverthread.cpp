@@ -15,7 +15,7 @@ void ThumbnailRemoverThread::run() {
     mutex.unlock();
 
     dir.setPath(dirName);
-    fileInfoList = dir.entryInfoList();
+    fileInfoList = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
 
     foreach (QFileInfo fi, fileInfoList) {
         date = fi.lastModified();
@@ -30,5 +30,16 @@ void ThumbnailRemoverThread::run() {
 void ThumbnailRemoverThread::removeFiles(QStringList fileList) {
     foreach (QString s, fileList) {
         QFile::remove(s);
+    }
+}
+
+void ThumbnailRemoverThread::removeAll() {
+    if (dir.exists())//QDir::NoDotAndDotDot
+    {
+        fileInfoList = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+
+        foreach (QFileInfo fi, fileInfoList) {
+            QFile::remove(fi.absoluteFilePath());
+        }
     }
 }

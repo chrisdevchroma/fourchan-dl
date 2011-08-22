@@ -67,10 +67,18 @@ UI4chan::UI4chan(QWidget *parent) :
     connect(openFileAction, SIGNAL(triggered()), this, SLOT(openFile()));
 
     connect(timer, SIGNAL(timeout()), this, SLOT(triggerRescan()));
+    connect(folderShortcuts, SIGNAL(shortcutsChanged()), this, SLOT(fillShortcutComboBox()));
+    connect(ui->cbFolderShortcuts, SIGNAL(currentIndexChanged(QString)), this, SLOT(selectShortcut(QString)));
+
+    // Connections for key bindings
+    connect(ui->listWidget, SIGNAL(openItem()), this, SLOT(openFile()));
+    connect(ui->listWidget, SIGNAL(deleteItem()), this, SLOT(deleteFile()));
+    connect(ui->listWidget, SIGNAL(reloadItem()), this, SLOT(reloadFile()));
 
     setTabTitle("idle");
 
     loadSettings();
+    fillShortcutComboBox();
 }
 
 UI4chan::~UI4chan()
@@ -100,57 +108,64 @@ void UI4chan::start(void) {
     QDir dir;
     QString savepath;
 
-    running = true;
+    // Check if Thread already exists
+    if (!(mainWindow->threadExists(ui->leURI->text())))
+    {
+        running = true;
+        setStatus("Running");
+        if (ui->leURI->text() != "") {
+            ui->leURI->setReadOnly(true);
+            p->setURI(ui->leURI->text());
+            savepath = ui->leSavepath->text();
 
-    if (ui->leURI->text() != "") {
-//        ui->leURI->setEnabled(false);
-        ui->leURI->setReadOnly(true);
-        p->setURI(ui->leURI->text());
-        savepath = ui->leSavepath->text();
-
-        if (savepath.endsWith("\\")) {
-            savepath.chop(1);
-            ui->leSavepath->setText(savepath);
-        }
-
-        dir.setPath(savepath);
-
-        if (!dir.exists()) {
-            QDir d;
-
-            d.mkpath(savepath);
-        }
-
-        if (dir.exists()) {
-            ui->leSavepath->setEnabled(false);
-            p->setSavePath(savepath);
-            p->setValues(getValues());
-            p->startDownload();
-
-            ui->btnStart->setEnabled(false);
-            ui->btnStop->setEnabled(true);
-            ui->cbRescan->setEnabled(false);
-            ui->comboBox->setEnabled(false);
-            ui->progressBar->setEnabled(true);
-            ui->cbOriginalFilename->setEnabled(false);
-            ui->btnChoosePath->setEnabled(false);
-
-            if (ui->cbRescan->isChecked()) {
-                timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
-
-                timer->start();
+            if (savepath.endsWith("\\")) {
+                savepath.chop(1);
+                ui->leSavepath->setText(savepath);
             }
-            // Hide thread settings
-            if ((ui->btnToggleView->isChecked()))
-                ui->btnToggleView->setChecked(false);
-        }
-        else
-        {
-            emit errorMessage("Directory does not exist / Could not be created");
-            stop();
+
+            dir.setPath(savepath);
+
+            if (!dir.exists()) {
+                QDir d;
+
+                d.mkpath(savepath);
+            }
+
+            if (dir.exists()) {
+                ui->leSavepath->setEnabled(false);
+                p->setSavePath(savepath);
+                p->setValues(getValues());
+                p->startDownload();
+
+                ui->btnStart->setEnabled(false);
+                ui->btnStop->setEnabled(true);
+                ui->cbRescan->setEnabled(false);
+                ui->comboBox->setEnabled(false);
+                ui->progressBar->setEnabled(true);
+                ui->cbOriginalFilename->setEnabled(false);
+                ui->btnChoosePath->setEnabled(false);
+                ui->cbFolderShortcuts->setEnabled(false);
+
+                if (ui->cbRescan->isChecked()) {
+                    timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
+
+                    timer->start();
+                }
+                // Hide thread settings
+                if ((ui->btnToggleView->isChecked()))
+                    ui->btnToggleView->setChecked(false);
+            }
+            else
+            {
+                emit errorMessage("Directory does not exist / Could not be created");
+                stop();
+            }
         }
     }
-
+    else {
+        emit errorMessage("Thread already exists");
+        emit tabTitleChanged(this, "Thread already exists");
+    }
 }
 
 void UI4chan::stop(void) {
@@ -167,10 +182,13 @@ void UI4chan::stop(void) {
     ui->progressBar->setEnabled(false);
     ui->cbOriginalFilename->setEnabled(true);
     ui->btnChoosePath->setEnabled(true);
+    ui->cbFolderShortcuts->setEnabled(true);
 
     // Bring up thread settings
     if (!(ui->btnToggleView->isChecked()))
         ui->btnToggleView->setChecked(true);
+
+    setStatus("Stopped");
 }
 
 void UI4chan::chooseLocation(void) {
@@ -190,13 +208,15 @@ void UI4chan::triggerRescan(void) {
     p->startDownload();
     timer->start();
 
-    setTabTitle("rescanning");
+    setStatus("rescanning");
 }
 
 void UI4chan::setDownloadedCount(int i) {
     ui->progressBar->setVisible(true);
     if (ui->progressBar->value() < i)
         ui->progressBar->setValue(i);
+
+    emit changed();
 }
 
 void UI4chan::createThumbnail(QString s) {
@@ -220,6 +240,8 @@ void UI4chan::downloadsFinished() {
     QStringList fileList;
 
     setTabTitle("finished");
+    setStatus("Finished");
+
     ui->progressBar->setVisible(false);
 
     if (!ui->cbRescan->isChecked())
@@ -354,15 +376,35 @@ void UI4chan::setDirectory(QString d) {
     ui->leSavepath->setText(d);
 }
 
+int UI4chan::getDownloadedCount() {
+    return p->getDownloadedCount();
+}
+
+int UI4chan::getTotalCount() {
+    return p->getTotalCount();
+}
+
+QString UI4chan::getStatus() {
+    return _status;
+}
+
+QString UI4chan::getTitle() {
+    return ui->lTitle->text();
+}
+
+QString UI4chan::getURI() {
+    return ui->leURI->text();
+}
+
 QString UI4chan::getValues(void) {
     QString ret;
     QStringList list;
 
     list << ui->leURI->text();
     list << ui->leSavepath->text();
-    list << QString("%1").arg(ui->cbRescan->checkState());
+    list << QString("%1").arg(ui->cbRescan->isChecked());
     list << QString("%1").arg(ui->comboBox->itemData(ui->comboBox->currentIndex()).toInt());
-    list << QString("%1").arg(ui->cbOriginalFilename->checkState());
+    list << QString("%1").arg(ui->cbOriginalFilename->isChecked());
     list << QString("%1").arg(running);
 
     ret = list.join(";;");
@@ -393,7 +435,7 @@ void UI4chan::setValues(QString s) {
         ui->comboBox->setEnabled(true);
     }
 
-    ui->cbOriginalFilename->setCheckState((Qt::CheckState)(list.value(4).toInt()));
+    ui->cbOriginalFilename->setChecked((bool)list.value(4).toInt());
     if (list.value(5) == "1")
         start();
 }
@@ -404,6 +446,7 @@ void UI4chan::setMaxDownloads(int i) {
 
 void UI4chan::setMaxImageCount(int i) {
     ui->progressBar->setFormat(QString("%p% (%v/%1)").arg(i));
+    emit changed();
 }
 
 void UI4chan::debugButton(void) {
@@ -533,4 +576,25 @@ void UI4chan::openDownloadFolder() {
 void UI4chan::setBlackList(BlackList *bl) {
     blackList = bl;
     p->setBlackList(bl);
+}
+
+void UI4chan::selectShortcutIndex(int idx) {
+    selectShortcut(ui->cbFolderShortcuts->itemText(idx));
+}
+
+void UI4chan::selectShortcut(QString name) {
+    QString path;
+
+    if (path != "-----") {
+        path = folderShortcuts->getPath(name);
+
+        if (!path.isEmpty())
+            ui->leSavepath->setText(path);
+    }
+}
+
+void UI4chan::fillShortcutComboBox() {
+    ui->cbFolderShortcuts->clear();
+    ui->cbFolderShortcuts->addItem("-----");
+    ui->cbFolderShortcuts->addItems(folderShortcuts->shortcuts());
 }

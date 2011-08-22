@@ -66,6 +66,9 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
 
 //    qDebug() << QTime::currentTime().toString("hh:mm:ss") << "Finished request" << uid << reply->url().toString() << "reply" << (qint64)reply;
 
+    if (uid == 0) {
+        qDebug() << "uid 0 finished; url=" << reply->url().toString();
+    }
     if (uid != -1) {
         if (reply->bytesAvailable() < reply->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
             //            reschedule(uid);
@@ -139,6 +142,8 @@ void DownloadManager::freeRequest(qint64 uid) {
         dr->deleteLater();
         requestList.remove(uid);
     }
+//    qDebug() << "open requests" << requestList.keys();
+//    qDebug() << "priorities" << priorities;
 }
 
 qint64 DownloadManager::requestDownload(RequestHandler* caller, QUrl url, int prio) {
@@ -200,7 +205,7 @@ void DownloadManager::processRequests() {
                     if (requestList.count(uid)>0) {
                         if (!(requestList.value(uid)->finished()) && !(requestList.value(uid)->processing())) {
                             startRequest(uid);
-                            //                    qDebug() << "addRequest (" << uid << ")";
+//                            qDebug() << "addRequest (" << uid << ")";
                         }
                     }
                 }
@@ -236,18 +241,20 @@ void DownloadManager::startRequest(qint64 uid) {
 
         req = QNetworkRequest(dr->url());
         req.setAttribute(QNetworkRequest::CookieSaveControlAttribute, QNetworkRequest::Automatic);
-        req.setRawHeader("User-Agent", "Wget/1.12");
-    //            req.setRawHeader("User-Agent", "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.9.168 Version/11.50");
+//        req.setRawHeader("User-Agent", "Wget/1.12");
+        req.setRawHeader("User-Agent", "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.9.168 Version/11.50");
         currentRequests++;
         rep = nam->get(req);
 
         sup->setNetworkReply(rep, uid);
         supervisors.insert(uid, sup);
 
-//        qDebug() << "Requesting" << uid << ":" << dr->url() << "with reply" << (qint64)rep;
+//        qDebug() << "Requesting" << uid << ":" << dr->url();// << "with reply" << (qint64)rep;
         activeReplies.insert(uid, rep);
     }
-
+    else {
+        qDebug() << "Requested start of uid which is non-existent";
+    }
 }
 
 void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
@@ -310,6 +317,7 @@ void DownloadManager::reschedule(qint64 uid) {
     DownloadRequest* dr;
     int prio;
 
+//    qDebug() << "rescheduling" << uid;
     dr = requestList.value(uid,0);
     if (dr != 0) {
         prio = dr->priority();
@@ -317,7 +325,7 @@ void DownloadManager::reschedule(qint64 uid) {
         // "decrease priority for rescheduled downloads"
         priorities.remove(prio, uid);
         prio++;
-//        qDebug() << uid << ":" << "setting new priority" << prio;
+        qDebug() << uid << ":" << "setting new priority" << prio;
         dr->setPriority(prio);
         priorities.insertMulti(prio,uid);
 
@@ -353,7 +361,7 @@ void DownloadManager::removeRequest(qint64 uid) {
 
     if (requestList.count(uid)>0) {
         prio = requestList.value(uid)->priority();
-        priorities.remove(uid, prio);
+        priorities.remove(prio, uid);
         requestList.remove(uid);
 
         // See if this id is currently downloading

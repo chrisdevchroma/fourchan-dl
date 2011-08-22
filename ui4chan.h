@@ -10,13 +10,19 @@
 #include <QSettings>
 #include <QImage>
 #include <QCloseEvent>
+#include "mainwindow.h"
 #include "parser.h"
 #include "thumbnailthread.h"
 #include "blacklist.h"
 #include "downloadmanager.h"
+#include "foldershortcuts.h"
 
 class ThumbnailThread;
+class MainWindow;
+
 extern ThumbnailThread* tnt;
+extern FolderShortcuts* folderShortcuts;
+extern MainWindow* mainWindow;
 
 namespace Ui {
     class UI4chan;
@@ -30,6 +36,11 @@ public:
     explicit UI4chan(QWidget *parent = 0);
     ~UI4chan();
     QString getURI(void);
+    QString getTitle();
+    int getDownloadedCount();
+    int getTotalCount();
+    QString getStatus();
+
     void setDirectory(QString);
     QString getValues(void);
     void setValues(QString);
@@ -52,12 +63,14 @@ private:
     QSettings* settings;
     QStringList pendingThumbnails;
     BlackList* blackList;
+    QString _status;
 
     bool thumbnailsizeLocked;
     bool running;
     bool closeWhenFinished;
 
     void loadSettings(void);
+    void setStatus(QString s) {_status = s; emit changed();}
 
 private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);
@@ -78,6 +91,9 @@ private slots:
     void processCloseRequest();
     void openURI();
     void openDownloadFolder();
+    void selectShortcutIndex(int idx);
+    void selectShortcut(QString name);
+    void fillShortcutComboBox();
 
 public slots:
     void addThumbnail(QString, QString);
@@ -92,9 +108,9 @@ signals:
     void closeRequest(UI4chan*, int);
     void createTabRequest(QString);
     void removeFiles(QStringList);
+    void changed();
 protected:
     void closeEvent(QCloseEvent *);
-//    void keyPressEvent(QKeyEvent* ke);
 };
 
 #endif // UI4CHAN_H

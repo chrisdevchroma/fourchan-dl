@@ -1,9 +1,34 @@
+Current version 1.2.0
+
 If you find bugs and/or have feature requests, please use the tracking system provided by sourceforge.
 
 As of version 0.9.6 each release is tested under Windows 7 professional (amd64) and Xubuntu 10.10 (amd64).
 When building from source make sure that you copy the "au" executable into the same folder as "fourchan-dl".
 
 Release notes
+
+Version 1.2.0
+* Added folder shortcuts - They can be defined in the options dialog
+* Download manager now identifies as Opera (just for the statistics :D)
+* Added thread overview widget for easier navigation
+* Added a history of recently closed threads
+* Replaced the toolbar with a normal menu to achieve the history function
+* Added a lot of shortcuts:
+ - Global
+   Ctrl+A   Add single thread
+   Ctrl+M   Add multiple threads
+   Ctrl+O   Bring up thread overview widget
+   Ctrl+S   Start all threads
+   Ctrl+T   Stop all threads
+   Ctrl+N   Configuration dialog (couldn't think of a better one)
+   Ctrl+W   Close current tab
+   Ctrl+Q   Close program
+ - Only in thumbnail view
+   Return/Enter Open image
+   Delete       Delete image
+   R            Reload image
+* Preventing opening an already opened thread
+* Not available images will not cause the thread to be closed
 
 Version 1.1.0
 * Fixed program crash when a lots of tabs were open

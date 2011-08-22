@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Add multiple tabs</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="0" column="0" rowspan="6">
@@ -37,7 +37,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="0" column="2">
        <widget class="QPushButton" name="btnChoosePath">
         <property name="toolTip">
          <string>Choose download folder</string>
@@ -50,6 +50,9 @@
           <normaloff>:/icons/resources/search.png</normaloff>:/icons/resources/search.png</iconset>
         </property>
        </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="cbFolderShortcuts"/>
       </item>
      </layout>
     </widget>

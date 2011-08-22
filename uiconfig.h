@@ -5,6 +5,10 @@
 #include <QSettings>
 #include <QFileDialog>
 #include "uilisteditor.h"
+#include "dialogfoldershortcut.h"
+#include "foldershortcuts.h"
+
+extern FolderShortcuts* folderShortcuts;
 
 namespace Ui {
     class UIConfig;
@@ -22,6 +26,7 @@ private:
     Ui::UIConfig *ui;
     QSettings* settings;
     UIListEditor* timeoutValueEditor;
+    DialogFolderShortcut* dialogFolderShortcut;
 
 private slots:
     void accept(void);
@@ -31,9 +36,14 @@ private slots:
     void editTimeoutValues(void);
     void loadSettings(void);
     void toggleProxy(bool);
-
+    void addShortcut(void);
+    void editShortcut(QString);
+    void deleteShortcut();
+    void editShortcutItem(QListWidgetItem*);
+    void loadShortcuts();
 signals:
     void configurationChanged(void);
+    void deleteAllThumbnails();
 };
 
 #endif // UICONFIG_H
