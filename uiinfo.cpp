@@ -20,6 +20,7 @@ UIInfo::UIInfo(QWidget *parent) :
     ui->label_2->setText(text);
 
     connect(timer, SIGNAL(timeout()), this, SLOT(updateStatistics()));
+    loadPluginInfo();
 }
 
 void UIInfo::setCurrentVersion(QString s) {
@@ -42,6 +43,39 @@ void UIInfo::updateStatistics() {
     s = QString("You have downloaded\n%1 files\n%2 MB").arg(files).arg(kbyte/1024);
 
     ui->lStatistics->setText(s);
+}
+
+void UIInfo::loadPluginInfo() {
+    int pluginCount;
+    ParserPluginInterface* p;
+
+    pluginCount = pluginManager->getAvailablePlugins().count();
+    for (int i=0; i<pluginCount; i++) {
+        p = pluginManager->getPlugin(i);
+
+        if (p != 0) {
+            QTreeWidgetItem* pluginName = new QTreeWidgetItem(ui->pluginInfo);
+            pluginName->setText(0, p->getPluginName());
+
+            QTreeWidgetItem* author = new QTreeWidgetItem(pluginName);
+            author->setText(0, "Author");
+            author->setText(1, p->getAuthor());
+
+            QTreeWidgetItem* version = new QTreeWidgetItem(pluginName);
+            version->setText(0, "Version");
+            version->setText(1, p->getVersion());
+
+            QTreeWidgetItem* iface = new QTreeWidgetItem(pluginName);
+            iface->setText(0, "Interface Revision");
+            iface->setText(1, p->getInterfaceRevision());
+
+            QTreeWidgetItem* domain = new QTreeWidgetItem(pluginName);
+            domain->setText(0, "Domain");
+            domain->setText(1, p->getDomain());
+
+            ui->pluginInfo->addTopLevelItem(pluginName);
+        }
+    }
 }
 
 UIInfo::~UIInfo()

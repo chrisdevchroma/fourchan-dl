@@ -72,8 +72,6 @@ QStringList UIThreadAdder::parseText(QString text) {
     QStringList res;
     QString url;
     QRegExp rx("(((http://www)|(http://)|(www))[-a-zA-Z0-9%_\\+.~?&//=]+)", Qt::CaseInsensitive, QRegExp::RegExp2);
-//    QRegExp rx("(https?://)?(www\\.)?([a-zA-Z0-9_%-\.]*)\\b\\.[a-z]{2,4}(\\.[a-z]{2})?((/[a-zA-Z0-9_%-]*)+)?(ß\.[a-z]*)?", Qt::CaseInsensitive, QRegExp::RegExp2);
-//    QRegExp rx("(?i)\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,?]))", Qt::CaseInsensitive, QRegExp::RegExp);
     int pos;
 
     // Insert word boundaries for RegExp
@@ -92,10 +90,10 @@ QStringList UIThreadAdder::parseText(QString text) {
 
         if (url.contains(QRegExp("(static|thumbs)", Qt::CaseInsensitive, QRegExp::RegExp2)))
             url.clear();
-
+/*
         if ((url.startsWith("http") || url.startsWith("www")) && !url.contains("4chan.org"))
             url.clear();
-
+*/
         if (!url.isEmpty())
             ret << url.trimmed();
     }

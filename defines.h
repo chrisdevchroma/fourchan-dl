@@ -3,7 +3,7 @@
 
 #ifdef Q_OS_WIN32
 #define APP_NAME        "fourchan-dl.exe"
-#define UPDATER_NAME    "au.exe"
+#define UPDATER_NAME    "updater/au.exe"
 #define USE_UPDATER
 //#else
 //#ifdef Q_OS_LINUX
@@ -14,5 +14,8 @@
 #endif
 
 #define debug_out(STRING, LEVEL)    qDebug() << STRING;
+
+#define __IMAGE_REGEXP__ "(\\.jpg|\\.gif|\\.png|\\.jpeg)"
+#define __IMAGEFILE_REGEXP__ QString("%1%2").arg("\\/(\\w+)").arg(__IMAGE_REGEXP__)
 
 #endif // DEFINES_H

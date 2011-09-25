@@ -24,7 +24,7 @@ void ThumbnailThread::run() {
     QString cacheFile;
     QString currentFilename;
     QDir dir;
-    QList<UI4chan*> uis;
+    QList<UIImageOverview*> uis;
     int iconWidth;
     int iconHeight;
     bool enlargeThumbnails;
@@ -84,7 +84,7 @@ void ThumbnailThread::run() {
 
             uis = callingUIs.values(currentFilename);
 
-            foreach(UI4chan* ui, uis) {
+            foreach(UIImageOverview* ui, uis) {
                 if (!canceled)
                     ui->addThumbnail(currentFilename, cacheFile);
                 callingUIs.remove(currentFilename, ui);
@@ -114,7 +114,7 @@ void ThumbnailThread::setIconSize(QSize s) {
     mutex.unlock();
 }
 
-void ThumbnailThread::addToList(UI4chan* caller, QString s) {
+void ThumbnailThread::addToList(UIImageOverview* caller, QString s) {
     mutex.lock();
     list.append(s);
     callingUIs.insertMulti(s, caller);
@@ -132,7 +132,7 @@ QString ThumbnailThread::getCacheFile(QString filename) {
     return ret;
 }
 
-bool ThumbnailThread::cancelAll(UI4chan *caller) {
+bool ThumbnailThread::cancelAll(UIImageOverview *caller) {
     bool ret;
     QList<QString> filenames;
 

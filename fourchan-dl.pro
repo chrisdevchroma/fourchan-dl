@@ -11,8 +11,7 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    parser.cpp \
-    ui4chan.cpp \
+    uiimageoverview.cpp \
     uiinfo.cpp \
     uiconfig.cpp \
     thumbnailthread.cpp \
@@ -28,11 +27,12 @@ SOURCES += main.cpp\
     uithreadadder.cpp \
     dialogfoldershortcut.cpp \
     foldershortcuts.cpp \
-    thumbnailview.cpp
+    thumbnailview.cpp \
+    networkaccessmanager.cpp \
+    pluginmanager.cpp
 
 HEADERS  += mainwindow.h \
-    parser.h \
-    ui4chan.h \
+    uiimageoverview.h \
     uiinfo.h \
     uiconfig.h \
     thumbnailthread.h \
@@ -49,10 +49,14 @@ HEADERS  += mainwindow.h \
     uithreadadder.h \
     dialogfoldershortcut.h \
     foldershortcuts.h \
-    thumbnailview.h
+    thumbnailview.h \
+    networkaccessmanager.h \
+    pluginmanager.h \
+    ParserPluginInterface.h \
+    structs.h
 
 FORMS    += mainwindow.ui \
-    ui4chan.ui \
+    uiimageoverview.ui \
     uiinfo.ui \
     uiconfig.ui \
     uilisteditor.ui \
@@ -67,9 +71,17 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.2.0\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.3.test\\\""
 
 OTHER_FILES += \
     readme.txt \
     settings.ini \
     fourchan-dl.rc
+
+
+
+
+
+
+
+

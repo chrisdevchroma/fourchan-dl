@@ -15,7 +15,7 @@ void RequestHandler::request(QUrl u) {
     QString sUrl;
 
     sUrl = u.toString();
-    if (sUrl.indexOf(QRegExp("(\\.jpg|\\.gif|\\.jpeg|\\.png)", Qt::CaseInsensitive)) != -1) {
+    if (sUrl.indexOf(QRegExp(__IMAGE_REGEXP__, Qt::CaseInsensitive)) != -1) {
         //Image requested
         prio = 1;
     }

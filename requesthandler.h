@@ -2,7 +2,9 @@
 #define REQUESTHANDLER_H
 
 #include <QObject>
+#include "defines.h"
 #include "downloadmanager.h"
+
 class DownloadManager;
 extern DownloadManager* downloadManager;
 

@@ -5,8 +5,10 @@
 #include <QUrl>
 #include <QtNetwork>
 #include "downloadmanager.h"
+#include "pluginmanager.h"
 //class DownloadManager;
 extern DownloadManager* downloadManager;
+extern PluginManager* pluginManager;
 
 namespace Ui {
     class UIInfo;
@@ -24,6 +26,8 @@ public:
 private:
     Ui::UIInfo *ui;
     QTimer* timer;
+
+    void loadPluginInfo();
 
 private slots:
     void updateStatistics();

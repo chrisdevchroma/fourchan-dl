@@ -9,6 +9,7 @@
 #include "requesthandler.h"
 #include "supervisednetworkreply.h"
 #include "downloadrequest.h"
+#include "networkaccessmanager.h"
 
 class RequestHandler;
 class DownloadRequest;
@@ -25,13 +26,15 @@ public:
     void getStatistics(int* files, float* kbytes);
 
 private:
-    QNetworkAccessManager* nam;
+    QList<NetworkAccessManager*> nams;
     QHash<qint64, DownloadRequest*> requestList;
     QHash<qint64, QNetworkReply*> activeReplies;
     QHash<qint64, SupervisedNetworkReply*> supervisors;
     QMultiMap<int, qint64> priorities;
     QSettings* settings;
     QTimer* waitTimer;
+    NetworkAccessManager* getFreeNAM();
+    void setupNetworkAccessManagers(int count);
     int maxRequests;
     int currentRequests;
     int totalRequests;

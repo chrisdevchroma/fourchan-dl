@@ -6,7 +6,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QTreeWidget>
-#include "ui4chan.h"
+#include "uiimageoverview.h"
 #include "uiinfo.h"
 #include "uiconfig.h"
 #include "applicationupdateinterface.h"
@@ -16,7 +16,7 @@
 #include "downloadmanager.h"
 #include "uithreadadder.h"
 
-class UI4chan;
+class UIImageOverview;
 
 extern DownloadManager* downloadManager;
 
@@ -36,7 +36,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QList<UI4chan> widgetList;
+    QList<UIImageOverview> widgetList;
     QMap<QString, QString> historyList;
     QString defaultDirectory;
     QSettings* settings;
@@ -52,6 +52,7 @@ private:
     ThumbnailRemoverThread* thumbnailRemover;
     int oldActiveTabIndex;
     QTimer* overviewUpdateTimer;
+    QMenu* historyMenu;
     bool _updateOverview;
 
     void restoreWindowSettings(void);
@@ -67,12 +68,12 @@ private slots:
     void addMultipleTabs();
     void closeTab(int);
     void displayError(QString);
-    void changeTabTitle(UI4chan*, QString);
+    void changeTabTitle(UIImageOverview*, QString);
     void showInfo(void);
     void showConfiguration(void);
     void setDefaultDirectory(QString);
     void loadOptions(void);
-    void processCloseRequest(UI4chan*, int);
+    void processCloseRequest(UIImageOverview*, int);
     void newVersionAvailable(QString);
     void createTab(QString);
     void replyFinished(QNetworkReply*);

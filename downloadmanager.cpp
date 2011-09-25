@@ -1,5 +1,7 @@
 #include "downloadmanager.h"
 
+#define MAX_CONCURRENT_DOWNLOADS_PER_NAM 5
+
 DownloadManager::DownloadManager(QObject *parent) :
 //    QThread(parent)
     QObject(parent)
@@ -9,7 +11,8 @@ DownloadManager::DownloadManager(QObject *parent) :
 
 void DownloadManager::run() {
 */
-    nam = new QNetworkAccessManager(this);
+    nams.clear();
+    nams.append(new NetworkAccessManager(this));    // Add at least one AccessManager
     settings = new QSettings("settings.ini", QSettings::IniFormat);
 
     waitTimer = new QTimer();
@@ -29,7 +32,7 @@ void DownloadManager::run() {
     loadSettings();
     serviceAvailable = true;
 
-    connect(nam, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+    connect(nams.at(0), SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     connect(waitTimer, SIGNAL(timeout()), this, SLOT(resumeDownloads()));
 
 //    exec();
@@ -46,6 +49,8 @@ void DownloadManager::loadSettings() {
         statistic_downloadedFiles = settings->value("downloaded_files", 0).toFloat();
         statistic_downloadedKBytes = settings->value("downloaded_kbytes", 0).toFloat();
     settings->endGroup();
+
+    setupNetworkAccessManagers(qCeil(maxRequests/MAX_CONCURRENT_DOWNLOADS_PER_NAM));
 }
 
 void DownloadManager::replyFinished(QNetworkReply* reply) {
@@ -71,7 +76,8 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
     }
     if (uid != -1) {
         if (reply->bytesAvailable() < reply->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
-            //            reschedule(uid);
+            qDebug() << "Received less byte than expected - Possibly because the download timed out";
+            reschedule(uid);
         }
         else {
             redirect = reply->header(QNetworkRequest::LocationHeader).toString();
@@ -228,6 +234,7 @@ void DownloadManager::processRequests() {
 void DownloadManager::startRequest(qint64 uid) {
     QNetworkRequest req;
     QNetworkReply* rep;
+    NetworkAccessManager* nam;
     DownloadRequest* dr;
     SupervisedNetworkReply* sup;
 
@@ -244,6 +251,7 @@ void DownloadManager::startRequest(qint64 uid) {
 //        req.setRawHeader("User-Agent", "Wget/1.12");
         req.setRawHeader("User-Agent", "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.9.168 Version/11.50");
         currentRequests++;
+        nam = getFreeNAM();
         rep = nam->get(req);
 
         sup->setNetworkReply(rep, uid);
@@ -261,7 +269,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
     DownloadRequest* dr;
     dr = requestList.value(uid);
 
-//    qDebug() << uid << "received error" << r->error() << ":" << r->errorString();
+    qDebug() << uid << "received error" << r->error() << ":" << r->errorString();
 
     switch (r->error()) {
     case 404:
@@ -302,10 +310,18 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
 
         currentRequests--;
         processRequests();
+
+    case 3:
+        qDebug() << "Host not found error for URL" << r->url().toString();
+        currentRequests--;
+        reschedule(uid);    // Try harder
+        processRequests();
+        break;
+
     default:
         qDebug() << "Unhandled error " << r->error();
 //        r.caller->error(r.uid, 404);
-
+        reschedule(uid);        // Since we don't know what happened, try harder
         currentRequests--;
         processRequests();
 
@@ -321,6 +337,7 @@ void DownloadManager::reschedule(qint64 uid) {
     dr = requestList.value(uid,0);
     if (dr != 0) {
         prio = dr->priority();
+        dr->setProcessing(false);
 
         // "decrease priority for rescheduled downloads"
         priorities.remove(prio, uid);
@@ -375,4 +392,24 @@ void DownloadManager::removeRequest(qint64 uid) {
 void DownloadManager::getStatistics(int *files, float *kbytes) {
     *files = statistic_downloadedFiles;
     *kbytes = statistic_downloadedKBytes;
+}
+
+NetworkAccessManager* DownloadManager::getFreeNAM() {
+    NetworkAccessManager* ret;
+    QMap<int, NetworkAccessManager*> load;
+
+    for (int i=0; i<nams.count(); i++) {
+        load.insertMulti(nams.at(i)->activeRequests(), nams.at(i));
+    }
+
+    ret = load.begin().value(); // Returns NetworkAccessManager with the least active requests
+
+    return ret;
+}
+
+void DownloadManager::setupNetworkAccessManagers(int count) {
+    for (int i=1; i<=count; i++) {
+        nams.append(new NetworkAccessManager(this));
+        connect(nams.last(), SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+    }
 }

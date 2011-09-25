@@ -28,20 +28,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Adding actions to menu bar
-    /*
+
     ui->menuBar->addAction(ui->actionAdd_Tab);
     ui->menuBar->addAction(ui->actionAddMultipleTabs);
     ui->menuBar->addAction(ui->actionTabOverview);
-
-    historyMenu->setTitle("History");
-    historyMenu->setIcon(QIcon(":/icons/resources/remove.png"));
-    ui->menuBar->addMenu(historyMenu);
 
     ui->menuBar->addAction(ui->actionStart_all);
     ui->menuBar->addAction(ui->actionStop_all);
 
     ui->menuBar->addAction(ui->actionOpen_Configuration);
-    */
+    ui->actionOpen_Configuration->setCheckable(true);
+
+    historyMenu = new QMenu(ui->menuBar);
+    historyMenu->setTitle("History");
+    historyMenu->setIcon(QIcon(":/icons/resources/remove.png"));
+    ui->menuBar->addMenu(historyMenu);
+
     ui->menuBar->addAction(ui->actionShowInfo);
 
     settings = new QSettings("settings.ini", QSettings::IniFormat);
@@ -70,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(downloadManager, SIGNAL(error(QString)), ui->statusBar, SLOT(showMessage(QString)));
 
     connect(overviewUpdateTimer, SIGNAL(timeout()), this, SLOT(overviewTimerTimeout()));
-    connect(ui->menuHistory, SIGNAL(triggered(QAction*)), this, SLOT(restoreFromHistory(QAction*)));
+    connect(historyMenu, SIGNAL(triggered(QAction*)), this, SLOT(restoreFromHistory(QAction*)));
 
 //    if (tnt->isRunning()) {
         connect(tnt, SIGNAL(pendingThumbnails(int)), ui->pbPendingThumbnails, SLOT(setValue(int)));
@@ -92,9 +94,9 @@ MainWindow::~MainWindow()
 
 int MainWindow::addTab() {
     int ci;
-    UI4chan* w;
+    UIImageOverview* w;
 
-    w = new UI4chan(this);
+    w = new UIImageOverview(this);
     w->setBlackList(blackList);
 
 //    w->setDownloadManager(downloadManager);
@@ -104,8 +106,8 @@ int MainWindow::addTab() {
         w->setDirectory(defaultDirectory);
 
     connect(w, SIGNAL(errorMessage(QString)), this, SLOT(displayError(QString)));
-    connect(w, SIGNAL(tabTitleChanged(UI4chan*, QString)), this, SLOT(changeTabTitle(UI4chan*, QString)));
-    connect(w, SIGNAL(closeRequest(UI4chan*, int)), this, SLOT(processCloseRequest(UI4chan*, int)));
+    connect(w, SIGNAL(tabTitleChanged(UIImageOverview*, QString)), this, SLOT(changeTabTitle(UIImageOverview*, QString)));
+    connect(w, SIGNAL(closeRequest(UIImageOverview*, int)), this, SLOT(processCloseRequest(UIImageOverview*, int)));
     connect(w, SIGNAL(directoryChanged(QString)), this, SLOT(setDefaultDirectory(QString)));
     connect(w, SIGNAL(createTabRequest(QString)), this, SLOT(createTab(QString)));
     connect(w, SIGNAL(removeFiles(QStringList)), this, SIGNAL(removeFiles(QStringList)));
@@ -120,19 +122,19 @@ int MainWindow::addTab() {
 
 void MainWindow::createTab(QString s) {
     int index;
-    UI4chan* w;
+    UIImageOverview* w;
 
     index = addTab();
-    w = ((UI4chan*)ui->tabWidget->widget(index));
+    w = ((UIImageOverview*)ui->tabWidget->widget(index));
     w->setValues(s);
     w->setAttribute(Qt::WA_DeleteOnClose, true);
 }
 
 void MainWindow::closeTab(int i) {
-    UI4chan* w;
+    UIImageOverview* w;
 
     ui->tabWidget->setCurrentIndex(i);
-    w = (UI4chan*)ui->tabWidget->widget(i);
+    w = (UIImageOverview*)ui->tabWidget->widget(i);
 
     addToHistory(w->getValues(), w->getTitle());
 
@@ -165,7 +167,7 @@ void MainWindow::setDefaultDirectory(QString d) {
         defaultDirectory = d;
 }
 
-void MainWindow::changeTabTitle(UI4chan* w, QString s) {
+void MainWindow::changeTabTitle(UIImageOverview* w, QString s) {
     int i;
 
     i = ui->tabWidget->indexOf((QWidget*)w);
@@ -214,7 +216,7 @@ void MainWindow::restoreTabs() {
         for (int i=0; i<tabCount; i++) {
             ci = addTab();
 
-            ((UI4chan*)ui->tabWidget->widget(ci))->setValues(
+            ((UIImageOverview*)ui->tabWidget->widget(ci))->setValues(
                     settings->value(QString("tabs/tab%1").arg(i), ";;;;0;;every 30 seconds;;0").toString()
                     );
             ui->pbOpenRequests->setValue((i+1));
@@ -263,7 +265,7 @@ void MainWindow::saveSettings(void) {
         settings->setValue("count", ui->tabWidget->count());
 
         for (int i=0; i<ui->tabWidget->count(); i++) {
-            settings->setValue(QString("tab%1").arg(i), ((UI4chan*)ui->tabWidget->widget(i))->getValues());
+            settings->setValue(QString("tab%1").arg(i), ((UIImageOverview*)ui->tabWidget->widget(i))->getValues());
         }
     settings->endGroup();
 
@@ -321,7 +323,7 @@ void MainWindow::loadOptions(void) {
 
 }
 
-void MainWindow::processCloseRequest(UI4chan* w, int reason) {
+void MainWindow::processCloseRequest(UIImageOverview* w, int reason) {
     int i;
     i = ui->tabWidget->indexOf((QWidget*)w);
 
@@ -362,7 +364,7 @@ void MainWindow::replyFinished(QNetworkReply* r) {
 
 void MainWindow::updateWidgetSettings(void) {
     for (int i=0; i<ui->tabWidget->count(); i++) {
-        ((UI4chan*)ui->tabWidget->widget(i))->updateSettings();
+        ((UIImageOverview*)ui->tabWidget->widget(i))->updateSettings();
     }
 }
 
@@ -422,7 +424,7 @@ void MainWindow::startAll() {
     ui->pbOpenRequests->setMaximum(ui->tabWidget->count());
 
     for (int i=0; i<ui->tabWidget->count(); i++) {
-        ((UI4chan*)ui->tabWidget->widget(i))->start();
+        ((UIImageOverview*)ui->tabWidget->widget(i))->start();
         ui->pbOpenRequests->setValue((i+1));
     }
 }
@@ -432,7 +434,7 @@ void MainWindow::stopAll() {
     ui->pbOpenRequests->setMaximum(ui->tabWidget->count());
 
     for (int i=0; i<ui->tabWidget->count(); i++) {
-        ((UI4chan*)ui->tabWidget->widget(i))->stop();
+        ((UIImageOverview*)ui->tabWidget->widget(i))->stop();
         ui->pbOpenRequests->setValue((i+1));
     }
 }
@@ -491,14 +493,14 @@ void MainWindow::updateThreadOverview() {
 //        ui->threadOverview->clear();
 
         for (int i=0; i<ui->tabWidget->count(); i++) {
-            UI4chan* tab;
+            UIImageOverview* tab;
             QTreeWidgetItem* item;
             sl.clear();
 
-            tab = (UI4chan*)(ui->tabWidget->widget(i));
+            tab = (UIImageOverview*)(ui->tabWidget->widget(i));
             sl << tab->getURI();
             sl << tab->getTitle();
-            sl << QString("%1/%2").arg(tab->getDownloadedCount()).arg(tab->getTotalCount());
+            sl << QString("%1/%2").arg(tab->getDownloadedImagesCount()).arg(tab->getTotalImagesCount());
             sl << tab->getStatus();
 
             if (ui->threadOverview->topLevelItemCount() > i) {                   // If there is an entry for the i-th tab
@@ -533,7 +535,7 @@ bool MainWindow::threadExists(QString url) {
     count = 0;
 
     for (int i=0; i<ui->tabWidget->count(); i++) {
-        if (((UI4chan*)ui->tabWidget->widget(i))->getURI() == url)
+        if (((UIImageOverview*)ui->tabWidget->widget(i))->getURI() == url)
             count++;
     }
 
@@ -560,7 +562,7 @@ void MainWindow::addToHistory(QString s, QString title="") {
             else
                 actionTitle = QString("%1 (%2) -> %3").arg(key).arg(title).arg(sl.at(1));
 
-            a = ui->menuHistory->addAction(actionTitle);
+            a = historyMenu->addAction(actionTitle);
             a->setIcon(QIcon(":/icons/resources/reload.png"));
             a->setStatusTip(QString("Reopen thread %1").arg(key));
             a->setToolTip(key); // Abusing the tooltip for saving the historyList key
@@ -583,7 +585,7 @@ void MainWindow::restoreFromHistory(QAction* a) {
         createTab(historyList.value(key, ""));
 
     removeFromHistory(key);
-    ui->menuHistory->removeAction(a);
+    historyMenu->removeAction(a);
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
