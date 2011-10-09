@@ -9,7 +9,7 @@ MainWindow::MainWindow(QWidget *parent) :
     uiInfo = new UIInfo(this);
     threadAdder = new UIThreadAdder(this);
     aui = new ApplicationUpdateInterface(this);
-    manager = new QNetworkAccessManager();
+    requestHandler = new RequestHandler(this);
     blackList = new BlackList(this);
     thumbnailRemover = new ThumbnailRemoverThread(this);
 
@@ -20,11 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
     overviewUpdateTimer->setSingleShot(true);
     _updateOverview = false;
 
+    runUpdate = false;
+
     connect(this, SIGNAL(removeFiles(QStringList)), thumbnailRemover, SLOT(removeFiles(QStringList)));
-
-//    downloadManager = new DownloadManager(this);
-//    downloadManager->start(QThread::NormalPriority);
-
     ui->setupUi(this);
 
     // Adding actions to menu bar
@@ -59,8 +57,9 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreWindowSettings();
     updateWidgetSettings();
 
-    connect(manager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(replyFinished(QNetworkReply*)));
+    connect(requestHandler, SIGNAL(response(QUrl,QByteArray)), this, SLOT(processRequestResponse(QUrl,QByteArray)));
+    connect(requestHandler, SIGNAL(responseError(QUrl,int)), this, SLOT(handleRequestError(QUrl,int)));
+
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     connect(uiConfig, SIGNAL(configurationChanged()), this, SLOT(loadOptions()));
     connect(uiConfig, SIGNAL(configurationChanged()), blackList, SLOT(loadSettings()));
@@ -74,14 +73,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(overviewUpdateTimer, SIGNAL(timeout()), this, SLOT(overviewTimerTimeout()));
     connect(historyMenu, SIGNAL(triggered(QAction*)), this, SLOT(restoreFromHistory(QAction*)));
 
-//    if (tnt->isRunning()) {
-        connect(tnt, SIGNAL(pendingThumbnails(int)), ui->pbPendingThumbnails, SLOT(setValue(int)));
-        connect(tnt, SIGNAL(pendingThumbnails(int)), this, SLOT(pendingThumbnailsChanged(int)));
-//    }
-//    connect(downloadManager, SIGNAL(totalRequestsChanged(int)), ui->pbOpenRequests, SLOT(setMaximum(int)));
-//    connect(downloadManager, SIGNAL(finishedRequestsChanged(int)), ui->pbOpenRequests, SLOT(setValue(int)));
+    connect(tnt, SIGNAL(pendingThumbnails(int)), ui->pbPendingThumbnails, SLOT(setValue(int)));
+    connect(tnt, SIGNAL(pendingThumbnails(int)), this, SLOT(pendingThumbnailsChanged(int)));
 
-    manager->get(QNetworkRequest(QUrl("http://sourceforge.net/projects/fourchan-dl/files/")));
+    connect(aui, SIGNAL(connectionEstablished()), this, SLOT(updaterConnected()));
+    connect(aui, SIGNAL(updateFinished()), this, SLOT(updateFinished()));
+    connect(aui, SIGNAL(updaterVersionSent(QString)), this, SLOT(setUpdaterVersion(QString)));
+
+//    createSupervisedDownload(QUrl("http://sourceforge.net/projects/fourchan-dl/files/"));
+#ifdef __DEBUG__
+    createSupervisedDownload(QUrl("file:webupdate.xml"));
+#else
+    createSupervisedDownload(QUrl("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download"));
+#endif
+
+    createComponentList();
     ui->mainToolBar->setVisible(false);
 }
 
@@ -337,30 +343,15 @@ void MainWindow::processCloseRequest(UIImageOverview* w, int reason) {
     }
 }
 
-void MainWindow::replyFinished(QNetworkReply* r) {
-    QString requestURI;
-    QRegExp rx("Current version ([0-9\\.]+)", Qt::CaseInsensitive, QRegExp::RegExp2);
-    QString html;
-    QStringList res;
-    int pos;
+void MainWindow::processRequestResponse(QUrl url, QByteArray ba) {
 
-    if (r->isFinished()) {
-        requestURI = r->request().url().toString();
-
-        html = r->readAll();
-
-        pos = rx.indexIn(html);
-        res = rx.capturedTexts();
-
-        if (pos != -1) {
-           uiInfo->setCurrentVersion(res.at(1));
-           checkVersion(res.at(1));
-        }
+    if (url.toString().contains("webupdate.xml")) {
+        checkForUpdates(QString(ba));
     }
-
-    r->deleteLater();
+    else {
+        qDebug() << "MainWindow should only ask for webupdate.xml but response was for" << url.toString();
+    }
 }
-
 
 void MainWindow::updateWidgetSettings(void) {
     for (int i=0; i<ui->tabWidget->count(); i++) {
@@ -368,28 +359,28 @@ void MainWindow::updateWidgetSettings(void) {
     }
 }
 
-void MainWindow::checkVersion(QString ver) {
-    QStringList currVersion, thisVersion;
-
-    currVersion = ver.split(".");
-    thisVersion = QString(PROGRAM_VERSION).split(".");
-
-    for (int i=0; i<currVersion.count(); i++) {
-        if (currVersion.value(i).toInt() > thisVersion.at(i).toInt()) {
-            newVersionAvailable(ver);
-            break;
-        }
-    }
-}
-
-void MainWindow::newVersionAvailable(QString v) {
+void MainWindow::newComponentsAvailable() {
     QProcess process;
     QFileInfo fi;
+    QString msg;
 
-    ui->statusBar->showMessage(QString("There is a new version (%1) available to download from sourceforge.").arg(v));
+    msg = "There are new components available to download from sourceforge.";
+
+    for (int i=0; i<updateableComponents.count(); i++) {
+        component_information c;
+
+        c = components.value(updateableComponents.at(i));
+
+        msg.append("\r\n");
+        msg.append(QString("   %1:%2 (installed: %3, available: %4)").arg(c.type).arg(c.componentName).arg(c.version).arg(c.remote_version));
+    }
+    ui->statusBar->showMessage(msg);
+
 #ifdef USE_UPDATER
+    msg.append("\r\nDo you want to update now?");
+
     switch (QMessageBox::question(0,"New version available",
-                                  QString("There is a new version (%1) available from sourceforge<br><a href=\"http://sourceforge.net/projects/fourchan-dl/files/\">sourceforge.net/projects/fourchan-dl</a><br />Do you want to update now?").arg(v),
+                                  msg,
                                   QMessageBox::Yes | QMessageBox::No)) {
     case QMessageBox::Ok:
     case QMessageBox::Yes:
@@ -404,7 +395,6 @@ void MainWindow::newVersionAvailable(QString v) {
         else {
             ui->statusBar->showMessage("Unable to start process "+fi.absoluteFilePath()+" ("+process.errorString()+")");
         }
-        aui->startUpdate(v);
         break;
 
     case QMessageBox::No:
@@ -594,4 +584,184 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (event->key() == Qt::Key_W && (event->modifiers() & Qt::ControlModifier) == Qt::ControlModifier) {
         closeTab(ui->tabWidget->currentIndex());
     }
+}
+
+void MainWindow::createSupervisedDownload(QUrl url) {
+    if (url.isValid()) {
+        requestHandler->request(url);
+    }
+}
+
+void MainWindow::removeSupervisedDownload(QUrl url) {
+    requestHandler->cancel(url);
+}
+
+void MainWindow::handleRequestError(QUrl url, int error) {
+
+}
+
+void MainWindow::checkForUpdates(QString xml) {
+    QRegExp rx("<win32>([\\w\\W]+[^<])+</win32>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rxFile("<file name=\"([^\\\"]+)\" filename=\"([\\w\\.\\-_]+)\" type=\"([^\\\"]+)\" version=\"([\\w\\.]+)\" source=\"([\\w:\\-\\./]+)\" target=\"([\\w\\.\\-/]*)\" />", Qt::CaseInsensitive, QRegExp::RegExp2);
+    int pos, posFile;
+    QStringList res, resFile;
+    QMap<QString, component_information> comp;
+    component_information c, local, remote;
+    QList<QString> foundComponents;
+
+    pos = rx.indexIn(xml);
+    res = rx.capturedTexts();
+
+    if (res.count() > 0 && pos != -1) {
+
+        posFile = 0;
+        while (posFile != -1) {
+            posFile = rxFile.indexIn(res.at(1), posFile+1);
+            resFile = rxFile.capturedTexts();
+
+            if (resFile.at(1) != "") {
+
+                c.componentName = resFile.at(1);
+                c.filename = resFile.at(2);
+                c.type = resFile.at(3);
+                c.version = resFile.at(4);
+                c.src = resFile.at(5);
+                c.target = resFile.at(6);
+
+                if (c.filename.startsWith("fourchan-dl") && c.type == "executable") {
+                    uiInfo->setCurrentVersion(c.version);
+                }
+
+                comp.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+            }
+        }
+    }
+
+    foundComponents = comp.keys();
+
+    foreach (QString key, foundComponents) {
+        local = components.value(key);
+        remote = comp.value(key);
+
+        if (local.filename == remote.filename) {
+            if (checkIfNewerVersion(remote.version, local.version)) {
+                qDebug() << "New version available for " << local.type << ":" << local.filename;
+                updateableComponents.append(key);
+                local.src = remote.src;
+                local.target = remote.target;
+                local.remote_version = remote.version;
+                components.insert(key,local);
+                runUpdate = true;
+            }
+        }
+        else if (remote.filename != "" && local.filename == "") {
+            // New component!
+            remote.remote_version = remote.version;
+            remote.version = "no";
+            components.insert(key, remote);
+            runUpdate = true;
+            updateableComponents.append(key);
+        }
+    }
+
+    if (runUpdate) newComponentsAvailable();
+//    qDebug() << xml;
+}
+
+bool MainWindow::checkIfNewerVersion(QString _new, QString _old) {
+    bool ret;
+    QStringList newVersion, oldVersion;
+
+    ret = false;
+
+    newVersion = _new.split(".");
+    oldVersion = _old.split(".");
+
+    for (int i=0; i<newVersion.count(); i++) {
+        if (newVersion.value(i).toInt() > oldVersion.at(i).toInt()) {
+            ret = true;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+void MainWindow::createComponentList() {
+    component_information c;
+    QStringList plugins;
+    QStringList qtFiles;
+
+    qtFiles << "QtCore4.dll" << "QtGui4.dll" << "QtNetwork4.dll";
+    components.clear();
+
+    c.filename = "fourchan-dl.exe";
+    c.componentName = "Main program";
+    c.type = "executable";
+    c.version = PROGRAM_VERSION;
+
+    components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+
+    c.filename = "au.exe";
+    c.componentName = "Updater";
+    c.type = "executable";
+    c.version = settings->value("updater/version", "unknown").toString();
+
+    components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+
+
+    foreach (QString f, qtFiles) {
+        c.filename = f;
+        c.componentName = f;
+        c.type = "qt";
+        c.version = qVersion();
+
+        components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+    }
+
+    plugins = pluginManager->getAvailablePlugins();
+
+    foreach (QString pluginName, plugins) {
+        c = pluginManager->getInfo(pluginName);
+        components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+    }
+
+    uiInfo->loadComponentInfo(components);
+}
+
+void MainWindow::updaterConnected() {
+    // We requested the update executable to start and now we have a connection
+    QStringList fileList;
+    component_information c;
+
+    if (runUpdate) {
+        foreach (QString component, updateableComponents) {
+            c = components.value(component);
+            fileList.append(QString("%1->%2").arg(c.src).arg(c.target));
+        }
+        aui->addFiles(fileList);
+        aui->startUpdate();
+    }
+}
+
+void MainWindow::updateFinished() {
+    aui->closeUpdaterExe();
+    aui->exchangeFiles();
+}
+
+QList<component_information> MainWindow::getComponents() {
+    QList<component_information> ret;
+    QStringList keys;
+
+    keys = components.keys();
+
+    foreach(QString key, keys) {
+        ret.append(components.value(key));
+    }
+
+    return ret;
+}
+
+void MainWindow::setUpdaterVersion(QString v) {
+    settings->setValue("updater/version", v);
 }

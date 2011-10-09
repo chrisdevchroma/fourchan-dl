@@ -33,6 +33,7 @@ public:
     ~MainWindow();
     void restoreTabs();
     bool threadExists(QString url);
+    QList<component_information> getComponents();
 
 private:
     Ui::MainWindow *ui;
@@ -48,20 +49,33 @@ private:
     bool autoClose;
     QSize thumbnailSize;
     int maxDownloads;
-    QNetworkAccessManager* manager;
+    RequestHandler* requestHandler;
     ThumbnailRemoverThread* thumbnailRemover;
     int oldActiveTabIndex;
     QTimer* overviewUpdateTimer;
     QMenu* historyMenu;
     bool _updateOverview;
+    QMap<QString, component_information> components;
+    QList<QString> updateableComponents;
+    bool runUpdate;
 
     void restoreWindowSettings(void);
     void updateWidgetSettings(void);
     void checkVersion(QString ver);
+    void checkForUpdates(QString xml);
+    bool checkIfNewerVersion(QString _new, QString _old);
     void addToHistory(QString s, QString title);
     void removeFromHistory(QString key);
+
+    void createSupervisedDownload(QUrl);
+    void removeSupervisedDownload(QUrl);
+
+    void createComponentList();
+    void newComponentsAvailable();
+
 protected:
     void keyPressEvent(QKeyEvent *event);
+
 private slots:
     void saveSettings(void);
     int addTab(void);
@@ -74,9 +88,7 @@ private slots:
     void setDefaultDirectory(QString);
     void loadOptions(void);
     void processCloseRequest(UIImageOverview*, int);
-    void newVersionAvailable(QString);
     void createTab(QString);
-    void replyFinished(QNetworkReply*);
     void startAll(void);
     void stopAll(void);
     void pendingThumbnailsChanged(int);
@@ -86,6 +98,11 @@ private slots:
     void overviewTimerTimeout();
     void scheduleOverviewUpdate();
     void restoreFromHistory(QAction*);
+    void processRequestResponse(QUrl url, QByteArray ba);
+    void handleRequestError(QUrl url, int error);
+    void updaterConnected();
+    void updateFinished();
+    void setUpdaterVersion(QString);
 
 signals:
     void removeFiles(QStringList);

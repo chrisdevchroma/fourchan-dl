@@ -34,7 +34,6 @@ int main(int argc, char *argv[])
     folderShortcuts = new FolderShortcuts();
 
     pluginManager = new PluginManager();
-    pluginManager->loadPlugins();
 
     mainWindow = new MainWindow();
     mainWindow->show();
@@ -48,14 +47,16 @@ int main(int argc, char *argv[])
 void checkEnvironment() {
     QDir dir;
     QDir updaterDir;
+    QDir pluginDir;
     QStringList neededFiles;
     QFile f;
 
     dir.setPath(QApplication::applicationDirPath());
     updaterDir.setPath(dir.path()+"/updater");
+    pluginDir.setPath(dir.path()+"/plugins");
 
 #ifdef Q_OS_WIN32
-    neededFiles << "Qt4Core.dll" << "QtNetwork4.dll" << "mingwm10.dll" << "libgcc_s_dw2-1.dll" << "au.exe";
+    neededFiles << "QtCore4.dll" << "QtNetwork4.dll" << "mingwm10.dll" << "libgcc_s_dw2-1.dll" << "au.exe";
 #endif
 
     // Check for updater folders
@@ -70,5 +71,13 @@ void checkEnvironment() {
             qDebug() << filename << "does not exists - copying from application dir";
             f.copy(QString("%1/%2").arg(dir.absolutePath()).arg(filename), QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename));
         }
+    }
+    f.setFileName("au.exe");
+    f.remove();
+
+    // Check for plugin folders
+    if (!pluginDir.exists()) {
+        qDebug() << "plugin directory does not exists. Creating " << QString("%1/plugins").arg(dir.absolutePath());
+        dir.mkdir("plugins");
     }
 }

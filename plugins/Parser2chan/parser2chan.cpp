@@ -13,11 +13,11 @@ Parser2chan::Parser2chan()
 }
 
 QString Parser2chan::getAuthor() {
-    return "Florian Born";
+    return "";
 }
 
 QString Parser2chan::getPluginName() {
-    return "2chan Parser";
+    return "2chan.net Parser";
 }
 
 QString Parser2chan::getVersion() {
@@ -121,4 +121,4 @@ QList<QUrl> Parser2chan::getUrlList() {
     return _urlList;
 }
 
-Q_EXPORT_PLUGIN2(pParser2chan, Parser2chan);
+Q_EXPORT_PLUGIN2(pParser2chan, Parser2chan)

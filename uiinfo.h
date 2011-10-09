@@ -6,7 +6,7 @@
 #include <QtNetwork>
 #include "downloadmanager.h"
 #include "pluginmanager.h"
-//class DownloadManager;
+
 extern DownloadManager* downloadManager;
 extern PluginManager* pluginManager;
 
@@ -22,12 +22,12 @@ public:
     explicit UIInfo(QWidget *parent = 0);
     ~UIInfo();
     void setCurrentVersion(QString);
+    void loadComponentInfo(QMap<QString, component_information> components);
 
 private:
     Ui::UIInfo *ui;
     QTimer* timer;
 
-    void loadPluginInfo();
 
 private slots:
     void updateStatistics();

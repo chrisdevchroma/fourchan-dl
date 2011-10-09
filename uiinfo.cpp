@@ -20,7 +20,6 @@ UIInfo::UIInfo(QWidget *parent) :
     ui->label_2->setText(text);
 
     connect(timer, SIGNAL(timeout()), this, SLOT(updateStatistics()));
-    loadPluginInfo();
 }
 
 void UIInfo::setCurrentVersion(QString s) {
@@ -45,37 +44,64 @@ void UIInfo::updateStatistics() {
     ui->lStatistics->setText(s);
 }
 
-void UIInfo::loadPluginInfo() {
-    int pluginCount;
+void UIInfo::loadComponentInfo(QMap<QString, component_information> components) {
+    component_information c;
     ParserPluginInterface* p;
+    QTreeWidgetItem* twi;
+    QStringList keys;
 
-    pluginCount = pluginManager->getAvailablePlugins().count();
-    for (int i=0; i<pluginCount; i++) {
-        p = pluginManager->getPlugin(i);
+    keys = components.keys();
+    QTreeWidgetItem* pluginTree = new QTreeWidgetItem(ui->pluginInfo);
+    pluginTree->setText(0, "Plugins");
+    QTreeWidgetItem* executableTree = new QTreeWidgetItem(ui->pluginInfo);
+    executableTree->setText(0, "Executables");
+    QTreeWidgetItem* qtTree = new QTreeWidgetItem(ui->pluginInfo);
+    qtTree->setText(0, "Qt");
 
-        if (p != 0) {
-            QTreeWidgetItem* pluginName = new QTreeWidgetItem(ui->pluginInfo);
-            pluginName->setText(0, p->getPluginName());
+    foreach (QString key, keys) {
+        c = components.value(key);
 
-            QTreeWidgetItem* author = new QTreeWidgetItem(pluginName);
-            author->setText(0, "Author");
-            author->setText(1, p->getAuthor());
+        if (c.type.startsWith("plugin")) {
+            p = pluginManager->getPlugin(key);
 
-            QTreeWidgetItem* version = new QTreeWidgetItem(pluginName);
-            version->setText(0, "Version");
-            version->setText(1, p->getVersion());
+            if (p != 0) {
+                QTreeWidgetItem* pluginName = new QTreeWidgetItem(pluginTree);
+                pluginName->setText(0, p->getPluginName());
 
-            QTreeWidgetItem* iface = new QTreeWidgetItem(pluginName);
-            iface->setText(0, "Interface Revision");
-            iface->setText(1, p->getInterfaceRevision());
+                QTreeWidgetItem* author = new QTreeWidgetItem(pluginName);
+                author->setText(0, "Author");
+                author->setText(1, p->getAuthor());
 
-            QTreeWidgetItem* domain = new QTreeWidgetItem(pluginName);
-            domain->setText(0, "Domain");
-            domain->setText(1, p->getDomain());
+                QTreeWidgetItem* version = new QTreeWidgetItem(pluginName);
+                version->setText(0, "Version");
+                version->setText(1, p->getVersion());
 
-            ui->pluginInfo->addTopLevelItem(pluginName);
+                QTreeWidgetItem* iface = new QTreeWidgetItem(pluginName);
+                iface->setText(0, "Interface Revision");
+                iface->setText(1, p->getInterfaceRevision());
+
+                QTreeWidgetItem* domain = new QTreeWidgetItem(pluginName);
+                domain->setText(0, "Domain");
+                domain->setText(1, p->getDomain());
+            }
         }
+        else {
+            if (c.type.startsWith("executable")) twi = executableTree;
+            else if (c.type.startsWith("qt")) twi = qtTree;
+
+            QTreeWidgetItem* componentName = new QTreeWidgetItem(twi);
+            componentName->setText(0, c.componentName);
+
+            QTreeWidgetItem* version = new QTreeWidgetItem(componentName);
+            version->setText(0, "Version");
+            version->setText(1, c.version);
+        }
+        ui->pluginInfo->addTopLevelItem(pluginTree);
+        ui->pluginInfo->addTopLevelItem(qtTree);
+        ui->pluginInfo->addTopLevelItem(executableTree);
     }
+
+    ui->pluginInfo->expandAll();
 }
 
 UIInfo::~UIInfo()

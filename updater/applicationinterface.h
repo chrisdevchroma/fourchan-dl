@@ -17,19 +17,23 @@ class ApplicationInterface : public QObject
 public:
     explicit ApplicationInterface(QObject *parent = 0);
     void sendCloseRequest();
-
+    void setFailedFiles(QList<FileUpdate> l);
+    void setUpdateFinished(bool b);
 private:
     QUdpSocket* udpSocket;
     QTextStream* output;
     QTimer* timer;
     QTimer* timeout;
-    bool varConnected;
+    bool _connected;
     bool pinging;
     bool closingApplication;
+    bool _updateFinished;
     FileUpdate fu;
     QList<FileUpdate> updateList;
+    QList<FileUpdate> failedFiles;
 
     void p(QString);
+    void sendFailedFiles();
 signals:
 
 private slots:

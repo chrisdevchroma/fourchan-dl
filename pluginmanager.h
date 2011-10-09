@@ -13,13 +13,16 @@ class PluginManager : public QObject
     Q_OBJECT
 public:
     explicit PluginManager(QObject *parent = 0);
-    void loadPlugins(void);
     QStringList getAvailablePlugins(void);
+    component_information getInfo(QString name);
     ParserPluginInterface* getParser(QUrl, bool*);
     ParserPluginInterface* getPlugin(int);
+    ParserPluginInterface* getPlugin(QString);
 private:
     QList<ParserPluginInterface*> loadedPlugins;
     QStringList pluginList;
+    QMap<QString, component_information> components;
+    void loadPlugins(void);
 signals:
 
 public slots:

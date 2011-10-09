@@ -59,8 +59,12 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
     QList<QNetworkReply*> replies;
     DownloadRequest* dr;
     int repliesRemoved;
+    QList<QByteArray> bal;
+
 
     // Search in requestList for this reply
+    bal = reply->rawHeaderList();
+//    qDebug() << reply->url().toString() << "rawHeader: " << bal;
     replies = activeReplies.values();
     uid = activeReplies.key(reply, -1);
     dr = requestList.value(uid,0);
@@ -97,7 +101,7 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
                     dr->requestHandler()->requestFinished(uid);
 
                     emit finishedRequestsChanged(++finishedRequests);
-                    if (reply->url().toString().indexOf(QRegExp("(\\.jpg|\\.gif|\\.jpeg|\\.png)", Qt::CaseInsensitive)) != -1) {
+                    if (reply->url().toString().indexOf(QRegExp(__IMAGE_REGEXP__, Qt::CaseInsensitive)) != -1) {
                         statistic_downloadedFiles++;
                         statistic_downloadedKBytes += ((reply->header(QNetworkRequest::ContentLengthHeader).toFloat())/1024);
                     }
@@ -248,8 +252,8 @@ void DownloadManager::startRequest(qint64 uid) {
 
         req = QNetworkRequest(dr->url());
         req.setAttribute(QNetworkRequest::CookieSaveControlAttribute, QNetworkRequest::Automatic);
-//        req.setRawHeader("User-Agent", "Wget/1.12");
-        req.setRawHeader("User-Agent", "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.9.168 Version/11.50");
+        req.setRawHeader("User-Agent", "Wget/1.12");
+//        req.setRawHeader("User-Agent", "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.9.168 Version/11.50");
         currentRequests++;
         nam = getFreeNAM();
         rep = nam->get(req);

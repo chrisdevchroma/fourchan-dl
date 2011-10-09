@@ -36,7 +36,7 @@ private slots:
     void startUpdate(QList<FileUpdate>);
     void downloadFinished(QList<FileUpdate>);
     void startExchange(bool);
-    void exchangeFinished();
+    void exchangeFinished(bool);
     void setExecutable(QString);
     void closeRequested();
 

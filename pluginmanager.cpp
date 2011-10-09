@@ -3,11 +3,14 @@
 PluginManager::PluginManager(QObject *parent) :
     QObject(parent)
 {
+    loadPlugins();
 }
 
 void PluginManager::loadPlugins(void)
 {
     QDir pluginDir(QApplication::applicationDirPath());
+    component_information c;
+#ifdef __DEBUG__
 #if defined(Q_OS_WIN)
     if (pluginDir.dirName().toLower() == "debug"
             || pluginDir.dirName().toLower() == "release")
@@ -19,8 +22,9 @@ void PluginManager::loadPlugins(void)
         pluginDir.cdUp();
     }
 #endif
+#endif
     if (!pluginDir.cd("plugins")) {
-        qDebug() << "Plugin directory not found: " << pluginDir.path();
+        // qDebug() << "Plugin directory not found: " << pluginDir.path();
     }
     else {
         qDebug() << "Plugin Search path: " << pluginDir.path();
@@ -34,17 +38,23 @@ void PluginManager::loadPlugins(void)
             if (ParserPluginInterface* interface =
                     qobject_cast<ParserPluginInterface *>(loader.instance()))
             {
+                c.componentName = interface->getPluginName();
+                c.filename = fileName;
+                c.type = "plugin/parser";
+                c.version = interface->getVersion();
+
+                components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
                 str.append(interface->getPluginName());
-//                str.append(";;;");
-//                str.append(pluginDir.absoluteFilePath(fileName));
+                str.append(";;;");
+                str.append(fileName);
                 pluginList.append(str);
                 loadedPlugins.append(interface);
             }
             else {
-                qDebug() << "error loading lib" << loader.errorString();
+                 qDebug() << "error loading lib" << loader.errorString();
             }
         }
-        qDebug() << "PluginList" << pluginList;
+        // qDebug() << "PluginList" << pluginList;
     }
 }
 
@@ -80,6 +90,33 @@ ParserPluginInterface* PluginManager::getPlugin(int i) {
     return ret;
 }
 
+ParserPluginInterface* PluginManager::getPlugin(QString component) {
+    ParserPluginInterface* ret;
+    component_information c;
+
+    ret = 0;
+
+    c = components.value(component);
+
+    for (int i=0; i<pluginList.count(); i++) {
+        if (pluginList.at(i).endsWith(QString(";;;%1").arg(c.filename))) {
+            ret = getPlugin(i);
+            break;
+        }
+    }
+
+    return ret;
+}
+
+
 QStringList PluginManager::getAvailablePlugins() {
-    return pluginList;
+    return components.keys();
+}
+
+component_information PluginManager::getInfo(QString name) {
+    component_information ret;
+
+    ret = components.value(name);
+
+    return ret;
 }

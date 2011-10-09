@@ -19,4 +19,14 @@ struct ParsingStatus
     bool hasErrors;
 };
 
+struct component_information {
+    QString componentName;
+    QString type;
+    QString filename;
+    QString version;
+    QString remote_version;
+    QString src;
+    QString target;
+};
+
 #endif // STRUCTS_H

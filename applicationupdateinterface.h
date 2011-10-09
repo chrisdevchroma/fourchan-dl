@@ -2,6 +2,7 @@
 #define APPLICATIONUPDATEINTERFACE_H
 
 #include <QObject>
+#include <QCoreApplication>
 #include <QByteArray>
 #include <QtNetwork/QUdpSocket>
 #include <QDir>
@@ -14,7 +15,11 @@ class ApplicationUpdateInterface : public QObject
     Q_OBJECT
 public:
     explicit ApplicationUpdateInterface(QObject *parent = 0);
-    void startUpdate(QString);
+    void startUpdate();
+    void addFile(QString url, QString loc);
+    void addFiles(QStringList list);
+    void closeUpdaterExe();
+    void exchangeFiles();
 private:
     QUdpSocket* udpSocket;
     bool pinging;
@@ -22,6 +27,8 @@ private:
     bool connected;
     bool startRequest;
     QString version;
+    QString fileToMoveFrom, fileToMoveTo;
+    QStringList filesToMove;
 
     void processCommand(QByteArray a);
     void writeCommand(int c, QByteArray a);
@@ -34,6 +41,8 @@ private slots:
 
 signals:
     void connectionEstablished();
+    void updateFinished();
+    void updaterVersionSent(QString);
 
 public slots:
 

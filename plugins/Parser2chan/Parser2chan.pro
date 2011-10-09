@@ -9,7 +9,7 @@ QT       -= gui
 TARGET = ../../parser2chan
 TEMPLATE = lib
 
-DEFINES += PARSER2CHAN_LIBRARY _LIB_VERSION="\\\"0.1\\\""
+DEFINES += PARSER2CHAN_LIBRARY _LIB_VERSION="\\\"1.0\\\""
 
 SOURCES += parser2chan.cpp
 

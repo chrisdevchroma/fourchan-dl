@@ -9,6 +9,10 @@ ApplicationUpdateInterface::ApplicationUpdateInterface(QObject *parent) :
     answerPing = false;
     startRequest = false;
 
+    fileToMoveFrom = "";
+    fileToMoveTo = "";
+    filesToMove.clear();
+
     if (!udpSocket->bind(APPLICATION_PORT))
         qDebug() << "Could not create socket (" << udpSocket->errorString() << ")";
 
@@ -40,15 +44,18 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
     switch (command) {
     case PING:
             writeCommand(PONG);
-            if (!connected)
+
+            if (!connected) {
+                connected = true;
                 emit connectionEstablished();
-            connected = true;
+            }
         break;
     case PONG:
         if (pinging)
             pinging=false;
         else
             writeCommand(ERROR);
+
     case CLOSE_REQUEST:
         exit(0);
         break;
@@ -60,38 +67,55 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
     case ERROR:
         QMessageBox::critical(0, "Update Error", QString(payload));
         break;
+
+    case CLEAR:
+        fileToMoveFrom = "";
+        fileToMoveTo = "";
+        filesToMove.clear();
+        break;
+
+    case SET_URI:
+        fileToMoveFrom = QString(payload);
+        qDebug() << "from" << fileToMoveFrom;
+        break;
+
+    case SET_TARGET:
+        fileToMoveTo = QString(payload);
+        qDebug() << "to" << fileToMoveTo;
+        break;
+
+    case ADD_SET:
+        filesToMove.append(QString("%1->%2").arg(fileToMoveFrom).arg(fileToMoveTo));
+        qDebug() << "add set";
+        break;
+
+    case UPDATE_FINISHED:
+        emit updateFinished();
+        break;
+
+    case VERSION:
+        emit updaterVersionSent(QString(payload));
+        break;
+
     default:
-        qDebug() << "Don't know what to do with command "<<QString::number(command);
+        qDebug() << "Don't know what to do with command " << QString::number(command);
         break;
     }
 }
 
-void ApplicationUpdateInterface::startUpdate(QString v) {
-    version = v;
-
-    startRequest = true;
+void ApplicationUpdateInterface::startUpdate() {
+    writeCommand(SET_EXE, QString("%1/%2").arg(QCoreApplication::applicationDirPath()).arg(APP_NAME));
+    writeCommand(START);
 }
 
 void ApplicationUpdateInterface::init() {
 #ifdef USE_UPDATER
-    if (startRequest) {
-        startRequest = false;
-
-        if (version != "") {
-            QDir dir;            
-            writeCommand(SET_EXE, QString("%1/%2").arg(dir.absolutePath()).arg(APP_NAME));
-            writeCommand(SET_URI, QString("http://sourceforge.net/projects/fourchan-dl/files/v%1/%2/download").arg(version).arg(APP_NAME));
-            writeCommand(SET_TARGET, QString(APP_NAME));
-            writeCommand(ADD_SET);
-            writeCommand(START);
-        }
-        else {
-            qDebug() << "Error: No version information given.";
-        }
+    if (connected) {
+            writeCommand(CLEAR);
+            writeCommand(GET_VERSION);  // Always poll version
     }
     else {
-        // Updater was running because of previous update
-        writeCommand(CLOSE_REQUEST);
+        qDebug() << "I am not connected to the update executable!";
     }
 #endif
 }
@@ -114,3 +138,63 @@ void ApplicationUpdateInterface::writeCommand(int c) {
     writeCommand(c, QByteArray());
 }
 
+void ApplicationUpdateInterface::addFile(QString url, QString loc) {
+    if (connected) {
+        writeCommand(SET_URI, url);
+        writeCommand(SET_TARGET, loc);
+        writeCommand(ADD_SET);
+    }
+}
+
+void ApplicationUpdateInterface::addFiles(QStringList list) {
+    foreach (QString set, list) {
+        QStringList sl;
+
+        sl = set.split("->");
+        addFile(sl.at(0), sl.at(1));
+    }
+}
+
+void ApplicationUpdateInterface::exchangeFiles() {
+    QStringList sl;
+    QString from, to;
+    QFile source;
+    QFile target;
+    bool success;
+
+
+    for(int i=0; i<filesToMove.count(); i++) {
+        sl = filesToMove.at(i).split("->");
+
+        from = sl.at(0);
+        to = sl.at(1);
+
+        source.setFileName(from);
+        target.setFileName(to);
+
+        qDebug() << "Moving" << source.fileName() << "to" << target.fileName();
+        success = false;
+
+        while (!target.remove());
+
+//        if (target.remove()) {
+            if (source.rename(to)) {
+                success = true;
+            }
+            else {
+                qDebug() << "rename failed";
+            }
+//        }
+
+        if (!success) {
+            qDebug() << " Failed";
+        }
+        else {
+            qDebug() << " Success!";
+        }
+    }
+}
+
+void ApplicationUpdateInterface::closeUpdaterExe() {
+    writeCommand(CLOSE_REQUEST);
+}

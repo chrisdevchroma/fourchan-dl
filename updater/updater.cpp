@@ -9,6 +9,7 @@ Updater::Updater(QObject *parent) :
 
     finishedDownload = false;
     exchanging = false;
+    ai->setUpdateFinished(false);
 
     output = new QTextStream(stdout);
 }
@@ -18,7 +19,7 @@ void Updater::run() {
     connect(dm, SIGNAL(downloadsFinished(QList<FileUpdate>)), this, SLOT(downloadFinished(QList<FileUpdate>)));
     connect(ai, SIGNAL(applicationClosed(bool)), this, SLOT(startExchange(bool)));
     connect(ai, SIGNAL(executableChanged(QString)), this, SLOT(setExecutable(QString)));
-    connect(fh, SIGNAL(exchangingFinished()), this, SLOT(exchangeFinished()));
+    connect(fh, SIGNAL(exchangingFinished(bool)), this, SLOT(exchangeFinished(bool)));
     connect(dm, SIGNAL(error(QString)), ai, SLOT(sendError(QString)));
     connect(fh, SIGNAL(error(QString)), ai, SLOT(sendError(QString)));
 
@@ -50,16 +51,23 @@ void Updater::startExchange(bool applicationClosed) {
     }
 }
 
-void Updater::exchangeFinished() {
+void Updater::exchangeFinished(bool errors) {
     p("Update process finished");
+    if (errors) {
+        ai->sendError("Update finished with errors.");
+    }
+
     if (executable != "") {
         p("Starting Executable file "+executable);
         QProcess::startDetached(QString("\"%1\"").arg(executable));
+
+        ai->setFailedFiles(fh->getFailedFiles());
     }
     else {
         p("Could not start application, because I don't know which one. Please start manually.");
     }
 
+    ai->setUpdateFinished(true);
     ai->sendMessage("Update finished.");
 }
 
@@ -74,7 +82,6 @@ void Updater::setExecutable(QString s) {
         p("Wanted to set Executable file '"+s+"', but it does not exist.");
         ai->sendError("Wanted to set Executable file '"+s+"', but it does not exist.");
     }
-
 }
 
 
