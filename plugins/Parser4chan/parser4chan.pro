@@ -6,7 +6,7 @@
 
 QT       -= gui
 
-TARGET = ../../4chanParser
+TARGET = ../../parser4chan
 TEMPLATE = lib
 
 DEFINES += FOURCHANPARSER_LIBRARY _LIB_VERSION="\\\"1.0\\\""
@@ -21,7 +21,7 @@ symbian {
     TARGET.UID3 = 0xE3114540
     TARGET.CAPABILITY = 
     TARGET.EPOCALLOWDLLDATA = 1
-    addFiles.sources = 4chanParser.dll
+    addFiles.sources = parser4chan.dll
     addFiles.path = !:/sys/bin
     DEPLOYMENT += addFiles
 }
