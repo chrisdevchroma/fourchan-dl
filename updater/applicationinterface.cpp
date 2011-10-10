@@ -3,7 +3,6 @@
 ApplicationInterface::ApplicationInterface(QObject *parent) :
     QObject(parent)
 {
-    output = new QTextStream(stdout);
     udpSocket = new QUdpSocket(this);
     timer = new QTimer();
     timer->setSingleShot(true);
@@ -34,6 +33,8 @@ void ApplicationInterface::timerTrigger(void) {
 void ApplicationInterface::p(QString msg) {
     *output << "ApplicationInterface: " << msg << endl;
     output->flush();
+    *foutput << "ApplicationInterface: " << msg << endl;
+    foutput->flush();
 }
 
 void ApplicationInterface::timeoutOccured() {
@@ -68,8 +69,8 @@ void ApplicationInterface::processCommand(QByteArray a) {
     command = a.at(0);
     payload = a.mid(1);
 
-    if (command != PONG)
-        p("Received: "+QString::number(command)+":"+QString(payload));
+//    if (command != PONG)
+//        p("Received: "+QString::number(command)+":"+QString(payload));
 
     switch (command) {
     case PING:

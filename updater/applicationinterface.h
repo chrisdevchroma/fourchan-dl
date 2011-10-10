@@ -11,6 +11,9 @@
 #define TIMEOUT_VALUE   1000       // 1s
 #define PING_INTERVAL   500        // 500ms
 
+extern QTextStream* output;
+extern QTextStream* foutput;
+
 class ApplicationInterface : public QObject
 {
     Q_OBJECT
@@ -21,7 +24,6 @@ public:
     void setUpdateFinished(bool b);
 private:
     QUdpSocket* udpSocket;
-    QTextStream* output;
     QTimer* timer;
     QTimer* timeout;
     bool _connected;

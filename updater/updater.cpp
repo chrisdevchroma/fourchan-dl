@@ -10,8 +10,6 @@ Updater::Updater(QObject *parent) :
     finishedDownload = false;
     exchanging = false;
     ai->setUpdateFinished(false);
-
-    output = new QTextStream(stdout);
 }
 
 void Updater::run() {
@@ -88,6 +86,8 @@ void Updater::setExecutable(QString s) {
 void Updater::p(QString msg) {
     *output << "Updater: " << msg << endl;
     output->flush();
+    *foutput << "Updater: " << msg << endl;
+    foutput->flush();
 }
 
 void Updater::closeRequested() {

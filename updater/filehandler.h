@@ -6,6 +6,9 @@
 #include <QTextStream>
 #include "types.h"
 
+extern QTextStream* output;
+extern QTextStream* foutput;
+
 class FileHandler : public QObject
 {
     Q_OBJECT
@@ -16,7 +19,6 @@ public:
 private:
     QList<FileUpdate> updateList;
     QList<FileUpdate> failedFiles;
-    QTextStream* output;
 
     void p(QString);
 

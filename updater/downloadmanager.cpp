@@ -3,7 +3,6 @@
 DownloadManager::DownloadManager(QObject *parent) :
     QObject(parent)
 {
-    output = new QTextStream(stdout);
     manager = new QNetworkAccessManager();
     cookies = new QNetworkCookieJar();
     manager->setCookieJar(cookies);
@@ -125,4 +124,6 @@ void DownloadManager::replyError(QNetworkReply::NetworkError e) {
 void DownloadManager::p(QString msg) {
     *output << "DownloadManager: " << msg << endl;
     output->flush();
+    *foutput << "DownloadManager: " << msg << endl;
+    foutput->flush();
 }

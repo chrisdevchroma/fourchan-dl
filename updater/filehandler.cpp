@@ -3,7 +3,6 @@
 FileHandler::FileHandler(QObject *parent) :
     QObject(parent)
 {
-    output = new QTextStream(stdout);
 }
 
 void FileHandler::startExchange(QList<FileUpdate> l) {
@@ -72,4 +71,6 @@ void FileHandler::startExchange(QList<FileUpdate> l) {
 void FileHandler::p(QString msg) {
     *output << "FileHandler: " << msg << endl;
     output->flush();
+    *foutput << "FileHandler: " << msg << endl;
+    foutput->flush();
 }
