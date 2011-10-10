@@ -1,6 +1,7 @@
 #include <QtGui/QApplication>
 #include <QtDebug>
 #include <QCleanlooksStyle>
+#include <QFile>
 #include "mainwindow.h"
 #include "downloadmanager.h"
 #include "thumbnailthread.h"
@@ -16,6 +17,7 @@ ThumbnailThread* tnt;
 FolderShortcuts* folderShortcuts;
 MainWindow* mainWindow;
 PluginManager* pluginManager;
+QString updaterFileName;
 
 void checkEnvironment();
 
@@ -56,7 +58,7 @@ void checkEnvironment() {
     pluginDir.setPath(dir.path()+"/plugins");
 
 #ifdef Q_OS_WIN32
-    neededFiles << "QtCore4.dll" << "QtNetwork4.dll" << "mingwm10.dll" << "libgcc_s_dw2-1.dll" << "au.exe";
+    neededFiles << "QtCore4.dll" << "QtNetwork4.dll" << "mingwm10.dll" << "libgcc_s_dw2-1.dll" << "au.exe" << "upd4t3r.exe";
 #endif
 
     // Check for updater folders
@@ -72,8 +74,22 @@ void checkEnvironment() {
             f.copy(QString("%1/%2").arg(dir.absolutePath()).arg(filename), QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename));
         }
     }
-    f.setFileName("au.exe");
-    f.remove();
+
+    updaterFileName = "";
+    if (QFile::exists("updater/upd4t3r.exe")) {
+        // The new updater is already present
+        // Use this for updating the components
+        // If old updater still exists, delete it because it's not needed anymore
+        updaterFileName = "updater/upd4t3r.exe";
+        QFile::remove("au.exe");
+        QFile::remove("updater/au.exe");
+    }
+    else if (QFile::exists("updater/au.exe")) {
+        updaterFileName = "updater/au.exe";
+    }
+    else {
+        qDebug() << "No updater found!";
+    }
 
     // Check for plugin folders
     if (!pluginDir.exists()) {

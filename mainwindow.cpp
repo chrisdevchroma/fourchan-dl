@@ -81,13 +81,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(aui, SIGNAL(updaterVersionSent(QString)), this, SLOT(setUpdaterVersion(QString)));
 
 //    createSupervisedDownload(QUrl("http://sourceforge.net/projects/fourchan-dl/files/"));
+    createComponentList();
+
 #ifdef __DEBUG__
     createSupervisedDownload(QUrl("file:webupdate.xml"));
 #else
     createSupervisedDownload(QUrl("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download"));
 #endif
 
-    createComponentList();
     ui->mainToolBar->setVisible(false);
 }
 
@@ -385,7 +386,7 @@ void MainWindow::newComponentsAvailable() {
     case QMessageBox::Ok:
     case QMessageBox::Yes:
 
-        fi.setFile(UPDATER_NAME);
+        fi.setFile(updaterFileName);
 
         qDebug() << "Starting updater " << fi.absoluteFilePath();
 
@@ -691,6 +692,7 @@ void MainWindow::createComponentList() {
     component_information c;
     QStringList plugins;
     QStringList qtFiles;
+    QString version;
 
     qtFiles << "QtCore4.dll" << "QtGui4.dll" << "QtNetwork4.dll";
     components.clear();
@@ -702,10 +704,21 @@ void MainWindow::createComponentList() {
 
     components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
 
-    c.filename = "au.exe";
+    c.filename = "upd4t3r.exe";
     c.componentName = "Updater";
     c.type = "executable";
-    c.version = settings->value("updater/version", "unknown").toString();
+    version = settings->value("updater/version", "unknown").toString();
+
+    qDebug() << "version:" << version << "updater:" << updaterFileName;
+    if (version == "unknown" && updaterFileName.contains("upd4t3r")) {
+        // No version informatin in settings fil, but new updater executable present
+        // means a freshly updated system. Assume version 1.1
+        version = "1.1";
+        settings->setValue("updater/version", version);
+    }
+
+    c.version = version;
+
 
     components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
 

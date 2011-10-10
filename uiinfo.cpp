@@ -50,6 +50,7 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
     QTreeWidgetItem* twi;
     QStringList keys;
 
+    twi = 0;
     keys = components.keys();
     QTreeWidgetItem* pluginTree = new QTreeWidgetItem(ui->pluginInfo);
     pluginTree->setText(0, "Plugins");

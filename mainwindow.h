@@ -19,6 +19,7 @@
 class UIImageOverview;
 
 extern DownloadManager* downloadManager;
+extern QString updaterFileName;
 
 namespace Ui {
     class MainWindow;
