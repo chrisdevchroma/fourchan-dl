@@ -41,18 +41,17 @@ void FileHandler::startExchange(QList<FileUpdate> l) {
                 failedFiles.append(fu);
                 errors = true;
             }
-            else {
-                if (!source.rename(targetFilename)) {
-                    p("Could not rename "+sourceFilename+" to "+targetFilename);
-                    error("Could not rename "+sourceFilename+" to "+targetFilename+" ("+target.errorString()+")");
+        }
 
-                    fu.tmpFilename = sourceFilename;
-                    fu.filename = targetFilename;
-                    failedFiles.append(fu);
+        if (!source.rename(targetFilename)) {
+            p("Could not rename "+sourceFilename+" to "+targetFilename);
+            error("Could not rename "+sourceFilename+" to "+targetFilename+" ("+target.errorString()+")");
 
-                    errors = true;
-                }
-            }
+            fu.tmpFilename = sourceFilename;
+            fu.filename = targetFilename;
+            failedFiles.append(fu);
+
+            errors = true;
         }
 
 #ifdef Q_OS_LINUX
