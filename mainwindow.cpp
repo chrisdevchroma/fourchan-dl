@@ -607,7 +607,7 @@ void MainWindow::handleRequestError(QUrl url, int error) {
 }
 
 void MainWindow::checkForUpdates(QString xml) {
-    QRegExp rx("<win32>([\\w\\W]+[^<])+</win32>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rx(QString("<%1>([\\w\\W]+[^<])+</%1>").arg(UPDATE_TREE), Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rxFile("<file name=\"([^\\\"]+)\" filename=\"([\\w\\.\\-_]+)\" type=\"([^\\\"]+)\" version=\"([\\w\\.]+)\" source=\"([\\w:\\-\\./]+)\" target=\"([\\w\\.\\-/]*)\" />", Qt::CaseInsensitive, QRegExp::RegExp2);
     int pos, posFile;
     QStringList res, resFile;
@@ -634,7 +634,7 @@ void MainWindow::checkForUpdates(QString xml) {
                 c.src = resFile.at(5);
                 c.target = resFile.at(6);
 
-                if (c.filename.startsWith("fourchan-dl") && c.type == "executable") {
+                if (c.filename == APP_NAME && c.type == "executable") {
                     uiInfo->setCurrentVersion(c.version);
                 }
 
@@ -697,18 +697,23 @@ void MainWindow::createComponentList() {
     component_information c;
     QStringList plugins;
     QStringList qtFiles;
+#ifdef USE_UPDATER
     QString version;
+#endif
 
-    qtFiles << "QtCore4.dll" << "QtGui4.dll" << "QtNetwork4.dll";
+    qtFiles << "QtCore4" << "QtGui4" << "QtNetwork4";
+
     components.clear();
 
-    c.filename = "fourchan-dl.exe";
+    c.filename = APP_NAME;
     c.componentName = "Main program";
     c.type = "executable";
     c.version = PROGRAM_VERSION;
 
     components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
 
+#ifdef USE_UPDATER
+    // TODO: use updaterFileName (but without the path)
     c.filename = "upd4t3r.exe";
     c.componentName = "Updater";
     c.type = "executable";
@@ -725,10 +730,16 @@ void MainWindow::createComponentList() {
 
 
     components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
-
+#endif
 
     foreach (QString f, qtFiles) {
+#ifdef Q_OS_WIN32
+        c.filename = QString("%1.dll").arg(f);
+#else
+#ifdef Q_OS_LINUX
         c.filename = f;
+#endif
+#endif
         c.componentName = f;
         c.type = "qt";
         c.version = qVersion();

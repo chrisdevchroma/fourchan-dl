@@ -5,12 +5,13 @@
 #define APP_NAME        "fourchan-dl.exe"
 #define UPDATE_TREE     "win32"
 #define USE_UPDATER
-//#else
-//#ifdef Q_OS_LINUX
-//#define APP_NAME        "fourchan-dl"
+#else
+#ifdef Q_OS_LINUX
+#define APP_NAME        "fourchan-dl"
+#define UPDATE_TREE     "linux"
 //#define UPDATER_NAME    "au"
 //#define USE_UPDATER
-//#endif
+#endif
 #endif
 
 #define debug_out(STRING, LEVEL)    qDebug() << STRING;
