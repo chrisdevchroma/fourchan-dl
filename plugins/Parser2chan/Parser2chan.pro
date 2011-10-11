@@ -9,12 +9,11 @@ QT       -= gui
 TARGET = ../../parser2chan
 TEMPLATE = lib
 
-DEFINES += PARSER2CHAN_LIBRARY _LIB_VERSION="\\\"1.0\\\""
+DEFINES += PARSER2CHAN_LIBRARY _LIB_VERSION="\\\"0.1\\\""
 
 SOURCES += parser2chan.cpp
 
-HEADERS += parser2chan.h\
-        parser2chan_global.h
+HEADERS += parser2chan.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN

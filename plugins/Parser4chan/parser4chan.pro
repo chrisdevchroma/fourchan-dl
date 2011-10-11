@@ -13,8 +13,7 @@ DEFINES += FOURCHANPARSER_LIBRARY _LIB_VERSION="\\\"1.0\\\""
 
 SOURCES += parser4chan.cpp
 
-HEADERS += parser4chan.h\
-        4chanParser_global.h
+HEADERS += parser4chan.h
 
 symbian {
     MMP_RULES += EXPORTUNFROZEN
