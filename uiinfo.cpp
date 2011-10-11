@@ -102,7 +102,7 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
         ui->pluginInfo->addTopLevelItem(executableTree);
     }
 
-    ui->pluginInfo->expandAll();
+//    ui->pluginInfo->expandAll();
 }
 
 UIInfo::~UIInfo()

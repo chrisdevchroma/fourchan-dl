@@ -361,24 +361,27 @@ void MainWindow::updateWidgetSettings(void) {
 }
 
 void MainWindow::newComponentsAvailable() {
+#ifdef USE_UPDATER
     QProcess process;
     QFileInfo fi;
+#endif
+
     QString msg;
 
-    msg = "There are new components available to download from sourceforge.";
+    msg = "There are new components available to download from sourceforge:";
 
     for (int i=0; i<updateableComponents.count(); i++) {
         component_information c;
 
         c = components.value(updateableComponents.at(i));
 
-        msg.append("\r\n");
-        msg.append(QString("   %1:%2 (installed: %3, available: %4)").arg(c.type).arg(c.componentName).arg(c.version).arg(c.remote_version));
+        msg.append("<br>");
+        msg.append(QString("&nbsp;&nbsp;%1:%2 (installed: %3, available: %4)").arg(c.type).arg(c.componentName).arg(c.version).arg(c.remote_version));
     }
     ui->statusBar->showMessage(msg);
 
 #ifdef USE_UPDATER
-    msg.append("\r\nDo you want to update now?");
+    msg.append("<br>Do you want to update now?");
 
     switch (QMessageBox::question(0,"New version available",
                                   msg,
@@ -403,9 +406,11 @@ void MainWindow::newComponentsAvailable() {
         break;
     }
 #else
+    msg.append("<br><a href=\"http://sourceforge.net/projects/fourchan-dl/files/\">http://sourceforge.net/projects/fourchan-dl</a>");
+
     QMessageBox::information(0,
                              "New version available",
-                             QString("There is a new version (%1) available from sourceforge<br><a href=\"http://sourceforge.net/projects/fourchan-dl/files/\">sourceforge.net/projects/fourchan-dl</a>").arg(v),
+                             msg,
                              QMessageBox::Ok);
 #endif
 }
@@ -709,7 +714,6 @@ void MainWindow::createComponentList() {
     c.type = "executable";
     version = settings->value("updater/version", "unknown").toString();
 
-    qDebug() << "version:" << version << "updater:" << updaterFileName;
     if (version == "unknown" && updaterFileName.contains("upd4t3r")) {
         // No version informatin in settings fil, but new updater executable present
         // means a freshly updated system. Assume version 1.1

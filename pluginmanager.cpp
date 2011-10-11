@@ -27,14 +27,14 @@ void PluginManager::loadPlugins(void)
         // qDebug() << "Plugin directory not found: " << pluginDir.path();
     }
     else {
-        qDebug() << "Plugin Search path: " << pluginDir.path();
+//        qDebug() << "Plugin Search path: " << pluginDir.path();
         foreach (QString fileName, pluginDir.entryList(QDir::Files))
         {
-            qDebug() << "Checking file " << pluginDir.absoluteFilePath(fileName);
+//            qDebug() << "Checking file " << pluginDir.absoluteFilePath(fileName);
             QPluginLoader loader(pluginDir.absoluteFilePath(fileName));
-            qDebug() << loader.errorString();
+//            qDebug() << loader.errorString();
             QString str;
-            qDebug() << "Intances : " << loader.staticInstances();
+//            qDebug() << "Intances : " << loader.staticInstances();
             if (ParserPluginInterface* interface =
                     qobject_cast<ParserPluginInterface *>(loader.instance()))
             {

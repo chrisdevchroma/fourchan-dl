@@ -63,14 +63,14 @@ void checkEnvironment() {
 
     // Check for updater folders
     if (!updaterDir.exists()) {
-        qDebug() << "updater directory does not exists. Creating " << QString("%1/updater").arg(dir.absolutePath());
+//        qDebug() << "updater directory does not exists. Creating " << QString("%1/updater").arg(dir.absolutePath());
         dir.mkdir("updater");
     }
 
     // Check if all files are present
     foreach (QString filename, neededFiles) {
         if (!QFile::exists(QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename))) {
-            qDebug() << filename << "does not exists - copying from application dir";
+//            qDebug() << filename << "does not exists - copying from application dir";
             f.copy(QString("%1/%2").arg(dir.absolutePath()).arg(filename), QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename));
         }
     }
@@ -93,7 +93,7 @@ void checkEnvironment() {
 
     // Check for plugin folders
     if (!pluginDir.exists()) {
-        qDebug() << "plugin directory does not exists. Creating " << QString("%1/plugins").arg(dir.absolutePath());
+//        qDebug() << "plugin directory does not exists. Creating " << QString("%1/plugins").arg(dir.absolutePath());
         dir.mkdir("plugins");
     }
 }
