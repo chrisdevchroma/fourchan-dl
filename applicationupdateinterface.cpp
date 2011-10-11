@@ -104,8 +104,12 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
 }
 
 void ApplicationUpdateInterface::startUpdate() {
+#ifdef USE_UPDATER
     writeCommand(SET_EXE, QString("%1/%2").arg(QCoreApplication::applicationDirPath()).arg(APP_NAME));
     writeCommand(START);
+#else
+    qDebug() << "This OS is not supported for automatic updating";
+#endif
 }
 
 void ApplicationUpdateInterface::init() {
