@@ -47,12 +47,12 @@ bool FolderShortcuts::addShortcut(QString name, QString path) {
     return ret;
 }
 
-void FolderShortcuts::updateShortcut(QString name, QString path) {
-    if (shortcutExists(name)) {
-        deleteShortcut(name);
+void FolderShortcuts::updateShortcut(QString originalName, QString newName, QString path) {
+    if (shortcutExists(originalName)) {
+        deleteShortcut(originalName);
     }
 
-    addShortcut(name, path);
+    addShortcut(newName, path);
 }
 
 void FolderShortcuts::deleteShortcut(QString name) {

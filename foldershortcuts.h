@@ -23,7 +23,7 @@ signals:
 
 public slots:
     bool addShortcut(QString name, QString path);
-    void updateShortcut(QString name, QString path);
+    void updateShortcut(QString originalName, QString newName, QString path);
     void deleteShortcut(QString name);
 
 signals:

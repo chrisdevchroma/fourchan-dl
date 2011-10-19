@@ -25,6 +25,7 @@ public:
 
 private:
     Ui::DialogFolderShortcut *ui;
+    QString _originalShortcutName;
 
 public slots:
     void clear();
@@ -39,7 +40,7 @@ private slots:
     void fillShortcutComboBox();
 
 signals:
-    void shortcutChanged(QString, QString);
+    void shortcutChanged(QString, QString, QString);
     void editCanceled();
 };
 

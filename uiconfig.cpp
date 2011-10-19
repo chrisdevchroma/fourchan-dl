@@ -20,7 +20,7 @@ UIConfig::UIConfig(QWidget *parent) :
     connect(ui->cbUseProxy, SIGNAL(toggled(bool)), this, SLOT(toggleProxy(bool)));
     connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(editShortcutItem(QListWidgetItem*)));
     connect(folderShortcuts, SIGNAL(shortcutsChanged()), this, SLOT(loadShortcuts()));
-    connect(dialogFolderShortcut, SIGNAL(shortcutChanged(QString,QString)), folderShortcuts, SLOT(updateShortcut(QString,QString)));
+    connect(dialogFolderShortcut, SIGNAL(shortcutChanged(QString,QString,QString)), folderShortcuts, SLOT(updateShortcut(QString,QString,QString)));
     connect(dialogFolderShortcut, SIGNAL(editCanceled()), this, SLOT(loadShortcuts()));
     connect(ui->btnDeleteAllThumbnails, SIGNAL(clicked()), this, SIGNAL(deleteAllThumbnails()));
 }

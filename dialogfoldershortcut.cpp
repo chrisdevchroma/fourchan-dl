@@ -59,7 +59,7 @@ void DialogFolderShortcut::checkValues() {
     }
 
     if (ok) {
-        emit shortcutChanged(ui->leShortcutName->text(), ui->leFolder->text());
+        emit shortcutChanged(_originalShortcutName, ui->leShortcutName->text(), ui->leFolder->text());
         accept();
     }
     else {
@@ -80,8 +80,10 @@ void DialogFolderShortcut::edit(QString name) {
     if (folderShortcuts->shortcutExists(name)) {
         ui->leShortcutName->setText(name);
         ui->leFolder->setText(folderShortcuts->getPath(name));
+        _originalShortcutName = name;
     } else {
         clear();
+        _originalShortcutName = "";
     }
 }
 
