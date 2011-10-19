@@ -18,6 +18,8 @@ public:
     ParserPluginInterface* getParser(QUrl, bool*);
     ParserPluginInterface* getPlugin(int);
     ParserPluginInterface* getPlugin(QString);
+    QStringList getSupportedDomains();
+    bool isSupported(QString);
 private:
     QList<ParserPluginInterface*> loadedPlugins;
     QStringList pluginList;

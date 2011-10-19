@@ -36,9 +36,9 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     ui->progressBar->setVisible(false);
     ui->progressBar->setFormat("%p%");
 
-
-    if (clipboard->text().contains("http://boards.4chan.org"))
+    if (QUrl(clipboard->text()).isValid() && pluginManager->isSupported(clipboard->text())) {
         ui->leURI->setText(clipboard->text());
+    }
 
     connect(requestHandler, SIGNAL(responseError(QUrl, int)), this, SLOT(errorHandler(QUrl, int)));
     connect(requestHandler, SIGNAL(response(QUrl, QByteArray)), this, SLOT(processRequestResponse(QUrl, QByteArray)));
@@ -150,11 +150,6 @@ void UIImageOverview::start(void) {
             }
         }
     }
-    else {
-        emit errorMessage("Thread already exists");
-        emit tabTitleChanged(this, "Thread already exists");
-        setStatus("Thread already exists");
-    }
 }
 
 void UIImageOverview::stop(void) {
@@ -220,10 +215,6 @@ void UIImageOverview::addThumbnail(QString filename, QString tnFilename) {
 
     ui->listWidget->addItem(item);
     thumbnailsizeLocked = true;
-}
-
-// Needs new name
-void UIImageOverview::downloadsFinished() {
 }
 
 void UIImageOverview::on_listWidget_customContextMenuRequested(QPoint pos)
@@ -311,40 +302,30 @@ void UIImageOverview::openFile(void) {
 }
 
 void UIImageOverview::errorHandler(QUrl url, int err) {
-//TODO
-    QStringList fileList;
-
     switch (err) {
     case 404:
         // If there are still images in the list, wait until they finished (maybe they still exist)
         // else close immediately
-        if (downloadFinished()) {
+        if (isDownloadFinished()) {
             stop();
 
             setTabTitle("Thread 404'ed");
             emit errorMessage("404 - Page not found");
             emit closeRequest(this, 404);
-
-            // Delete all thumbnails
-            for (int i=0; i<ui->listWidget->count(); i++) {
-                fileList.append(tnt->getCacheFile(
-                                    ui->listWidget->item(i)->text()
-                                    )
-                            );
-            }
-            emit removeFiles(fileList);
         }
         else {
             closeWhenFinished = true;
         }
 
         break;
+
     case 999:
         setTabTitle("Banned");
         emit errorMessage("You are banned");
         break;
 
     default:
+        qDebug() << "Unhandled error (" << url.toString() << "," << err << ")";
         break;
     }
 }
@@ -626,7 +607,7 @@ bool UIImageOverview::getUrlOfFilename(QString filename, QString * url) {
     return ret;
 }
 
-bool UIImageOverview::downloadFinished() {
+bool UIImageOverview::isDownloadFinished() {
     bool ret;
 
     ret = false;
@@ -700,12 +681,13 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
 
     }
     else {
-        if (ba.contains("<title>4chan - Banned</title>"))
-            errorHandler(url, 999);
-        else {
-            setStatus("Parsing");
-            status = iParser->parseHTML(ba);
+        setStatus("Parsing");
+        status = iParser->parseHTML(ba);
 
+        if (status.hasErrors) {
+            qDebug() << iParser->getErrorCode();
+        }
+        else {
             if (status.isFrontpage) {
                 QStringList newTab;
                 QString v;
@@ -729,11 +711,13 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
                             // This path is really relative
                             QString s;
 
-                            s = path.left(path.lastIndexOf("/"));
+                            if (!s.endsWith("/"))
+                                s = path.left(path.lastIndexOf("/"));
+
                             sUrl = QString("%1://%2%3/%4").arg(url.scheme()).
-                                     arg(url.authority()).
-                                     arg(s).
-                                     arg(threadPath);
+                                    arg(url.authority()).
+                                    arg(s).
+                                    arg(threadPath);
                         }
                     }
 
@@ -772,9 +756,8 @@ void UIImageOverview::setCompleted(QString uri, QString filename) {
 
             updateDownloadStatus();
 
-            if (downloadFinished()) {
+            if (isDownloadFinished()) {
                 download(false);
-                downloadsFinished();
             }
         }
     }
@@ -791,10 +774,16 @@ bool UIImageOverview::isImage(QUrl url) {
     return ret;
 }
 
-int UIImageOverview::getNextImage(QString* s) {
+bool UIImageOverview::getNextImage(QString* s) {
     int i;
+    bool ret;
     _IMAGE tmp;
     QFile f;
+    QRegExp rx(__IMAGEFILE_REGEXP__, Qt::CaseInsensitive, QRegExp::RegExp2);
+    QStringList res;
+    int pos;
+
+    ret = false;
 
     if (downloading) {
         for (i=0; i<images.length(); i++) {
@@ -804,10 +793,6 @@ int UIImageOverview::getNextImage(QString* s) {
                 images.replace(i,tmp);
 
                 // Check if file already exists in destination dir
-                QRegExp rx(__IMAGEFILE_REGEXP__, Qt::CaseInsensitive, QRegExp::RegExp2);
-                QStringList res;
-                int pos;
-
                 pos = 0;
 
                 pos = rx.indexIn(tmp.largeURI);
@@ -820,16 +805,20 @@ int UIImageOverview::getNextImage(QString* s) {
                 if (f.exists()) {
                     tmp.downloaded = true;
                     images.replace(i, tmp);
+
+                    createThumbnail(f.fileName());
+                    setCompleted(tmp.largeURI, f.fileName());
                 }
                 else {
                     *s = tmp.largeURI;
-                    return 1;
+                    ret = true;
+                    break;
                 }
             }
         }
     }
 
-    return 0;
+    return ret;
 }
 
 void UIImageOverview::setRescheduleInterval(int i) {
@@ -866,9 +855,8 @@ void UIImageOverview::mergeImageList(QList<_IMAGE> list) {
         download(true);
     }
     else {
-        if (downloadFinished()) {
+        if (isDownloadFinished()) {
             download(false);
-            downloadsFinished();
         }
     }
 
@@ -943,7 +931,7 @@ bool UIImageOverview::addImage(_IMAGE img) {
     return (!alreadyInList && !fileExists);
 }
 
-bool UIImageOverview::checkForExistingThread(QString url) {
+bool UIImageOverview::checkForExistingThread(QString s) {
     bool ret;
 
     ret = mainWindow->threadExists(ui->leURI->text());
@@ -952,6 +940,9 @@ bool UIImageOverview::checkForExistingThread(QString url) {
         ui->lTitle->setText("<span style=\"font-weight:600; color:#ff0000;\">Thread does already exists!</span>");
         ui->lTitle->setTextFormat(Qt::AutoText);
         ui->btnStart->setEnabled(false);
+        setStatus("Thread already exists");
+        emit errorMessage("Thread already exists");
+        emit tabTitleChanged(this, "Thread already exists");
     }
     else {
         ui->btnStart->setEnabled(true);
@@ -967,7 +958,7 @@ void UIImageOverview::updateDownloadStatus() {
     d = getDownloadedImagesCount();
     t = getTotalImagesCount();
 
-    if (!downloadFinished()) {
+    if (!isDownloadFinished()) {
         setTabTitle(QString("%1/%2").arg(d).arg(t));
         setStatus("downloading");
         ui->progressBar->setVisible(true);

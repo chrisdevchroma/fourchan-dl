@@ -71,34 +71,6 @@
     </item>
    </layout>
   </widget>
-  <widget class="QToolBar" name="mainToolBar">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="movable">
-    <bool>true</bool>
-   </property>
-   <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonIconOnly</enum>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>LeftToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-   <addaction name="actionAdd_Tab"/>
-   <addaction name="actionAddMultipleTabs"/>
-   <addaction name="actionTabOverview"/>
-   <addaction name="separator"/>
-   <addaction name="actionHistory"/>
-   <addaction name="separator"/>
-   <addaction name="actionStart_all"/>
-   <addaction name="actionStop_all"/>
-   <addaction name="separator"/>
-   <addaction name="actionOpen_Configuration"/>
-   <addaction name="actionShowInfo"/>
-  </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockWidget">
    <property name="features">

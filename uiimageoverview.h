@@ -54,7 +54,6 @@ public:
 
 private:
     Ui::UIImageOverview *ui;
-//    ThumbnailThread* tnt;
     QTimer* timer;
     QList<int> timeoutValues;
     QList<_IMAGE> images;
@@ -80,9 +79,9 @@ private:
     void createSupervisedDownload(QUrl);
     void removeSupervisedDownload(QUrl);
     bool getUrlOfFilename(QString filename, QString * url);
-    bool downloadFinished();
+    bool isDownloadFinished();
     void deleteAllThumbnails();
-    int getNextImage(QString* s);
+    bool getNextImage(QString* s);
     bool selectParser(QUrl url=QUrl());
     void mergeImageList(QList<_IMAGE> list);
     bool addImage(_IMAGE img);
@@ -92,7 +91,6 @@ private slots:
     void chooseLocation(void);
     void triggerRescan(void);
     void createThumbnail(QString);
-    void downloadsFinished(void);
     void deleteFile(void);
     void reloadFile(void);
     void openFile(void);
@@ -114,13 +112,13 @@ private slots:
     void processRequestResponse(QUrl url, QByteArray ba);
     void setCompleted(QString uri, QString filename);
     bool isImage(QUrl);
-    bool checkForExistingThread(QString);
     void updateDownloadStatus();
 
 public slots:
     void addThumbnail(QString, QString);
     void start(void);
     void stop(void);
+    bool checkForExistingThread(QString s="");
 
 signals:
     void finished(void);

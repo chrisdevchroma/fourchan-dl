@@ -120,3 +120,32 @@ component_information PluginManager::getInfo(QString name) {
 
     return ret;
 }
+
+QStringList PluginManager::getSupportedDomains() {
+    QStringList ret;
+
+    for (int i=0; i<loadedPlugins.count(); i++) {
+        ret << loadedPlugins.at(i)->getDomain();
+    }
+
+    return ret;
+}
+
+bool PluginManager::isSupported(QString domain) {
+    bool ret;
+    QStringList supported;
+
+    ret = false;
+
+    supported = getSupportedDomains();
+
+    foreach (QString sd, supported) {
+        if (domain.contains(sd)) {
+            ret = true;
+
+            break;
+        }
+    }
+
+    return ret;
+}

@@ -53,43 +53,50 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
     i.requested = false;
     pageIsFrontpage = false;
 
-    while (pos > -1) {
-        pos = boardPage.indexIn(html, pos+1);
-        res = boardPage.capturedTexts();
-
-        if (res.at(1) != "") {
-            pageIsFrontpage=true;
-            _urlList << QUrl("res/"+res.at(1));
-            _statusCode.isFrontpage = true;
-        }
+    if (html.contains("<title>4chan - Banned</title>")) {
+        _statusCode.hasErrors = true;
+        _errorCode = 999;
     }
+    else {
 
-    pos = 0;
-    while (pos > -1) {
-        pos = rx.indexIn(html, pos+1);
-        res = rx.capturedTexts();
-        QUrl temp = QUrl::fromEncoded(res.at(1).toAscii());
+        while (pos > -1) {
+            pos = boardPage.indexIn(html, pos+1);
+            res = boardPage.capturedTexts();
 
-        i.originalFilename = temp.toString();
-        i.largeURI = "http://images.4chan.org/"+res.at(2);
-        i.thumbURI = res.at(3);
-
-        if (pos != -1) {
-            _images.append(i);
-            _statusCode.hasImages = true;
-        }
-    }
-
-    pos = 0;
-    while (pos > -1) {
-        pos = rxTitle.indexIn(html,pos+1);
-        res = rxTitle.capturedTexts();
-
-        if (res.at(1) != "") {
-            _threadTitle = res.at(1);
-            _statusCode.hasTitle = true;
+            if (res.at(1) != "") {
+                pageIsFrontpage=true;
+                _urlList << QUrl("res/"+res.at(1));
+                _statusCode.isFrontpage = true;
+            }
         }
 
+        pos = 0;
+        while (pos > -1) {
+            pos = rx.indexIn(html, pos+1);
+            res = rx.capturedTexts();
+            QUrl temp = QUrl::fromEncoded(res.at(1).toAscii());
+
+            i.originalFilename = temp.toString();
+            i.largeURI = "http://images.4chan.org/"+res.at(2);
+            i.thumbURI = res.at(3);
+
+            if (pos != -1) {
+                _images.append(i);
+                _statusCode.hasImages = true;
+            }
+        }
+
+        pos = 0;
+        while (pos > -1) {
+            pos = rxTitle.indexIn(html,pos+1);
+            res = rxTitle.capturedTexts();
+
+            if (res.at(1) != "") {
+                _threadTitle = res.at(1);
+                _statusCode.hasTitle = true;
+            }
+
+        }
     }
 
     return _statusCode;

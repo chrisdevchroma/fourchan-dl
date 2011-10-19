@@ -88,8 +88,6 @@ MainWindow::MainWindow(QWidget *parent) :
 #else
     createSupervisedDownload(QUrl("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download"));
 #endif
-
-    ui->mainToolBar->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -106,8 +104,6 @@ int MainWindow::addTab() {
     w = new UIImageOverview(this);
     w->setBlackList(blackList);
 
-//    w->setDownloadManager(downloadManager);
-
     ci = ui->tabWidget->addTab(w, "no name");
     if (settings->value("options/remember_directory", false).toBool())
         w->setDirectory(defaultDirectory);
@@ -123,6 +119,7 @@ int MainWindow::addTab() {
     ui->tabWidget->setCurrentIndex(ci);
 
     changeTabTitle(w, "idle");
+    w->checkForExistingThread();
 
     return ci;
 }
@@ -688,6 +685,11 @@ bool MainWindow::checkIfNewerVersion(QString _new, QString _old) {
             ret = true;
             break;
         }
+        else {
+            if (oldVersion.at(i).toInt() > newVersion.value(i).toInt()) {
+                break;
+            }
+        }
     }
 
     return ret;
@@ -720,7 +722,7 @@ void MainWindow::createComponentList() {
     version = settings->value("updater/version", "unknown").toString();
 
     if (version == "unknown" && updaterFileName.contains("upd4t3r")) {
-        // No version informatin in settings fil, but new updater executable present
+        // No version information in settings file, but new updater executable present
         // means a freshly updated system. Assume version 1.1
         version = "1.1";
         settings->setValue("updater/version", version);
