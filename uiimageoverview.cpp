@@ -53,6 +53,8 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(triggerRescan()));
     connect(folderShortcuts, SIGNAL(shortcutsChanged()), this, SLOT(fillShortcutComboBox()));
     connect(ui->cbFolderShortcuts, SIGNAL(currentIndexChanged(QString)), this, SLOT(selectShortcut(QString)));
+    connect(ui->leSavepath, SIGNAL(textChanged(QString)), this, SLOT(checkForFolderShortcut(QString)));
+    connect(ui->btnAddShortcut, SIGNAL(clicked()), this, SLOT(addShortcut()));
 
     // Connections for key bindings
     connect(ui->listWidget, SIGNAL(openItem()), this, SLOT(openFile()));
@@ -544,6 +546,21 @@ void UIImageOverview::fillShortcutComboBox() {
     ui->cbFolderShortcuts->clear();
     ui->cbFolderShortcuts->addItem("-----");
     ui->cbFolderShortcuts->addItems(folderShortcuts->shortcuts());
+}
+
+void UIImageOverview::checkForFolderShortcut(QString s) {
+    if (folderShortcuts->shortcutExists(s)) {
+        ui->btnAddShortcut->setEnabled(false);
+    }
+    else {
+        ui->btnAddShortcut->setEnabled(true);
+    }
+}
+
+void UIImageOverview::addShortcut() {
+    if (!folderShortcuts->shortcutExists(ui->leSavepath->text())) {
+        folderShortcuts->addShortcut(ui->leSavepath->text(), ui->leSavepath->text());
+    }
 }
 
 void UIImageOverview::startDownload(void) {

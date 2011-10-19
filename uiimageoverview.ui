@@ -124,7 +124,7 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
+         <item row="0" column="3">
           <widget class="QPushButton" name="btnChoosePath">
            <property name="toolTip">
             <string>Choose download folder</string>
@@ -138,7 +138,7 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="3">
+         <item row="0" column="4">
           <widget class="QPushButton" name="btnOpenDownloadFolder">
            <property name="toolTip">
             <string>Open download folder</string>
@@ -152,8 +152,19 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="0" column="2">
           <widget class="QComboBox" name="cbFolderShortcuts"/>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="btnAddShortcut">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/add.png</normaloff>:/icons/resources/add.png</iconset>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>

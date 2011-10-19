@@ -105,6 +105,8 @@ private slots:
     void selectShortcutIndex(int idx);
     void selectShortcut(QString name);
     void fillShortcutComboBox();
+    void checkForFolderShortcut(QString s);
+    void addShortcut();
 
     void startDownload(void);
     void stopDownload(void);
