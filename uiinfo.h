@@ -31,6 +31,7 @@ private:
 
 private slots:
     void updateStatistics();
+    void updateDebugInformation();
 
 signals:
 };

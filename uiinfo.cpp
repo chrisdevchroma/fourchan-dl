@@ -20,6 +20,7 @@ UIInfo::UIInfo(QWidget *parent) :
     ui->label_2->setText(text);
 
     connect(timer, SIGNAL(timeout()), this, SLOT(updateStatistics()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateDebugInformation()));
 }
 
 void UIInfo::setCurrentVersion(QString s) {
@@ -42,6 +43,17 @@ void UIInfo::updateStatistics() {
     s = QString("You have downloaded\n%1 files\n%2 MB").arg(files).arg(kbyte/1024);
 
     ui->lStatistics->setText(s);
+}
+
+void UIInfo::updateDebugInformation() {
+    QString str;
+
+    str = QString("Pending requests: %1<br />" \
+                  "Running requests: %2")
+            .arg(downloadManager->getPendingRequests())
+            .arg(downloadManager->getRunningRequests());
+
+    ui->lDebugInformation->setText(str);
 }
 
 void UIInfo::loadComponentInfo(QMap<QString, component_information> components) {

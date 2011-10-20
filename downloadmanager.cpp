@@ -417,3 +417,11 @@ void DownloadManager::setupNetworkAccessManagers(int count) {
         connect(nams.last(), SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     }
 }
+
+int DownloadManager::getPendingRequests() {
+    return priorities.count();
+}
+
+int DownloadManager::getRunningRequests() {
+    return activeReplies.count();
+}

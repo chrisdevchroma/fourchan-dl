@@ -24,6 +24,8 @@ public:
     void removeRequest(qint64);
     qint64 requestDownload(RequestHandler* caller, QUrl url, int prio=0);
     void getStatistics(int* files, float* kbytes);
+    int getPendingRequests();
+    int getRunningRequests();
 
 private:
     QList<NetworkAccessManager*> nams;
