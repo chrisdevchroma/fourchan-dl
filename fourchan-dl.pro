@@ -77,11 +77,3 @@ OTHER_FILES += \
     readme.txt \
     settings.ini \
     fourchan-dl.rc
-
-
-
-
-
-
-
-
