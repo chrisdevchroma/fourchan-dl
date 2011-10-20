@@ -37,6 +37,9 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
     bool pageIsFrontpage;
     int pos;
     _IMAGE i;
+    QUrl u;
+    QString sUrl;
+    QString boardName;
 
     _html = html;
     _images.clear();
@@ -58,18 +61,38 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
         _errorCode = 999;
     }
     else {
-
+        // CHecking for Thread Links
         while (pos > -1) {
             pos = boardPage.indexIn(html, pos+1);
             res = boardPage.capturedTexts();
 
             if (res.at(1) != "") {
                 pageIsFrontpage=true;
-                _urlList << QUrl("res/"+res.at(1));
+                u.setUrl(QString("res/%1").arg(res.at(1)));
+
+                // build complete url
+                boardName = _url.path().section("/", 1, 1);
+
+                if (u.isRelative()) {
+                    sUrl = "";
+                    if (u.path().startsWith("/")) {
+                        // We need to complete only the host
+                        sUrl = QString("%1/%2").arg(_url.host()).arg(u.path());
+                    }
+                    else if (u.path().startsWith("res")) {
+                        sUrl = QString("http://boards.4chan.org/%1/%2").arg(boardName).arg(u.path());
+                    }
+                    else {
+                        qDebug() << "Parsing front page and don't know what to do. Found url" << u.toString();
+                    }
+                }
+
+                _urlList << QUrl(sUrl);
                 _statusCode.isFrontpage = true;
             }
         }
 
+        // Checking for Images
         pos = 0;
         while (pos > -1) {
             pos = rx.indexIn(html, pos+1);
@@ -124,6 +147,10 @@ ParsingStatus Parser4chan::getStatusCode() {
 
 QList<QUrl> Parser4chan::getUrlList() {
     return _urlList;
+}
+
+void Parser4chan::setURL(QUrl url) {
+    _url = url;
 }
 
 Q_EXPORT_PLUGIN2(pParser4chan, Parser4chan);

@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QList>
 #include <QRegExp>
+#include <QtDebug>
 #include "../../ParserPluginInterface.h"
 #include "../../structs.h"
 
@@ -20,6 +21,7 @@ public:
     QString getDomain();
     QString getInterfaceRevision() {return _PARSER_PLUGIN_INTERFACE_REVISION;}
     ParsingStatus parseHTML(QString html);
+    void setURL(QUrl url);
     QString getThreadTitle();
     QList<_IMAGE> getImageList();
     QList<QUrl> getUrlList();
@@ -34,6 +36,7 @@ private:
     QList<_IMAGE> _images;
     QList<QUrl> _urlList;
     QUrl _redirect;
+    QUrl _url;
     ParsingStatus _statusCode;
     int _errorCode;
     QString _threadTitle;

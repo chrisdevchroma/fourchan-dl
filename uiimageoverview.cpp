@@ -117,26 +117,26 @@ void UIImageOverview::start(void) {
             if (dir.exists()) {
                 // Get right parser for this URI
                 if (selectParser()) {
-                ui->leSavepath->setEnabled(false);
-                startDownload();
+                    ui->leSavepath->setEnabled(false);
+                    startDownload();
 
-                ui->btnStart->setEnabled(false);
-                ui->btnStop->setEnabled(true);
-                ui->cbRescan->setEnabled(false);
-                ui->comboBox->setEnabled(false);
-//                ui->progressBar->setEnabled(true);
-                ui->cbOriginalFilename->setEnabled(false);
-                ui->btnChoosePath->setEnabled(false);
-                ui->cbFolderShortcuts->setEnabled(false);
+                    ui->btnStart->setEnabled(false);
+                    ui->btnStop->setEnabled(true);
+                    ui->cbRescan->setEnabled(false);
+                    ui->comboBox->setEnabled(false);
+                    //                ui->progressBar->setEnabled(true);
+                    ui->cbOriginalFilename->setEnabled(false);
+                    ui->btnChoosePath->setEnabled(false);
+                    ui->cbFolderShortcuts->setEnabled(false);
 
-                if (ui->cbRescan->isChecked()) {
-                    timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
+                    if (ui->cbRescan->isChecked()) {
+                        timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
 
-                    timer->start();
-                }
-                // Hide thread settings
-                if ((ui->btnToggleView->isChecked()))
-                    ui->btnToggleView->setChecked(false);
+                        timer->start();
+                    }
+                    // Hide thread settings
+                    if ((ui->btnToggleView->isChecked()))
+                        ui->btnToggleView->setChecked(false);
                 }
                 else {
                     stop();
@@ -306,19 +306,23 @@ void UIImageOverview::openFile(void) {
 void UIImageOverview::errorHandler(QUrl url, int err) {
     switch (err) {
     case 404:
-        // If there are still images in the list, wait until they finished (maybe they still exist)
-        // else close immediately
-        if (isDownloadFinished()) {
-            stop();
-
-            setTabTitle("Thread 404'ed");
-            emit errorMessage("404 - Page not found");
-            emit closeRequest(this, 404);
+        if (isImage(url)) {
+            setCompleted(url.toString(), "");
         }
         else {
-            closeWhenFinished = true;
-        }
+            // If there are still images in the list, wait until they finished (maybe they still exist)
+            // else close immediately
+            if (isDownloadFinished()) {
+                stop();
 
+                setTabTitle("Thread 404'ed");
+                emit errorMessage("404 - Page not found");
+                emit closeRequest(this, 404);
+            }
+            else {
+                closeWhenFinished = true;
+            }
+        }
         break;
 
     case 999:
@@ -656,6 +660,8 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
     QList<QUrl>     threadList;
     ParsingStatus   status;
     QString         path;
+    QString         sUrl;
+    QString         boardName;
 
     requestURI = url.toString();
     path = url.path();
@@ -699,6 +705,7 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
     }
     else {
         setStatus("Parsing");
+        iParser->setURL(url);
         status = iParser->parseHTML(ba);
 
         if (status.hasErrors) {
@@ -714,33 +721,9 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
                 threadList = iParser->getUrlList();
 
                 foreach (QUrl u, threadList) {
-                    QString sUrl;
-
-                    if (u.isRelative()) {
-                        QString threadPath;
-
-                        threadPath = u.path();
-                        if (threadPath.startsWith("/")) {
-                            // We need to complete only the host
-                            sUrl = QString("%1/%2").arg(url.host()).arg(threadPath);
-                        }
-                        else {
-                            // This path is really relative
-                            QString s;
-
-                            if (!s.endsWith("/"))
-                                s = path.left(path.lastIndexOf("/"));
-
-                            sUrl = QString("%1://%2%3/%4").arg(url.scheme()).
-                                    arg(url.authority()).
-                                    arg(s).
-                                    arg(threadPath);
-                        }
-                    }
-
-                    newTab.replace(0, sUrl);
+                    newTab.replace(0, u.toString());
                     emit createTabRequest(newTab.join(";;"));
-                    qDebug() << sUrl;
+                    qDebug() << u.toString();
                 }
 
                 emit closeRequest(this, 0);

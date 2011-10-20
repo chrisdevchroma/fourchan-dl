@@ -38,6 +38,9 @@ ParsingStatus Parser2chan::parseHTML(QString html) {
     int pos;
     _IMAGE i;
     QString tempFilename;
+    QUrl u;
+    QString sUrl;
+    QString boardName;
 
     _html = html;
     _images.clear();
@@ -60,6 +63,26 @@ ParsingStatus Parser2chan::parseHTML(QString html) {
 
         if (res.at(1) != "") {
             pageIsFrontpage=true;
+
+            u.setUrl(QString("res/%1").arg(res.at(1)));
+
+            // build complete url
+            boardName = _url.path().section("/", 1, 1);
+
+            if (u.isRelative()) {
+                sUrl = "";
+                if (u.path().startsWith("/")) {
+                    // We need to complete only the host
+                    sUrl = QString("%1/%2").arg(_url.host()).arg(u.path());
+                }
+                else if (u.path().startsWith("res")) {
+                    sUrl = QString("http://boards.2chan.net/%1/%2").arg(boardName).arg(u.path());
+                }
+                else {
+                    qDebug() << "Parsing front page and don't know what to do. Found url" << u.toString();
+                }
+            }
+
             _urlList << QUrl("res/"+res.at(1));
             _statusCode.isFrontpage = true;
         }
@@ -119,6 +142,10 @@ ParsingStatus Parser2chan::getStatusCode() {
 
 QList<QUrl> Parser2chan::getUrlList() {
     return _urlList;
+}
+
+void Parser2chan::setURL(QUrl url) {
+    _url = url;
 }
 
 Q_EXPORT_PLUGIN2(pParser2chan, Parser2chan)

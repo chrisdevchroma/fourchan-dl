@@ -17,6 +17,7 @@ public:
     virtual QString getInterfaceRevision() = 0;
 
     virtual ParsingStatus parseHTML(QString html) = 0;
+    virtual void setURL(QUrl url) = 0;
     virtual QList<_IMAGE> getImageList() = 0;
     virtual QList<QUrl> getUrlList() = 0;
     virtual QUrl getRedirectURL() = 0;
