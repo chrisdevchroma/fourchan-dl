@@ -4,7 +4,7 @@
 #include <QUrl>
 #include "structs.h"
 
-#define _PARSER_PLUGIN_INTERFACE_REVISION "1.0"
+#define _PARSER_PLUGIN_INTERFACE_REVISION "1.1"
 
 class ParserPluginInterface
 {
