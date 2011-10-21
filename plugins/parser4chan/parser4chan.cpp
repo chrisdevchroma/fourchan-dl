@@ -13,7 +13,7 @@ Parser4chan::Parser4chan()
 }
 
 QString Parser4chan::getAuthor() {
-    return "";
+    return "Florian Born";
 }
 
 QString Parser4chan::getPluginName() {

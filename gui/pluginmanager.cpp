@@ -12,8 +12,6 @@ void PluginManager::loadPlugins(void)
     component_information c;
 #ifdef __DEBUG__
 #if defined(Q_OS_WIN)
-    if (pluginDir.dirName().toLower() == "debug"
-            || pluginDir.dirName().toLower() == "release")
         pluginDir.cdUp();
 #elif defined(Q_OS_MAC)
     if (pluginDir.dirName() == "MacOS") {
@@ -38,17 +36,22 @@ void PluginManager::loadPlugins(void)
             if (ParserPluginInterface* interface =
                     qobject_cast<ParserPluginInterface *>(loader.instance()))
             {
-                c.componentName = interface->getPluginName();
-                c.filename = fileName;
-                c.type = "plugin/parser";
-                c.version = interface->getVersion();
+                if (interface->getInterfaceRevision() == _PARSER_PLUGIN_INTERFACE_REVISION) {
+                    c.componentName = interface->getPluginName();
+                    c.filename = fileName;
+                    c.type = "plugin/parser";
+                    c.version = interface->getVersion();
 
-                components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
-                str.append(interface->getPluginName());
-                str.append(";;;");
-                str.append(fileName);
-                pluginList.append(str);
-                loadedPlugins.append(interface);
+                    components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+                    str.append(interface->getPluginName());
+                    str.append(";;;");
+                    str.append(fileName);
+                    pluginList.append(str);
+                    loadedPlugins.append(interface);
+                }
+                else {
+                    qDebug() << "Skipping plugin, because it has the wrong interface revision";
+                }
             }
             else {
                  qDebug() << "error loading lib" << loader.errorString();

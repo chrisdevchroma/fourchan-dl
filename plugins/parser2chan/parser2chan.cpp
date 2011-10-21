@@ -13,7 +13,7 @@ Parser2chan::Parser2chan()
 }
 
 QString Parser2chan::getAuthor() {
-    return "";
+    return "Florian Born";
 }
 
 QString Parser2chan::getPluginName() {
