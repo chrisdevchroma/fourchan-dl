@@ -1,4 +1,4 @@
 TEMPLATE      = subdirs
 SUBDIRS       = \
-                Parser2chan \
-                Parser4chan
+                parser2chan \
+                parser4chan
