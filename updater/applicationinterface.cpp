@@ -3,13 +3,13 @@
 ApplicationInterface::ApplicationInterface(QObject *parent) :
     QObject(parent)
 {
-    output = new QTextStream(stdout);
     udpSocket = new QUdpSocket(this);
     timer = new QTimer();
     timer->setSingleShot(true);
     timeout = new QTimer();
     timeout->setSingleShot(true);
-    varConnected = false;
+    _connected = false;
+    _updateFinished = true;
 
     connect(udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
     connect(timer, SIGNAL(timeout()), this, SLOT(timerTrigger()));
@@ -33,13 +33,14 @@ void ApplicationInterface::timerTrigger(void) {
 void ApplicationInterface::p(QString msg) {
     *output << "ApplicationInterface: " << msg << endl;
     output->flush();
+    *foutput << "ApplicationInterface: " << msg << endl;
+    foutput->flush();
 }
 
 void ApplicationInterface::timeoutOccured() {
-    if (varConnected)
-        p("Not connected");
+    if (_connected) p("Not connected");
 
-    varConnected = false;
+    _connected = false;
 
     timer->start(PING_INTERVAL);
 
@@ -68,8 +69,8 @@ void ApplicationInterface::processCommand(QByteArray a) {
     command = a.at(0);
     payload = a.mid(1);
 
-    if (command != PONG)
-        p("Received: "+QString::number(command)+":"+QString(payload));
+//    if (command != PONG)
+//        p("Received: "+QString::number(command)+":"+QString(payload));
 
     switch (command) {
     case PING:
@@ -78,11 +79,16 @@ void ApplicationInterface::processCommand(QByteArray a) {
 
     case PONG:
         if (pinging) {
-            if (!varConnected) {
+            if (!_connected) {
                 p("Connected");
+                _connected = true;
+
+                sendFailedFiles();
             }
 
-            varConnected = true;
+            if (_updateFinished) {
+                udpSocket->writeDatagram(createCommand(UPDATE_FINISHED), QHostAddress(HOST_ADDRESS), APPLICATION_PORT);
+            }
 
             pinging = false;
             timeout->stop();
@@ -96,7 +102,7 @@ void ApplicationInterface::processCommand(QByteArray a) {
         break;
 
     case CLEAR:
-        if (varConnected) {
+        if (_connected) {
             fu.filename = "";
             fu.uri = "";
             updateList.clear();
@@ -104,7 +110,7 @@ void ApplicationInterface::processCommand(QByteArray a) {
         break;
 
     case ADD_SET:
-        if (varConnected) {
+        if (_connected) {
             updateList.append(fu);
             fu.filename = "";
             fu.uri = "";
@@ -112,31 +118,31 @@ void ApplicationInterface::processCommand(QByteArray a) {
         break;
 
     case SET_TARGET:
-        if (varConnected) {
+        if (_connected) {
             fu.filename = QString(payload);
         }
         break;
 
     case SET_URI:
-        if (varConnected) {
+        if (_connected) {
             fu.uri = QString(payload);
         }
         break;
 
     case SET_EXE:
-        if (varConnected) {
+        if (_connected) {
             emit executableChanged(QString(payload));
         }
         break;
 
     case START:
-        if (varConnected) {
+        if (_connected) {
             emit startUpdate(updateList);
         }
         break;
 
     case CLOSE_REQUEST:
-        if (varConnected) {
+        if (_connected) {
             p("Received close request");
             emit close();
         }
@@ -145,6 +151,11 @@ void ApplicationInterface::processCommand(QByteArray a) {
     case DISPLAY_MSG:
         p(QString(payload));
         break;
+
+    case GET_VERSION:
+        udpSocket->writeDatagram(createCommand(VERSION, QString(PROGRAM_VERSION)), QHostAddress(HOST_ADDRESS), APPLICATION_PORT);
+        break;
+
     case STOP:
     default:
         p("Received unknown/unhandled command");
@@ -165,4 +176,32 @@ void ApplicationInterface::sendMessage(QString s) {
 
 void ApplicationInterface::sendError(QString s) {
     udpSocket->writeDatagram(createCommand(ERROR, s), QHostAddress(HOST_ADDRESS), APPLICATION_PORT);
+}
+
+void ApplicationInterface::setFailedFiles(QList<FileUpdate> l) {
+    failedFiles = l;
+
+    if (_connected) sendFailedFiles();
+
+    if (failedFiles.count() > 0)
+        p("Some files failed");
+}
+
+void ApplicationInterface::sendFailedFiles() {
+    if (_connected && (failedFiles.count() > 0)) {
+        udpSocket->writeDatagram(createCommand(CLEAR), QHostAddress(HOST_ADDRESS), APPLICATION_PORT);
+
+        for (int i=0; i<failedFiles.count(); i++) {
+            udpSocket->writeDatagram(createCommand(SET_URI, failedFiles.at(i).tmpFilename), QHostAddress(HOST_ADDRESS), APPLICATION_PORT);
+            udpSocket->writeDatagram(createCommand(SET_TARGET, failedFiles.at(i).filename), QHostAddress(HOST_ADDRESS), APPLICATION_PORT);
+            udpSocket->writeDatagram(createCommand(ADD_SET), QHostAddress(HOST_ADDRESS), APPLICATION_PORT);
+        }
+        failedFiles.clear();
+
+        p("Transmitted failed files to main application");
+    }
+}
+
+void ApplicationInterface::setUpdateFinished(bool b) {
+    _updateFinished = b;
 }

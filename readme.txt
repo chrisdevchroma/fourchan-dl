@@ -6,6 +6,9 @@ As of version 0.9.6 each release is tested under Windows 7 professional (amd64) 
 When building from source make sure that you copy the "au" executable into the same folder as "fourchan-dl".
 
 Release notes
+Version 1.3.0
+* Realized that one QNetworkAccessManager only opens up to 5 HTTP requests. If mor simultaneous requests are desired an appropriate number of AccessManagers are created
+
 
 Version 1.2.0
 * Added folder shortcuts - They can be defined in the options dialog

@@ -6,20 +6,24 @@
 #include <QTextStream>
 #include "types.h"
 
+extern QTextStream* output;
+extern QTextStream* foutput;
+
 class FileHandler : public QObject
 {
     Q_OBJECT
 public:
     explicit FileHandler(QObject *parent = 0);
+    QList<FileUpdate> getFailedFiles() {return failedFiles;}
 
 private:
     QList<FileUpdate> updateList;
-    QTextStream* output;
+    QList<FileUpdate> failedFiles;
 
     void p(QString);
 
 signals:
-    void exchangingFinished();
+    void exchangingFinished(bool);
     void error(QString);
 
 public slots:

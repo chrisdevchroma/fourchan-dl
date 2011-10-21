@@ -3,7 +3,6 @@
 DownloadManager::DownloadManager(QObject *parent) :
     QObject(parent)
 {
-    output = new QTextStream(stdout);
     manager = new QNetworkAccessManager();
     cookies = new QNetworkCookieJar();
     manager->setCookieJar(cookies);
@@ -20,7 +19,7 @@ void DownloadManager::replyFinished(QNetworkReply* r) {
     QFile f;
 
     if (r->bytesAvailable() < r->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
-        p(QString("Received only partial data of %1. Reinitiating download.").arg(r->url().toString()));
+//        p(QString("Received only partial data of %1. Reinitiating download.").arg(r->url().toString()));
 
         manager->get(QNetworkRequest(r->url()));
         r->deleteLater();
@@ -29,17 +28,8 @@ void DownloadManager::replyFinished(QNetworkReply* r) {
         if (r->isFinished()) {
             QString mimeType;
             QString redirectTo;
-            QList<QByteArray> bal;
-
-            bal = r->rawHeaderList();
-            qDebug() << "rawHeader: " << bal;
-
-            foreach (QByteArray ba, bal) {
-                qDebug() << QString(ba) << ":"<< r->rawHeader(ba);
-            }
 
             redirectTo = r->header(QNetworkRequest::LocationHeader).toString();
-            qDebug() << redirectTo;
             mimeType = r->header(QNetworkRequest::ContentTypeHeader).toString();
             requestURI = r->request().url().toString();
 
@@ -134,4 +124,6 @@ void DownloadManager::replyError(QNetworkReply::NetworkError e) {
 void DownloadManager::p(QString msg) {
     *output << "DownloadManager: " << msg << endl;
     output->flush();
+    *foutput << "DownloadManager: " << msg << endl;
+    foutput->flush();
 }

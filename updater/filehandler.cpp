@@ -3,15 +3,17 @@
 FileHandler::FileHandler(QObject *parent) :
     QObject(parent)
 {
-    output = new QTextStream(stdout);
 }
 
 void FileHandler::startExchange(QList<FileUpdate> l) {
-    updateList = l;
-
     bool filesRemaining;
+    bool errors;
     QString sourceFilename;
     QString targetFilename;
+    FileUpdate fu;
+
+    updateList = l;
+    errors = false;
 
     filesRemaining = false;
 
@@ -29,15 +31,27 @@ void FileHandler::startExchange(QList<FileUpdate> l) {
 
         source.open(QIODevice::ReadWrite);
 
-        if (target.exists())
+        if (target.exists()) {
             if  (!target.remove()) {
                 p("Cannot remove "+targetFilename);
                 error("Cannot remove "+targetFilename+" ("+target.errorString()+")");
+
+                fu.tmpFilename = sourceFilename;
+                fu.filename = targetFilename;
+                failedFiles.append(fu);
+                errors = true;
             }
+        }
 
         if (!source.rename(targetFilename)) {
             p("Could not rename "+sourceFilename+" to "+targetFilename);
             error("Could not rename "+sourceFilename+" to "+targetFilename+" ("+target.errorString()+")");
+
+            fu.tmpFilename = sourceFilename;
+            fu.filename = targetFilename;
+            failedFiles.append(fu);
+
+            errors = true;
         }
 
 #ifdef Q_OS_LINUX
@@ -47,11 +61,15 @@ void FileHandler::startExchange(QList<FileUpdate> l) {
 
     }
 
+    if (errors) p("Rename had errors");
+
     p("Updating finished - If this window doesn't close it save to close it manually.");
-    emit exchangingFinished();
+    emit exchangingFinished(errors);
 }
 
 void FileHandler::p(QString msg) {
     *output << "FileHandler: " << msg << endl;
     output->flush();
+    *foutput << "FileHandler: " << msg << endl;
+    foutput->flush();
 }

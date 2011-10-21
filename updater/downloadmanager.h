@@ -6,6 +6,9 @@
 #include <QRegExp>
 #include "types.h"
 
+extern QTextStream* output;
+extern QTextStream* foutput;
+
 class DownloadManager : public QObject
 {
     Q_OBJECT
@@ -20,7 +23,6 @@ private:
     QNetworkAccessManager* manager;
     QNetworkCookieJar* cookies;
     QList<FileUpdate> updateList;
-    QTextStream* output;
 
     void p(QString);
     void initiateDownload();

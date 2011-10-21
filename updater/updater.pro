@@ -7,7 +7,7 @@
 QT       += core network
 QT       -= gui
 
-TARGET = au
+TARGET = upd4t3r
 CONFIG   += console qt
 CONFIG   -= app_bundle
 
@@ -37,3 +37,5 @@ RESOURCES += \
 
 OTHER_FILES += \
     updater.rc
+
+DEFINES += PROGRAM_VERSION="\\\"1.1\\\""

@@ -7,6 +7,9 @@
 #include "filehandler.h"
 #include "types.h"
 
+extern QTextStream* output;
+extern QTextStream* foutput;
+
 class Updater : public QObject
 {
     Q_OBJECT
@@ -16,7 +19,6 @@ private:
     ApplicationInterface* ai;
     DownloadManager* dm;
     FileHandler* fh;
-    QTextStream* output;
     bool finishedDownload;
     bool exchanging;
     bool updateFinished;
@@ -36,7 +38,7 @@ private slots:
     void startUpdate(QList<FileUpdate>);
     void downloadFinished(QList<FileUpdate>);
     void startExchange(bool);
-    void exchangeFinished();
+    void exchangeFinished(bool);
     void setExecutable(QString);
     void closeRequested();
 
