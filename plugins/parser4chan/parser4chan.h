@@ -1,13 +1,12 @@
 #ifndef PARSER4CHAN_H
 #define PARSER4CHAN_H
 
-//#include "4chanParser_global.h"
 #include <QStringList>
 #include <QList>
 #include <QRegExp>
 #include <QtDebug>
-#include "../../ParserPluginInterface.h"
-#include "../../structs.h"
+#include "../../gui/ParserPluginInterface.h"
+#include "../../gui/structs.h"
 
 class Parser4chan : public QObject, public ParserPluginInterface {
     Q_OBJECT

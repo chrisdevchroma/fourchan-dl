@@ -1,13 +1,12 @@
 #ifndef Parser2chan_H
 #define Parser2chan_H
 
-//#include "parser2chan_global.h"
 #include <QStringList>
 #include <QList>
 #include <QRegExp>
 #include <QtDebug>
-#include "../../ParserPluginInterface.h"
-#include "../../structs.h"
+#include "../../gui/ParserPluginInterface.h"
+#include "../../gui/structs.h"
 
 class Parser2chan : public QObject, public ParserPluginInterface {
     Q_OBJECT
