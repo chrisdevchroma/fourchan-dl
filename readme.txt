@@ -1,14 +1,24 @@
-Current version 1.2.0
-
 If you find bugs and/or have feature requests, please use the tracking system provided by sourceforge.
 
 As of version 0.9.6 each release is tested under Windows 7 professional (amd64) and Xubuntu 10.10 (amd64).
-When building from source make sure that you copy the "au" executable into the same folder as "fourchan-dl".
+
+When updating from 1.2.0 to 1.3.0 please close the updater executable manually.
 
 Release notes
-Version 1.3.0
-* Realized that one QNetworkAccessManager only opens up to 5 HTTP requests. If mor simultaneous requests are desired an appropriate number of AccessManagers are created
+Version 1.3.1
+* Added checkbox to prevent closing of overview threads (e. g. boards.4chan.org/wg/2). -> Download ALL the 4chan!
+* Hopefully fixed bug #3434272
+* Added fancy progress bar for Win7 users
 
+Version 1.3.0
+* Realised that one QNetworkAccessManager only opens up to 5 HTTP requests. If more simultaneous requests are desired an appropriate number of AccessManagers are created
+* Added a plugin system to support others chans than 4chan
+* Added plugin for 4chan
+* Added plugin for 2chan (not thoroughly tested, because my japanese is not existent)
+* The update files are now available from sourceforge in the webupdate folder
+* The Qt system files can be updated
+* Fixed issue that download stalls with one missing file
+* Program menu is (nearly) back to the old version
 
 Version 1.2.0
 * Added folder shortcuts - They can be defined in the options dialog

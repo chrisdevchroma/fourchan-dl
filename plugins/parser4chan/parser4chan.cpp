@@ -153,4 +153,4 @@ void Parser4chan::setURL(QUrl url) {
     _url = url;
 }
 
-Q_EXPORT_PLUGIN2(pParser4chan, Parser4chan);
+Q_EXPORT_PLUGIN2(pParser4chan, Parser4chan)

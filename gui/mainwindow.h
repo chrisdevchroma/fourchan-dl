@@ -10,6 +10,7 @@
 #include "uiinfo.h"
 #include "uiconfig.h"
 #include "applicationupdateinterface.h"
+#include "ecwin7.h"
 #include "defines.h"
 #include "blacklist.h"
 #include "thumbnailremoverthread.h"
@@ -59,6 +60,7 @@ private:
     QMap<QString, component_information> components;
     QList<QString> updateableComponents;
     bool runUpdate;
+    EcWin7 win7;
 
     void restoreWindowSettings(void);
     void updateWidgetSettings(void);
@@ -76,10 +78,12 @@ private:
 
 protected:
     void keyPressEvent(QKeyEvent *event);
+    virtual bool winEvent(MSG *message, long *result);
 
 private slots:
     void saveSettings(void);
     int addTab(void);
+    int addForegroundTab();
     void addMultipleTabs();
     void closeTab(int);
     void displayError(QString);
@@ -104,6 +108,7 @@ private slots:
     void updaterConnected();
     void updateFinished();
     void setUpdaterVersion(QString);
+    void updateDownloadProgress();
 
 signals:
     void removeFiles(QStringList);

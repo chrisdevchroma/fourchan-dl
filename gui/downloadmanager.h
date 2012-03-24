@@ -26,6 +26,10 @@ public:
     void getStatistics(int* files, float* kbytes);
     int getPendingRequests();
     int getRunningRequests();
+    int getTotalRequests();
+    int getFinishedRequests();
+    void pauseDownloads();
+    void resumeDownloads();
 
 private:
     QList<NetworkAccessManager*> nams;
@@ -43,7 +47,7 @@ private:
     int finishedRequests;
     int initialTimeout;
     int runningTimeout;
-    bool serviceAvailable;
+    bool downloadsPaused;
     int statistic_downloadedFiles;
     float statistic_downloadedKBytes;
 
@@ -61,7 +65,6 @@ private slots:
 //    void dlProgress(qint64 b, qint64 t) {/*qDebug() << QString("%1 of %2").arg(b).arg(t);*/}
     void replyError(QNetworkReply::NetworkError e) {qDebug() << "reply error " << e;}
     void downloadTimeout(qint64);
-    void resumeDownloads();
 
 signals:
     void totalRequestsChanged(int);

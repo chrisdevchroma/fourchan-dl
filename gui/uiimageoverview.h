@@ -38,7 +38,7 @@ class UIImageOverview : public QWidget
 public:
     explicit UIImageOverview(QWidget *parent = 0);
     ~UIImageOverview();
-    QString getURI(void);
+    QString getURI();
     QString getTitle();
     QString getStatus();
 

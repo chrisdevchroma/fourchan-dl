@@ -59,6 +59,8 @@ void UIConfig::loadSettings(void) {
     b = settings->value("use_thumbnail_cache",true).toBool();
         ui->cbUseThumbnailCache->setChecked(b);
 
+    ui->cbCloseOverviewThreads->setChecked(settings->value("close_overview_threads", true).toBool());
+
     ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",1).toInt());
     ui->sbRescheduleInterval->setValue(settings->value("reschedule_interval", 60).toInt());
     ui->sbThumbnailHeight->setValue(settings->value("thumbnail_height",200).toInt());
@@ -162,6 +164,9 @@ void UIConfig::accept(void) {
 
         settings->setValue("thumbnail_cache_folder", ui->leThumbnailCacheFolder->text());
         settings->setValue("thumbnail_TTL", ui->sbThumbnailTTL->value());
+
+        settings->setValue("close_overview_threads", ui->cbCloseOverviewThreads->isChecked());
+
     settings->endGroup();
     settings->beginGroup("blacklist");
         if (ui->cbUseBlackList->isChecked())

@@ -6,7 +6,7 @@
 
 QT       += core gui network
 
-TARGET = ../fourchan-dl
+TARGET = ../../fourchan-dl
 TEMPLATE = app
 
 SOURCES += main.cpp\
@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     foldershortcuts.cpp \
     thumbnailview.cpp \
     networkaccessmanager.cpp \
-    pluginmanager.cpp
+    pluginmanager.cpp \
+    ecwin7.cpp
 
 HEADERS  += mainwindow.h \
     uiimageoverview.h \
@@ -53,7 +54,8 @@ HEADERS  += mainwindow.h \
     networkaccessmanager.h \
     pluginmanager.h \
     ParserPluginInterface.h \
-    structs.h
+    structs.h \
+    ecwin7.h
 
 FORMS    += mainwindow.ui \
     uiimageoverview.ui \
@@ -71,7 +73,9 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.3.0\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.3.1\\\""
+
+LIBS += libole32
 
 OTHER_FILES += \
     readme.txt \

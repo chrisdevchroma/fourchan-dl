@@ -26,7 +26,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     // Adding actions to menu bar
-
     ui->menuBar->addAction(ui->actionAdd_Tab);
     ui->menuBar->addAction(ui->actionAddMultipleTabs);
     ui->menuBar->addAction(ui->actionTabOverview);
@@ -69,6 +68,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionStop_all, SIGNAL(triggered()), this, SLOT(stopAll()));
     connect(threadAdder, SIGNAL(addTab(QString)), this, SLOT(createTab(QString)));
     connect(downloadManager, SIGNAL(error(QString)), ui->statusBar, SLOT(showMessage(QString)));
+    connect(downloadManager, SIGNAL(finishedRequestsChanged(int)), this, SLOT(updateDownloadProgress()));
+    connect(downloadManager, SIGNAL(totalRequestsChanged(int)), this, SLOT(updateDownloadProgress()));
 
     connect(overviewUpdateTimer, SIGNAL(timeout()), this, SLOT(overviewTimerTimeout()));
     connect(historyMenu, SIGNAL(triggered(QAction*)), this, SLOT(restoreFromHistory(QAction*)));
@@ -87,6 +88,10 @@ MainWindow::MainWindow(QWidget *parent) :
     createSupervisedDownload(QUrl("file:webupdate.xml"));
 #else
     createSupervisedDownload(QUrl("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download"));
+#endif
+
+#ifdef Q_OS_WIN
+    win7.init(this->winId());
 #endif
 }
 
@@ -116,10 +121,16 @@ int MainWindow::addTab() {
     connect(w, SIGNAL(removeFiles(QStringList)), this, SIGNAL(removeFiles(QStringList)));
     connect(w, SIGNAL(changed()), this, SLOT(scheduleOverviewUpdate()));
 
-    ui->tabWidget->setCurrentIndex(ci);
-
     changeTabTitle(w, "idle");
-    w->checkForExistingThread();
+
+    return ci;
+}
+
+int MainWindow::addForegroundTab() {
+    int ci;
+
+    ci = addTab();
+    ui->tabWidget->setCurrentIndex(ci);
 
     return ci;
 }
@@ -127,11 +138,19 @@ int MainWindow::addTab() {
 void MainWindow::createTab(QString s) {
     int index;
     UIImageOverview* w;
+    QStringList sl;
 
-    index = addTab();
-    w = ((UIImageOverview*)ui->tabWidget->widget(index));
-    w->setValues(s);
-    w->setAttribute(Qt::WA_DeleteOnClose, true);
+    sl = s.split(";;");
+
+    if (!threadExists(sl.at(0))) {
+        index = addTab();
+        w = ((UIImageOverview*)ui->tabWidget->widget(index));
+        w->setValues(s);
+        w->setAttribute(Qt::WA_DeleteOnClose, true);
+    }
+    else {
+        qDebug() << "Prevented opening of thread" << sl.at(0) << "because it's already open.";
+    }
 }
 
 void MainWindow::closeTab(int i) {
@@ -532,7 +551,7 @@ bool MainWindow::threadExists(QString url) {
             count++;
     }
 
-    if (count > 1)      // Check if url was found more than 1 time, because requesting thread is also counted
+    if (count > 0)
         ret = true;
 
     return ret;
@@ -721,7 +740,7 @@ void MainWindow::createComponentList() {
     c.type = "executable";
     version = settings->value("updater/version", "unknown").toString();
 
-    if (version == "unknown" && updaterFileName.contains("upd4t3r")) {
+    if (version == "unknown" && c.filename.contains("upd4t3r")) {
         // No version information in settings file, but new updater executable present
         // means a freshly updated system. Assume version 1.1
         version = "1.1";
@@ -794,4 +813,27 @@ QList<component_information> MainWindow::getComponents() {
 
 void MainWindow::setUpdaterVersion(QString v) {
     settings->setValue("updater/version", v);
+}
+
+void MainWindow::updateDownloadProgress() {
+#ifdef Q_OS_WIN
+    int total, finished;
+
+    total = downloadManager->getTotalRequests();
+    finished = downloadManager->getFinishedRequests();
+
+    if (finished != total || total != 0) {
+        win7.setProgressValue(finished, total);
+        win7.setProgressState(win7.Normal);
+    }
+    else {
+        win7.setProgressState(win7.NoProgress);
+    }
+
+#endif
+}
+
+bool MainWindow::winEvent(MSG *message, long *result)
+{
+    return win7.winEvent(message, result);
 }

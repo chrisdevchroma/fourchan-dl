@@ -3,14 +3,8 @@
 #define MAX_CONCURRENT_DOWNLOADS_PER_NAM 5
 
 DownloadManager::DownloadManager(QObject *parent) :
-//    QThread(parent)
     QObject(parent)
 {
-/*
-}
-
-void DownloadManager::run() {
-*/
     nams.clear();
     nams.append(new NetworkAccessManager(this));    // Add at least one AccessManager
     settings = new QSettings("settings.ini", QSettings::IniFormat);
@@ -30,12 +24,10 @@ void DownloadManager::run() {
     statistic_downloadedKBytes = 0;
 
     loadSettings();
-    serviceAvailable = true;
+    downloadsPaused = false;
 
     connect(nams.at(0), SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     connect(waitTimer, SIGNAL(timeout()), this, SLOT(resumeDownloads()));
-
-//    exec();
 }
 
 void DownloadManager::loadSettings() {
@@ -117,8 +109,8 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
     reply->deleteLater();
 
     if (activeReplies.count() > (maxRequests+10)) {
-        qDebug() << "There are more active requests than allowed. Setting service to unavailable";
-        serviceAvailable = false;
+        qDebug() << "There are more active requests than allowed. Pausing downloads.";
+        pauseDownloads();
 
         foreach (QNetworkReply* r, activeReplies) {
             r->abort();
@@ -173,6 +165,8 @@ qint64 DownloadManager::requestDownload(RequestHandler* caller, QUrl url, int pr
 
     processRequests();
 
+    emit totalRequestsChanged(++totalRequests);
+
     return uid;
 }
 
@@ -200,7 +194,7 @@ void DownloadManager::downloadTimeout(qint64 uid) {
 void DownloadManager::processRequests() {
     QList<qint64> uids;
 
-    if (serviceAvailable) {
+    if (!downloadsPaused) {
 
         //    uids = requestList.keys();
         uids = priorities.values();
@@ -222,14 +216,20 @@ void DownloadManager::processRequests() {
             }
         }
         else {
-            // This should not happen but if there are no (more) priorities set for some downloads, reset them
             if (requestList.count() > 0) {
+                // This should not happen but if there are no (more) priorities set for some downloads, reset them
                 uids = requestList.keys();
                 foreach(qint64 uid, uids) {
                     priorities.insertMulti(uid, 0);
                 }
 
                 processRequests();
+            }
+            else {
+                // We are finished
+                totalRequests = 0;
+                finishedRequests = 0;
+                emit totalRequestsChanged(totalRequests);
             }
         }
     }
@@ -244,7 +244,7 @@ void DownloadManager::startRequest(qint64 uid) {
 
     dr = requestList.value(uid, 0);
 
-    if (dr != 0 && serviceAvailable) {
+    if (dr != 0 && !downloadsPaused) {
         dr->setProcessing(true);
         sup = new SupervisedNetworkReply();
         sup->setTimeouts(initialTimeout, runningTimeout);
@@ -289,7 +289,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
         qDebug() << "Service unavailable";
         emit error("Service unavailable");
         // Pause downloading to let the server relax
-        serviceAvailable = false;
+        pauseDownloads();
         // Abort all downloads
         foreach (QNetworkReply* r, activeReplies) {
             r->abort();
@@ -359,9 +359,9 @@ void DownloadManager::reschedule(qint64 uid) {
 void DownloadManager::resumeDownloads() {
     QList<qint64> uids;
 
-    qDebug() << "rechecking service status";
+    //qDebug() << "rechecking service status";
     // Start only one request to check if service is available again
-    serviceAvailable = true;
+    downloadsPaused = false;
     uids = priorities.values();
 
     foreach (qint64 uid, uids) {
@@ -424,4 +424,16 @@ int DownloadManager::getPendingRequests() {
 
 int DownloadManager::getRunningRequests() {
     return activeReplies.count();
+}
+
+int DownloadManager::getTotalRequests() {
+    return totalRequests;
+}
+
+int DownloadManager::getFinishedRequests() {
+    return finishedRequests;
+}
+
+void DownloadManager::pauseDownloads() {
+    downloadsPaused = true;
 }

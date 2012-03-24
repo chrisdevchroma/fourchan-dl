@@ -279,22 +279,6 @@
  </resources>
  <connections>
   <connection>
-   <sender>actionAdd_Tab</sender>
-   <signal>triggered()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>addTab()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>269</x>
-     <y>304</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>actionShowInfo</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
@@ -406,6 +390,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAdd_Tab</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>addForegroundTab()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>304</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addTab()</slot>
@@ -415,5 +415,6 @@
   <slot>addMultipleTabs()</slot>
   <slot>showTab(QTreeWidgetItem*,int)</slot>
   <slot>debugButton()</slot>
+  <slot>addForegroundTab()</slot>
  </slots>
 </ui>

@@ -30,6 +30,8 @@ int main(int argc, char *argv[])
     checkEnvironment();
 
     downloadManager = new DownloadManager();
+    downloadManager->pauseDownloads();  // Do not download anything until we are fully set
+
     tnt = new ThumbnailThread();
     tnt->start(QThread::NormalPriority);
 
@@ -40,6 +42,8 @@ int main(int argc, char *argv[])
     mainWindow = new MainWindow();
     mainWindow->show();
     mainWindow->restoreTabs();
+
+    downloadManager->resumeDownloads();
 
     a.connect(&a, SIGNAL(lastWindowClosed()), mainWindow, SLOT(saveSettings()));
 

@@ -33,14 +33,27 @@ void UIInfo::setCurrentVersion(QString s) {
 
 void UIInfo::updateStatistics() {
     QString s;
-    int files;
+    QStringList sizePostfix;
+    int files, idx;
     float kbyte;
+
+    sizePostfix << "KB" << "MB" << "GB" << "TB";
 
     files = 0;
     kbyte = 0;
 
     downloadManager->getStatistics(&files, &kbyte);
-    s = QString("You have downloaded\n%1 files\n%2 MB").arg(files).arg(kbyte/1024);
+
+    for (idx=0; idx<sizePostfix.size(); idx++) {
+        if (kbyte>1024.0) {
+            kbyte /= 1024.0;
+        }
+        else {
+            break;
+        }
+    }
+
+    s = QString("You have downloaded\n%1 files\n%2 %3").arg(files).arg(kbyte).arg(sizePostfix.value(idx));
 
     ui->lStatistics->setText(s);
 }

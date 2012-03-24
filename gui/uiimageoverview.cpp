@@ -92,8 +92,8 @@ void UIImageOverview::start(void) {
     QString savepath;
 
     // Check if Thread already exists
-    if (!(mainWindow->threadExists(ui->leURI->text())))
-    {
+//    if (!(mainWindow->threadExists(ui->leURI->text())))
+//    {
         running = true;
         setStatus("Running");
         if (ui->leURI->text() != "") {
@@ -151,7 +151,7 @@ void UIImageOverview::start(void) {
                 setStatus("Directory does not exist / Could not be created");
             }
         }
-    }
+//    }
 }
 
 void UIImageOverview::stop(void) {
@@ -660,8 +660,6 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
     QList<QUrl>     threadList;
     ParsingStatus   status;
     QString         path;
-    QString         sUrl;
-    QString         boardName;
 
     requestURI = url.toString();
     path = url.path();
@@ -726,7 +724,9 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
                     qDebug() << u.toString();
                 }
 
-                emit closeRequest(this, 0);
+                if (settings->value("options/close_overview_threads", true).toBool()) {
+                    emit closeRequest(this, 0);
+                }
             }
             else {
                 if (status.hasImages) {
@@ -922,7 +922,7 @@ bool UIImageOverview::addImage(_IMAGE img) {
 
             images.append(img);
 
-            if (fileExists) {
+            if (fileExists && img.savedAs != "") {
                 createThumbnail(f.fileName());
             }
         }
@@ -934,6 +934,8 @@ bool UIImageOverview::addImage(_IMAGE img) {
 bool UIImageOverview::checkForExistingThread(QString s) {
     bool ret;
 
+    ret = false;
+/*
     ret = mainWindow->threadExists(ui->leURI->text());
 
     if (ret) {
@@ -948,7 +950,7 @@ bool UIImageOverview::checkForExistingThread(QString s) {
         ui->btnStart->setEnabled(true);
         ui->lTitle->setText("");
     }
-
+*/
     return ret;
 }
 
