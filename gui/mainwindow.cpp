@@ -833,7 +833,9 @@ void MainWindow::updateDownloadProgress() {
 #endif
 }
 
+#ifdef Q_OS_WIN
 bool MainWindow::winEvent(MSG *message, long *result)
 {
     return win7.winEvent(message, result);
 }
+#endif

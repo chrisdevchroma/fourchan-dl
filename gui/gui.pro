@@ -6,7 +6,9 @@
 
 QT       += core gui network
 
-TARGET = ../../fourchan-dl
+TARGET = ../fourchan-dl
+win32:TARGET = ../../fourchan-dl
+
 TEMPLATE = app
 
 SOURCES += main.cpp\
@@ -75,7 +77,7 @@ macx: ICON = resources/fourchan-dl.icns
 BUILDDATE = __DATE__
 DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.3.1\\\""
 
-LIBS += libole32
+win32: LIBS += libole32
 
 OTHER_FILES += \
     readme.txt \

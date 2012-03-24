@@ -29,7 +29,6 @@ public:
     int getTotalRequests();
     int getFinishedRequests();
     void pauseDownloads();
-    void resumeDownloads();
 
 private:
     QList<NetworkAccessManager*> nams;
@@ -72,5 +71,6 @@ signals:
     void error(QString);
 public slots:
     void loadSettings();
+    void resumeDownloads();
 };
 #endif // DOWNLOADMANAGER_H

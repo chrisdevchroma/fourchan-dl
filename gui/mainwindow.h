@@ -78,7 +78,9 @@ private:
 
 protected:
     void keyPressEvent(QKeyEvent *event);
+#ifdef Q_OS_WIN
     virtual bool winEvent(MSG *message, long *result);
+#endif
 
 private slots:
     void saveSettings(void);
