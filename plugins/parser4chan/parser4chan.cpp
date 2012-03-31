@@ -13,7 +13,7 @@ Parser4chan::Parser4chan()
 }
 
 QString Parser4chan::getAuthor() {
-    return "Florian Born";
+    return "Mickey Fenton";
 }
 
 QString Parser4chan::getPluginName() {
@@ -30,7 +30,7 @@ QString Parser4chan::getDomain() {
 
 ParsingStatus Parser4chan::parseHTML(QString html) {
     QStringList res;
-    QRegExp rx("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"http://images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rx("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp boardPage("<a href=\"res/(\\d+)\">Reply</a>", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitle("<span class=\"filetitle\">([^<]+)</span>");
     bool imagesAdded;
@@ -100,8 +100,8 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
             QUrl temp = QUrl::fromEncoded(res.at(1).toAscii());
 
             i.originalFilename = temp.toString();
-            i.largeURI = "http://images.4chan.org/"+res.at(2);
-            i.thumbURI = res.at(3);
+            i.largeURI = "http://images.4chan.org/"+res.at(3);
+            i.thumbURI = res.at(4);
 
             if (pos != -1) {
                 _images.append(i);
