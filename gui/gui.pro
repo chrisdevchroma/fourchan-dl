@@ -6,8 +6,8 @@
 
 QT       += core gui network
 
-TARGET = ../fourchan-dl
 win32:TARGET = ../../fourchan-dl
+else:TARGET = ../fourchan-dl
 
 TEMPLATE = app
 

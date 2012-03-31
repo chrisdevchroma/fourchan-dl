@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent) :
     createComponentList();
 
 #ifdef __DEBUG__
-    createSupervisedDownload(QUrl("file:webupdate.xml"));
+    createSupervisedDownload(QUrl("file:d:/Qt/fourchan-dl/webupdate.xml"));
 #else
     createSupervisedDownload(QUrl("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download"));
 #endif
