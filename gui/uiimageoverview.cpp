@@ -15,6 +15,10 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
 
     ui->setupUi(this);
 
+#ifndef __DEBUG__
+    ui->btnDebug->hide();
+#endif
+
     timer = new QTimer(this);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
 
@@ -296,10 +300,28 @@ void UIImageOverview::reloadFile(void) {
 
 void UIImageOverview::openFile(void) {
     QString filename;
+    QStringList slImageList;
 
     filename = ui->listWidget->currentItem()->text();
     if (filename != "") {
-        QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(filename)));
+        if (settings->value("options/use_internal_viewer", false).toBool()) {
+            for (int i=0; i<images.length(); i++) {
+                if ((images.at(i).downloaded) && !blackList->contains(images.at(i).largeURI)) {
+                    slImageList << images.at(i).savedAs;
+                }
+            }
+            qDebug() << slImageList;
+
+            imageViewer->setImageList(slImageList);
+//            if (ui->listWidget->selectedItems().count() > 0 &&
+//                ui->listWidget->currentItem()->text() != "") {
+                imageViewer->setCurrentImage(ui->listWidget->currentItem()->text());
+//            }
+            imageViewer->show();
+        }
+        else {
+            QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(filename)));
+        }
     }
 }
 
@@ -418,7 +440,20 @@ void UIImageOverview::setValues(QString s) {
 }
 
 void UIImageOverview::debugButton(void) {
-    tnt->createThumbnails();
+    QStringList slImageList;
+
+    for (int i=0; i<images.length(); i++) {
+        if ((images.at(i).downloaded)) {
+            slImageList << images.at(i).savedAs;
+        }
+    }
+    qDebug() << slImageList;
+    imageViewer->setImageList(slImageList);
+    if (ui->listWidget->selectedItems().count() > 0 &&
+        ui->listWidget->currentItem()->text() != "") {
+        imageViewer->setCurrentImage(ui->listWidget->currentItem()->text());
+    }
+    imageViewer->show();
 }
 
 void UIImageOverview::closeEvent(QCloseEvent *event)

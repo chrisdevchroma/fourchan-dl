@@ -7,6 +7,7 @@
 #include "thumbnailthread.h"
 #include "foldershortcuts.h"
 #include "pluginmanager.h"
+#include "uiimageviewer.h"
 
 #if QT_VERSION < 0x040000
  #error "Sorry mate, this application needs Qt4.x.x to run properly."
@@ -18,6 +19,7 @@ FolderShortcuts* folderShortcuts;
 MainWindow* mainWindow;
 PluginManager* pluginManager;
 QString updaterFileName;
+UIImageViewer* imageViewer;
 
 void checkEnvironment();
 
@@ -42,6 +44,8 @@ int main(int argc, char *argv[])
     mainWindow = new MainWindow();
     mainWindow->show();
     mainWindow->restoreTabs();
+
+    imageViewer = new UIImageViewer(mainWindow);
 
     downloadManager->resumeDownloads();
 

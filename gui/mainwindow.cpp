@@ -299,6 +299,8 @@ void MainWindow::saveSettings(void) {
     settings->endGroup();
 
     settings->sync();
+
+    imageViewer->saveSettings();
 }
 
 void MainWindow::loadOptions(void) {

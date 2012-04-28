@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     thumbnailview.cpp \
     networkaccessmanager.cpp \
     pluginmanager.cpp \
-    ecwin7.cpp
+    ecwin7.cpp \
+    uiimageviewer.cpp
 
 HEADERS  += mainwindow.h \
     uiimageoverview.h \
@@ -57,7 +58,8 @@ HEADERS  += mainwindow.h \
     pluginmanager.h \
     ParserPluginInterface.h \
     structs.h \
-    ecwin7.h
+    ecwin7.h \
+    uiimageviewer.h
 
 FORMS    += mainwindow.ui \
     uiimageoverview.ui \
@@ -65,7 +67,8 @@ FORMS    += mainwindow.ui \
     uiconfig.ui \
     uilisteditor.ui \
     uithreadadder.ui \
-    dialogfoldershortcut.ui
+    dialogfoldershortcut.ui \
+    uiimageviewer.ui
 
 RESOURCES += \
     resources.qrc
@@ -75,7 +78,7 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.3.1\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.4.experimental\\\""
 
 win32: LIBS += libole32
 

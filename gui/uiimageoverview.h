@@ -18,6 +18,7 @@
 #include "foldershortcuts.h"
 #include "pluginmanager.h"
 #include "requesthandler.h"
+#include "uiimageviewer.h"
 
 class ThumbnailThread;
 class MainWindow;
@@ -26,6 +27,7 @@ extern ThumbnailThread* tnt;
 extern FolderShortcuts* folderShortcuts;
 extern MainWindow* mainWindow;
 extern PluginManager* pluginManager;
+extern UIImageViewer* imageViewer;
 
 namespace Ui {
     class UIImageOverview;

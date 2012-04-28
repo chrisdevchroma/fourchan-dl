@@ -65,7 +65,7 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QFrame" name="frame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -101,10 +101,17 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0" colspan="2">
+         <item row="2" column="0" colspan="2">
           <widget class="QLabel" name="lTitle">
            <property name="text">
             <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="btnDebug">
+           <property name="text">
+            <string>DEBUG</string>
            </property>
           </widget>
          </item>
@@ -213,7 +220,7 @@
      </layout>
     </widget>
    </item>
-   <item row="2" column="0">
+   <item row="3" column="0">
     <widget class="ThumbnailView" name="listWidget">
      <property name="contextMenuPolicy">
       <enum>Qt::CustomContextMenu</enum>
@@ -256,7 +263,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0">
+   <item row="4" column="0">
     <widget class="QProgressBar" name="progressBar">
      <property name="enabled">
       <bool>true</bool>
@@ -368,7 +375,7 @@
    <slot>chooseLocation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>406</x>
+     <x>325</x>
      <y>179</y>
     </hint>
     <hint type="destinationlabel">
@@ -384,7 +391,7 @@
    <slot>openURI()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>440</x>
+     <x>359</x>
      <y>97</y>
     </hint>
     <hint type="destinationlabel">
@@ -400,7 +407,7 @@
    <slot>openDownloadFolder()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>440</x>
+     <x>359</x>
      <y>179</y>
     </hint>
     <hint type="destinationlabel">
@@ -438,6 +445,22 @@
     <hint type="destinationlabel">
      <x>234</x>
      <y>337</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnDebug</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>debugButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>423</x>
+     <y>232</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>465</x>
+     <y>252</y>
     </hint>
    </hints>
   </connection>

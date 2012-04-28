@@ -60,6 +60,7 @@ void UIConfig::loadSettings(void) {
         ui->cbUseThumbnailCache->setChecked(b);
 
     ui->cbCloseOverviewThreads->setChecked(settings->value("close_overview_threads", true).toBool());
+    ui->cbUseInternalViewer->setChecked(settings->value("use_internal_viewer", false).toBool());
 
     ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",1).toInt());
     ui->sbRescheduleInterval->setValue(settings->value("reschedule_interval", 60).toInt());
@@ -166,7 +167,7 @@ void UIConfig::accept(void) {
         settings->setValue("thumbnail_TTL", ui->sbThumbnailTTL->value());
 
         settings->setValue("close_overview_threads", ui->cbCloseOverviewThreads->isChecked());
-
+        settings->setValue("use_internal_viewer", ui->cbUseInternalViewer->isChecked());
     settings->endGroup();
     settings->beginGroup("blacklist");
         if (ui->cbUseBlackList->isChecked())
