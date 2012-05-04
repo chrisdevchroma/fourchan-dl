@@ -10,7 +10,17 @@ void PluginManager::loadPlugins(void)
 {
     QDir pluginDir(QApplication::applicationDirPath());
     component_information c;
-
+#ifdef __DEBUG__
+#if defined(Q_OS_WIN)
+//        pluginDir.cdUp();
+#elif defined(Q_OS_MAC)
+    if (pluginDir.dirName() == "MacOS") {
+        pluginDir.cdUp();
+        pluginDir.cdUp();
+        pluginDir.cdUp();
+    }
+#endif
+#endif
     if (!pluginDir.cd("plugins")) {
          qDebug() << "Plugin directory not found: " << pluginDir.path();
     }
