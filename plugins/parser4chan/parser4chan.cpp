@@ -30,9 +30,13 @@ QString Parser4chan::getDomain() {
 
 ParsingStatus Parser4chan::parseHTML(QString html) {
     QStringList res;
-    QRegExp rx("<span class=\"fileText\">[^<]*<a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)</a>[^<]*<span title=\"([^\"]+)\">[^<]+</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
-    QRegExp boardPage("<div class=\"thread\" id=\"t([^\"]+)\">", Qt::CaseSensitive, QRegExp::RegExp2);
-    QRegExp rxTitle("<span class=\"subject\">([^<]+)</span>");
+    QRegExp rxImagesNew("<span class=\"fileText\">[^<]*<a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)</a>[^<]*<span title=\"([^\"]+)\">[^<]+</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rxThreadsNew("<div class=\"thread\" id=\"t([^\"]+)\">", Qt::CaseSensitive, QRegExp::RegExp2);
+    QRegExp rxTitleNew("<span class=\"subject\">([^<]+)</span>");
+    QRegExp rxImagesOld("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rxThreadsOld("<a href=\"res/(\\d+)\">Reply</a>", Qt::CaseSensitive, QRegExp::RegExp2);
+    QRegExp rxTitleOld("<span class=\"filetitle\">([^<]+)</span>");
+
     bool imagesAdded;
     bool pageIsFrontpage;
     int pos;
@@ -61,11 +65,77 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
         _errorCode = 999;
     }
     else {
-        // Check if this is a thread overview
-        if (html.count("<div class=\"thread\"") > 1) {
+        if (html.contains("<div class=\"board\">")) {
+            // Page is using the new html
+            // Check if this is a thread overview
+            if (html.count("<div class=\"thread\"") > 1) {
+                while (pos > -1) {
+                    pos = rxThreadsNew.indexIn(html, pos+1);
+                    res = rxThreadsNew.capturedTexts();
+
+                    if (res.at(1) != "") {
+                        pageIsFrontpage=true;
+                        u.setUrl(QString("res/%1").arg(res.at(1)));
+
+                        // build complete url
+                        boardName = _url.path().section("/", 1, 1);
+
+                        if (u.isRelative()) {
+                            sUrl = "";
+                            if (u.path().startsWith("/")) {
+                                // We need to complete only the host
+                                sUrl = QString("%1/%2").arg(_url.host()).arg(u.path());
+                            }
+                            else if (u.path().startsWith("res")) {
+                                sUrl = QString("http://boards.4chan.org/%1/%2").arg(boardName).arg(u.path());
+                            }
+                            else {
+                                qDebug() << "Parsing front page and don't know what to do. Found url" << u.toString();
+                            }
+                        }
+
+                        _urlList << QUrl(sUrl);
+                        _statusCode.isFrontpage = true;
+                    }
+                }
+            }
+            else {
+                // Checking for Images
+                pos = 0;
+                while (pos > -1) {
+                    pos = rxImagesNew.indexIn(html, pos+1);
+                    res = rxImagesNew.capturedTexts();
+
+                    i.originalFilename = res.at(3);
+                    i.largeURI = "http://images.4chan.org/"+res.at(2);
+                    i.thumbURI = "";
+
+                    if (pos != -1) {
+                        _images.append(i);
+                        _statusCode.hasImages = true;
+                    }
+                }
+
+                pos = 0;
+                while (pos > -1) {
+                    pos = rxTitleNew.indexIn(html,pos+1);
+                    res = rxTitleNew.capturedTexts();
+
+                    if (res.at(1) != "") {
+                        _threadTitle = res.at(1);
+                        _statusCode.hasTitle = true;
+                        pos = -1;
+                    }
+                }
+            }
+        }
+        else {
+            //Page is using the old html
+
+            // CHecking for Thread Links
             while (pos > -1) {
-                pos = boardPage.indexIn(html, pos+1);
-                res = boardPage.capturedTexts();
+                pos = rxThreadsOld.indexIn(html, pos+1);
+                res = rxThreadsOld.capturedTexts();
 
                 if (res.at(1) != "") {
                     pageIsFrontpage=true;
@@ -92,17 +162,17 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                     _statusCode.isFrontpage = true;
                 }
             }
-        }
-        else {
+
             // Checking for Images
             pos = 0;
             while (pos > -1) {
-                pos = rx.indexIn(html, pos+1);
-                res = rx.capturedTexts();
+                pos = rxImagesOld.indexIn(html, pos+1);
+                res = rxImagesOld.capturedTexts();
+                QUrl temp = QUrl::fromEncoded(res.at(1).toAscii());
 
-                i.originalFilename = res.at(3);
-                i.largeURI = "http://images.4chan.org/"+res.at(2);
-                i.thumbURI = "";
+                i.originalFilename = temp.toString();
+                i.largeURI = "http://images.4chan.org/"+res.at(3);
+                i.thumbURI = res.at(4);
 
                 if (pos != -1) {
                     _images.append(i);
@@ -112,14 +182,14 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
 
             pos = 0;
             while (pos > -1) {
-                pos = rxTitle.indexIn(html,pos+1);
-                res = rxTitle.capturedTexts();
+                pos = rxTitleOld.indexIn(html,pos+1);
+                res = rxTitleOld.capturedTexts();
 
                 if (res.at(1) != "") {
                     _threadTitle = res.at(1);
                     _statusCode.hasTitle = true;
-                    pos = -1;
                 }
+
             }
         }
     }
