@@ -30,7 +30,7 @@ QString Parser4chan::getDomain() {
 
 ParsingStatus Parser4chan::parseHTML(QString html) {
     QStringList res;
-    QRegExp rxImagesNew("<span class=\"fileText\">[^<]*<a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)</a>[^<]*<span title=\"([^\"]+)\">[^<]+</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rxImagesNew("<span class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)</a>[^<]*<span title=\"([^\"]+)\">[^<]+</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rxThreadsNew("<div class=\"thread\" id=\"t([^\"]+)\">", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitleNew("<span class=\"subject\">([^<]+)</span>");
     QRegExp rxImagesOld("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
