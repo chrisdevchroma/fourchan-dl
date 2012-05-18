@@ -64,6 +64,7 @@ void UIImageViewer::loadImage(int i) {
         filename = imagesToDisplay.value(i);
 
         if (f.exists(filename)) {
+            ui->statusbar->showMessage("Working...");
             if (p.load(filename)) {
                 originalPixmap = p;
                 transformPixmap();
