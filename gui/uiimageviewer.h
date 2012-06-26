@@ -7,6 +7,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QSettings>
+#include <QMovie>
 
 namespace Ui {
 class UIImageViewer;

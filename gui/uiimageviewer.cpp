@@ -57,6 +57,8 @@ void UIImageViewer::loadImage(int i) {
     QPixmap p;
     QString filename;
 
+    if (!this->isVisible()) show();
+
     qDebug() << "Loading image " << currentImage << "from" << imagesToDisplay.count();
     rotation = 0;
 
@@ -65,15 +67,26 @@ void UIImageViewer::loadImage(int i) {
 
         if (f.exists(filename)) {
             ui->statusbar->showMessage("Working...");
-            if (p.load(filename)) {
-                originalPixmap = p;
-                transformPixmap();
-                fitImage();
-                ui->statusbar->showMessage("Loaded image" + filename, 2000);
-                ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
+            if (ui->image->movie() != 0) ui->image->movie()->stop();
+
+            if (filename.endsWith(".gif")) {
+                // Always assume gifs are animated -> therefore use QMovie for playback
+                QMovie *movie = new QMovie(filename);
+                ui->image->setMovie(movie);
+                movie->start();
+                ui->statusbar->clearMessage();
             }
             else {
-                qDebug() << "Error loading image" << filename;
+                if (p.load(filename)) {
+                    originalPixmap = p;
+                    transformPixmap();
+                    fitImage();
+                    ui->statusbar->showMessage("Loaded image" + filename, 2000);
+                    ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
+                }
+                else {
+                    qDebug() << "Error loading image" << filename;
+                }
             }
         }
     }
@@ -99,12 +112,12 @@ void UIImageViewer::setCurrentImage(QString filename) {
 void UIImageViewer::fitImage() {
     QPixmap p;
 
-    p = QPixmap(1,1);
+    p = QPixmap(2,2);
     ui->image->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     ui->image->setPixmap(p);
 //    ui->image->repaint();
 //    ui->scrollArea->ensureWidgetVisible(ui->image);
-//    qDebug() << "\nScrollWidgetSize: " << ui->scrollArea->size() << "\npixmapSize: "<<originalPixmap.size();
+    qDebug() << "\nScrollWidgetSize: " << ui->scrollArea->size() << "\npixmapSize: "<<originalPixmap.size();
 
     if (ui->btnFitImage->isChecked()) {
         //ui->image->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

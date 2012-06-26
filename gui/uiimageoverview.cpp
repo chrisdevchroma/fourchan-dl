@@ -310,14 +310,8 @@ void UIImageOverview::openFile(void) {
                     slImageList << images.at(i).savedAs;
                 }
             }
-            qDebug() << slImageList;
-
             imageViewer->setImageList(slImageList);
-//            if (ui->listWidget->selectedItems().count() > 0 &&
-//                ui->listWidget->currentItem()->text() != "") {
-                imageViewer->setCurrentImage(ui->listWidget->currentItem()->text());
-//            }
-            imageViewer->show();
+            imageViewer->setCurrentImage(ui->listWidget->currentItem()->text());
         }
         else {
             QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(filename)));
