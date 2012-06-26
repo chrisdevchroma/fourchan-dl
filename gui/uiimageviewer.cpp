@@ -74,7 +74,8 @@ void UIImageViewer::loadImage(int i) {
                 QMovie *movie = new QMovie(filename);
                 ui->image->setMovie(movie);
                 movie->start();
-                ui->statusbar->clearMessage();
+                ui->statusbar->showMessage("Loaded image" + filename, 2000);
+                ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
             }
             else {
                 if (p.load(filename)) {
