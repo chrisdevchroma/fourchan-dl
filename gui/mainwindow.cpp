@@ -893,7 +893,7 @@ void MainWindow::createTrayIcon() {
 }
 
 void MainWindow::removeTrayIcon() {
-    if (QSystemTrayIcon::isSystemTrayAvailable() && settings->value("options/close_to_tray", false).toBool()) {
+    if (QSystemTrayIcon::isSystemTrayAvailable() && settings->value("options/close_to_tray", false).toBool() && trayIcon) {
         trayIcon->hide();
     }
 }
