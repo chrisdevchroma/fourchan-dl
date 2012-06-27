@@ -95,12 +95,15 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     createTrayIcon();
+
+    autosaveTimer = new QTimer(this);
+    autosaveTimer->setInterval(1000*60*10);     // 10 Minutes
+    autosaveTimer->setSingleShot(false);
+    connect(autosaveTimer, SIGNAL(timeout()), this, SLOT(saveSettings()));
 }
 
 MainWindow::~MainWindow()
 {
-    saveSettings();
-
     delete ui;
 }
 
@@ -130,8 +133,19 @@ int MainWindow::addTab() {
 
 int MainWindow::addForegroundTab() {
     int ci;
+    UIImageOverview* w;
+    QStringList sl;
 
-    ci = addTab();
+    if (threadExists(QApplication::clipboard()->text())) {
+        ci = addTab();
+        w = ((UIImageOverview*)ui->tabWidget->widget(ci));
+        sl = w->getValues().split(";;");
+        sl.replace(0, "");
+        w->setValues(sl.join(";;"));
+    }
+    else {
+        ci = addTab();
+    }
     ui->tabWidget->setCurrentIndex(ci);
 
     return ci;
@@ -546,13 +560,17 @@ void MainWindow::debugButton() {
 bool MainWindow::threadExists(QString url) {
     bool ret;
     int count;
+    QString widgetUri;
 
     ret = false;
     count = 0;
 
     for (int i=0; i<ui->tabWidget->count(); i++) {
-        if (((UIImageOverview*)ui->tabWidget->widget(i))->getURI() == url)
+        widgetUri = ((UIImageOverview*)ui->tabWidget->widget(i))->getURI();
+
+        if ( widgetUri.left(widgetUri.lastIndexOf("#")) == url.left(url.lastIndexOf("#"))) {
             count++;
+        }
     }
 
     if (count > 0)
@@ -871,5 +889,11 @@ void MainWindow::createTrayIcon() {
 
         trayIcon->setIcon(QIcon(":/icons/resources/4chan.ico"));
         trayIcon->show();
+    }
+}
+
+void MainWindow::removeTrayIcon() {
+    if (QSystemTrayIcon::isSystemTrayAvailable() && settings->value("options/close_to_tray", false).toBool()) {
+        trayIcon->hide();
     }
 }

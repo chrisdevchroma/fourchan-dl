@@ -49,7 +49,8 @@ int main(int argc, char *argv[])
 
     downloadManager->resumeDownloads();
 
-    a.connect(&a, SIGNAL(lastWindowClosed()), mainWindow, SLOT(saveSettings()));
+    a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(saveSettings()));
+    a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(removeTrayIcon()));
 
     return a.exec();
 }
