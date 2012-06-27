@@ -93,6 +93,8 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef Q_OS_WIN
     win7.init(this->winId());
 #endif
+
+    createTrayIcon();
 }
 
 MainWindow::~MainWindow()
@@ -841,3 +843,33 @@ bool MainWindow::winEvent(MSG *message, long *result)
     return win7.winEvent(message, result);
 }
 #endif
+
+void MainWindow::createTrayActions()
+{
+    restoreAction = new QAction(tr("&Restore"), this);
+    restoreAction->setIcon(QIcon(":/icons/resources/rotateCW.png"));
+    connect(restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
+
+    quitAction = new QAction(tr("&Quit"), this);
+    quitAction->setIcon(QIcon(":/icons/resources/close.png"));
+    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+}
+
+void MainWindow::createTrayIcon() {
+    if (QSystemTrayIcon::isSystemTrayAvailable() && settings->value("options/close_to_tray", false).toBool()) {
+        createTrayActions();
+
+        trayIconMenu = new QMenu(this);
+        trayIconMenu->addAction(restoreAction);
+        trayIconMenu->addSeparator();
+        trayIconMenu->addAction(quitAction);
+
+        trayIcon = new QSystemTrayIcon(this);
+        trayIcon->setContextMenu(trayIconMenu);
+
+        QApplication::setQuitOnLastWindowClosed(false);
+
+        trayIcon->setIcon(QIcon(":/icons/resources/4chan.ico"));
+        trayIcon->show();
+    }
+}

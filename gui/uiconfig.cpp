@@ -109,6 +109,8 @@ void UIConfig::loadSettings(void) {
     index = ui->cbRescanInterval->findData(settings->value("default_timeout", 0).toInt());
     if (index != -1) ui->cbRescanInterval->setCurrentIndex(index);
     else ui->cbRescanInterval->setCurrentIndex(0);
+
+    ui->cbCloseToTray->setChecked(settings->value("close_to_tray", false).toBool());
     settings->endGroup();
 
     settings->beginGroup("blacklist");
@@ -168,6 +170,7 @@ void UIConfig::accept(void) {
 
         settings->setValue("close_overview_threads", ui->cbCloseOverviewThreads->isChecked());
         settings->setValue("use_internal_viewer", ui->cbUseInternalViewer->isChecked());
+        settings->setValue("close_to_tray", ui->cbCloseToTray->isChecked());
     settings->endGroup();
     settings->beginGroup("blacklist");
         if (ui->cbUseBlackList->isChecked())

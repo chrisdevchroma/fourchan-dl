@@ -6,6 +6,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QTreeWidget>
+#include <QSystemTrayIcon>
 #include "uiimageoverview.h"
 #include "uiinfo.h"
 #include "uiconfig.h"
@@ -75,6 +76,14 @@ private:
 
     void createComponentList();
     void newComponentsAvailable();
+
+    QAction *restoreAction;
+    QAction *quitAction;
+
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayIconMenu;
+    void createTrayActions();
+    void createTrayIcon();
 
 protected:
     void keyPressEvent(QKeyEvent *event);
