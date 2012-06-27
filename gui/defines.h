@@ -11,6 +11,9 @@
 #define UPDATE_TREE     "linux"
 //#define UPDATER_NAME    "au"
 //#define USE_UPDATER
+#else
+#define APP_NAME        ""
+#define UPDATE_TREE     "source"
 #endif
 #endif
 

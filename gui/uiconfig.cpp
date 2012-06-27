@@ -60,6 +60,7 @@ void UIConfig::loadSettings(void) {
         ui->cbUseThumbnailCache->setChecked(b);
 
     ui->cbCloseOverviewThreads->setChecked(settings->value("close_overview_threads", true).toBool());
+    ui->cbUseInternalViewer->setChecked(settings->value("use_internal_viewer", false).toBool());
 
     ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",1).toInt());
     ui->sbRescheduleInterval->setValue(settings->value("reschedule_interval", 60).toInt());
@@ -108,6 +109,8 @@ void UIConfig::loadSettings(void) {
     index = ui->cbRescanInterval->findData(settings->value("default_timeout", 0).toInt());
     if (index != -1) ui->cbRescanInterval->setCurrentIndex(index);
     else ui->cbRescanInterval->setCurrentIndex(0);
+
+    ui->cbCloseToTray->setChecked(settings->value("close_to_tray", false).toBool());
     settings->endGroup();
 
     settings->beginGroup("blacklist");
@@ -166,7 +169,8 @@ void UIConfig::accept(void) {
         settings->setValue("thumbnail_TTL", ui->sbThumbnailTTL->value());
 
         settings->setValue("close_overview_threads", ui->cbCloseOverviewThreads->isChecked());
-
+        settings->setValue("use_internal_viewer", ui->cbUseInternalViewer->isChecked());
+        settings->setValue("close_to_tray", ui->cbCloseToTray->isChecked());
     settings->endGroup();
     settings->beginGroup("blacklist");
         if (ui->cbUseBlackList->isChecked())

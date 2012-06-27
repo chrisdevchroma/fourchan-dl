@@ -24,5 +24,9 @@
         <file>resources/tab-++.png</file>
         <file>resources/dialog-ok.png</file>
         <file>resources/list.png</file>
+        <file>resources/go-next.png</file>
+        <file>resources/go-previous.png</file>
+        <file>resources/fit-image.png</file>
+        <file>resources/rotateCW.png</file>
     </qresource>
 </RCC>

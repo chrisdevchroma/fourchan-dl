@@ -6,6 +6,7 @@
 #include <QSettings>
 #include <QMessageBox>
 #include <QTreeWidget>
+#include <QSystemTrayIcon>
 #include "uiimageoverview.h"
 #include "uiinfo.h"
 #include "uiconfig.h"
@@ -76,6 +77,16 @@ private:
     void createComponentList();
     void newComponentsAvailable();
 
+    QAction *restoreAction;
+    QAction *quitAction;
+
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayIconMenu;
+    void createTrayActions();
+    void createTrayIcon();
+
+    QTimer* autosaveTimer;
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 #ifdef Q_OS_WIN
@@ -84,7 +95,7 @@ protected:
 
 private slots:
     void saveSettings(void);
-    int addTab(void);
+    int addTab();
     int addForegroundTab();
     void addMultipleTabs();
     void closeTab(int);
@@ -111,6 +122,7 @@ private slots:
     void updateFinished();
     void setUpdaterVersion(QString);
     void updateDownloadProgress();
+    void removeTrayIcon();
 
 signals:
     void removeFiles(QStringList);
