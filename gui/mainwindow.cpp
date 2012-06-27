@@ -874,6 +874,8 @@ void MainWindow::createTrayActions()
 }
 
 void MainWindow::createTrayIcon() {
+    trayIcon = new QSystemTrayIcon(this);
+
     if (QSystemTrayIcon::isSystemTrayAvailable() && settings->value("options/close_to_tray", false).toBool()) {
         createTrayActions();
 
@@ -882,7 +884,6 @@ void MainWindow::createTrayIcon() {
         trayIconMenu->addSeparator();
         trayIconMenu->addAction(quitAction);
 
-        trayIcon = new QSystemTrayIcon(this);
         trayIcon->setContextMenu(trayIconMenu);
 
         QApplication::setQuitOnLastWindowClosed(false);
