@@ -25,6 +25,14 @@ UIInfo::UIInfo(QWidget *parent) :
 
     connect(timer, SIGNAL(timeout()), this, SLOT(updateStatistics()));
     connect(timer, SIGNAL(timeout()), this, SLOT(updateDebugInformation()));
+
+    logFile = new QFile();
+    logFile->setFileName("fourchan-dl.log");
+    logFile->open(QIODevice::ReadOnly | QIODevice::Unbuffered | QIODevice::Text);
+
+    if (logFile->isReadable()) {
+        connect(timer, SIGNAL(timeout()), this, SLOT(updateLogFile()));
+    }
 }
 
 void UIInfo::setCurrentVersion(QString s) {
@@ -134,7 +142,17 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
 //    ui->pluginInfo->expandAll();
 }
 
+void UIInfo::updateLogFile() {
+    if (logFile->isReadable()) {
+        while (!logFile->atEnd()) {
+            ui->textEdit->append(QString(logFile->readLine()).simplified());
+        }
+//        ui->textEdit->setText(QString(logFile->readAll()));
+    }
+}
+
 UIInfo::~UIInfo()
 {
+    logFile->close();
     delete ui;
 }

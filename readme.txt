@@ -5,6 +5,11 @@ As of version 0.9.6 each release is tested under Windows 7 professional (amd64) 
 When updating from 1.2.0 to 1.3.0 please close the updater executable manually.
 
 Release notes
+Version 1.4.0
+* Added internal image viewer
+* Added "Close to systray"
+* Added Autosave function (every 10 minutes)
+
 Version 1.3.1
 * Added checkbox to prevent closing of overview threads (e. g. boards.4chan.org/wg/2). -> Download ALL the 4chan!
 * Hopefully fixed bug #3434272

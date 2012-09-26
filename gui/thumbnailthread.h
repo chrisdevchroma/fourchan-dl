@@ -14,6 +14,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include "uiimageoverview.h"
+#include "QsLog.h"
 
 class UIImageOverview;
 

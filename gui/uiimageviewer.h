@@ -8,6 +8,8 @@
 #include <QUrl>
 #include <QSettings>
 #include <QMovie>
+#include <QTimer>
+#include "QsLog.h"
 
 namespace Ui {
 class UIImageViewer;
@@ -33,6 +35,8 @@ private:
     QPixmap transformedPixmap;
     QSettings* settings;
     int rotation;
+    QTimer* slideshowTimer;
+    bool runSlideshow;
 
     void loadImage(int);
     void loadSettings();
@@ -45,6 +49,8 @@ private slots:
     void openWithExternalViewer();
     void rotateCW();
     void rotateCCW();
+    void toggleSlideshow(bool);
+    void setSlideshowTimeout(int);
 
 };
 

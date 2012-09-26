@@ -56,7 +56,7 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
 
     // Search in requestList for this reply
     bal = reply->rawHeaderList();
-//    qDebug() << reply->url().toString() << "rawHeader: " << bal;
+//    QLOG_TRACE() << "DownloadManager :: " << reply->url().toString() << "rawHeader: " << bal;
     replies = activeReplies.values();
     uid = activeReplies.key(reply, -1);
     dr = requestList.value(uid,0);
@@ -65,14 +65,14 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
     supervisors.remove(uid);
     priorities.remove(priorities.key(uid), uid);
 
-//    qDebug() << QTime::currentTime().toString("hh:mm:ss") << "Finished request" << uid << reply->url().toString() << "reply" << (qint64)reply;
+    QLOG_TRACE() << "DownloadManager :: " << "Finished request" << uid << reply->url().toString() << "reply" << (qint64)reply;
 
     if (uid == 0) {
-        qDebug() << "uid 0 finished; url=" << reply->url().toString();
+        QLOG_INFO() << "DownloadManager :: " << "uid 0 finished; url=" << reply->url().toString();
     }
     if (uid != -1) {
         if (reply->bytesAvailable() < reply->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
-            qDebug() << "Received less byte than expected - Possibly because the download timed out";
+            QLOG_WARN() << "DownloadManager :: " << "Received less byte than expected - Possibly because the download timed out";
             reschedule(uid);
         }
         else {
@@ -102,14 +102,14 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
         }
     }
     else {
-        qDebug() << "I did not find the request to the reply!";
+        QLOG_ERROR() << "DownloadManager :: " << "I did not find the request to the reply!";
     }
 
     currentRequests--;
     reply->deleteLater();
 
     if (activeReplies.count() > (maxRequests+10)) {
-        qDebug() << "There are more active requests than allowed. Pausing downloads.";
+        QLOG_WARN() << "DownloadManager :: " << "There are more active requests than allowed. Pausing downloads.";
         pauseDownloads();
 
         foreach (QNetworkReply* r, activeReplies) {
@@ -138,14 +138,14 @@ QByteArray DownloadManager::getByteArray(qint64 uid) {
 void DownloadManager::freeRequest(qint64 uid) {
     DownloadRequest* dr;
     dr = requestList.value(uid, 0);
-//    qDebug() << "freeRequest(" << uid << ")";
+    QLOG_TRACE() << "DownloadManager :: " << "freeRequest(" << uid << ")";
 
     if (dr != 0) {
         dr->deleteLater();
         requestList.remove(uid);
     }
-//    qDebug() << "open requests" << requestList.keys();
-//    qDebug() << "priorities" << priorities;
+//    QLOG_TRACE() << "DownloadManager :: " << "open requests" << requestList.keys();
+//    QLOG_TRACE() << "DownloadManager :: " << "priorities" << priorities;
 }
 
 qint64 DownloadManager::requestDownload(RequestHandler* caller, QUrl url, int prio) {
@@ -186,7 +186,7 @@ void DownloadManager::downloadTimeout(qint64 uid) {
     r = activeReplies.value(uid);
 
     if (r != 0) {
-//        qDebug() << uid << QString(r->readAll());
+//        QLOG_TRACE() << "DownloadManager :: " << uid << QString(r->readAll());
         r->abort();
     }
 }
@@ -209,7 +209,7 @@ void DownloadManager::processRequests() {
                     if (requestList.count(uid)>0) {
                         if (!(requestList.value(uid)->finished()) && !(requestList.value(uid)->processing())) {
                             startRequest(uid);
-//                            qDebug() << "addRequest (" << uid << ")";
+//                            QLOG_TRACE() << "DownloadManager :: " << "addRequest (" << uid << ")";
                         }
                     }
                 }
@@ -261,11 +261,11 @@ void DownloadManager::startRequest(qint64 uid) {
         sup->setNetworkReply(rep, uid);
         supervisors.insert(uid, sup);
 
-//        qDebug() << "Requesting" << uid << ":" << dr->url();// << "with reply" << (qint64)rep;
+//        QLOG_TRACE() << "DownloadManager :: " << "Requesting" << uid << ":" << dr->url();// << "with reply" << (qint64)rep;
         activeReplies.insert(uid, rep);
     }
     else {
-        qDebug() << "Requested start of uid which is non-existent";
+        QLOG_WARN() << "DownloadManager :: " << "Requested start of uid which is non-existent";
     }
 }
 
@@ -273,7 +273,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
     DownloadRequest* dr;
     dr = requestList.value(uid);
 
-    qDebug() << uid << "received error" << r->error() << ":" << r->errorString();
+    QLOG_WARN() << "DownloadManager :: " << uid << "received error" << r->error() << ":" << r->errorString();
 
     switch (r->error()) {
     case 404:
@@ -286,7 +286,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
         break;
 
     case 301:   // Service unavailable
-        qDebug() << "Service unavailable";
+        QLOG_INFO() << "DownloadManager :: " << "Service unavailable";
         emit error("Service unavailable");
         // Pause downloading to let the server relax
         pauseDownloads();
@@ -302,8 +302,8 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
     case 299:
     case 5:         // aborted
     case 2:         // Connection closed
-        //        qDebug() << "response:" << QString(r->readAll());
-        //        qDebug() << "finished:" << r->isFinished();
+        //        QLOG_TRACE() << "DownloadManager :: " << "response:" << QString(r->readAll());
+        //        QLOG_TRACE() << "DownloadManager :: " << "finished:" << r->isFinished();
         reschedule(uid);
 
 //        emit message(QString("Rescheduled %1").arg(r->url().toString()));
@@ -316,14 +316,14 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
         processRequests();
 
     case 3:
-        qDebug() << "Host not found error for URL" << r->url().toString();
+        QLOG_WARN() << "DownloadManager :: " << "Host not found error for URL" << r->url().toString();
         currentRequests--;
         reschedule(uid);    // Try harder
         processRequests();
         break;
 
     default:
-        qDebug() << "Unhandled error " << r->error();
+        QLOG_ERROR() << "DownloadManager :: " << "Unhandled error " << r->error();
 //        r.caller->error(r.uid, 404);
         reschedule(uid);        // Since we don't know what happened, try harder
         currentRequests--;
@@ -337,7 +337,7 @@ void DownloadManager::reschedule(qint64 uid) {
     DownloadRequest* dr;
     int prio;
 
-//    qDebug() << "rescheduling" << uid;
+    QLOG_INFO() << "DownloadManager :: " << "rescheduling" << uid;
     dr = requestList.value(uid,0);
     if (dr != 0) {
         prio = dr->priority();
@@ -346,7 +346,7 @@ void DownloadManager::reschedule(qint64 uid) {
         // "decrease priority for rescheduled downloads"
         priorities.remove(prio, uid);
         prio++;
-        qDebug() << uid << ":" << "setting new priority" << prio;
+        QLOG_INFO() << "DownloadManager :: " << uid << ":" << "setting new priority" << prio;
         dr->setPriority(prio);
         priorities.insertMulti(prio,uid);
 
@@ -359,7 +359,7 @@ void DownloadManager::reschedule(qint64 uid) {
 void DownloadManager::resumeDownloads() {
     QList<qint64> uids;
 
-    //qDebug() << "rechecking service status";
+    QLOG_INFO() << "DownloadManager :: " << "rechecking service status";
     // Start only one request to check if service is available again
     downloadsPaused = false;
     uids = priorities.values();

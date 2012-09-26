@@ -26,11 +26,11 @@ void RequestHandler::request(QUrl u) {
 
     if (downloadManager != 0) {
         uid = downloadManager->requestDownload(this, u, prio);
-//        qDebug() << "Adding request" << uid << ":" << u.toString() << "prio" <<prio;
+//        QLOG_TRACE() << "RequestHandler :: Adding request" << uid << ":" << u.toString() << "prio" <<prio;
         requests.insert(uid, u);
     }
     else {
-        qDebug() << "There is no DownloadManager set - aborting";
+        QLOG_ERROR() << "RequestHandler :: There is no DownloadManager set - aborting";
     }
 }
 

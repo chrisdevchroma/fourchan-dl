@@ -6,6 +6,7 @@
 #include <QtDebug>
 #include <QPluginLoader>
 #include <QDir>
+#include "QsLog.h"
 #include "ParserPluginInterface.h"
 
 class PluginManager : public QObject

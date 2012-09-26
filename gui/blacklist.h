@@ -5,6 +5,7 @@
 #include <QtNetwork>
 #include <QTimer>
 #include <QFile>
+#include "QsLog.h"
 
 class BlackList : public QObject
 {

@@ -109,6 +109,8 @@ private slots:
     void fillShortcutComboBox();
     void checkForFolderShortcut(QString s);
     void addShortcut();
+    void rebuildThumbnails();
+    void reloadThread();
 
     void startDownload(void);
     void stopDownload(void);

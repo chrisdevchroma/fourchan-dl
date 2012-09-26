@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QUrl>
 #include <QtNetwork>
+#include <QFile>
 #include "downloadmanager.h"
 #include "pluginmanager.h"
 
@@ -27,11 +28,13 @@ public:
 private:
     Ui::UIInfo *ui;
     QTimer* timer;
+    QFile* logFile;
 
 
 private slots:
     void updateStatistics();
     void updateDebugInformation();
+    void updateLogFile();
 
 signals:
 };

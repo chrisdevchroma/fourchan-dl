@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QtDebug>
 #include <QTime>
+#include "QsLog.h"
 
 class SupervisedNetworkReply : public QObject
 {

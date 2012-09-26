@@ -17,6 +17,7 @@
 #include "thumbnailremoverthread.h"
 #include "downloadmanager.h"
 #include "uithreadadder.h"
+#include "QsLog.h"
 
 class UIImageOverview;
 
@@ -123,6 +124,7 @@ private slots:
     void setUpdaterVersion(QString);
     void updateDownloadProgress();
     void removeTrayIcon();
+    void trayIconActivated(QSystemTrayIcon::ActivationReason ar);
 
 signals:
     void removeFiles(QStringList);

@@ -9,6 +9,7 @@
 #include <QMessageBox>
 #include "../updater/commands.h"
 #include "defines.h"
+#include "QsLog.h"
 
 class ApplicationUpdateInterface : public QObject
 {

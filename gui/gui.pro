@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network xml
 
 win32:TARGET = ../../fourchan-dl
 else:TARGET = ../fourchan-dl
@@ -72,6 +72,8 @@ FORMS    += mainwindow.ui \
 
 RESOURCES += \
     resources.qrc
+
+include(QsLog.pri)
 
 win32: RC_FILE = fourchan-dl-win.rc
 os2: RC_FILE = fourchan-dl-os2.rc

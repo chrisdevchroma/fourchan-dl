@@ -347,7 +347,7 @@ void UIImageOverview::errorHandler(QUrl url, int err) {
         break;
 
     default:
-        qDebug() << "Unhandled error (" << url.toString() << "," << err << ")";
+        QLOG_ERROR() << "ImageOverview :: Unhandled error (" << url.toString() << "," << err << ")";
         break;
     }
 }
@@ -441,7 +441,7 @@ void UIImageOverview::debugButton(void) {
             slImageList << images.at(i).savedAs;
         }
     }
-    qDebug() << slImageList;
+    QLOG_TRACE() << slImageList;
     imageViewer->setImageList(slImageList);
     if (ui->listWidget->selectedItems().count() > 0 &&
         ui->listWidget->currentItem()->text() != "") {
@@ -736,7 +736,7 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
         status = iParser->parseHTML(ba);
 
         if (status.hasErrors) {
-            qDebug() << iParser->getErrorCode();
+            QLOG_ERROR() << "ImageOverview :: Parser error " << iParser->getErrorCode();
         }
         else {
             if (status.isFrontpage) {
@@ -750,7 +750,6 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
                 foreach (QUrl u, threadList) {
                     newTab.replace(0, u.toString());
                     emit createTabRequest(newTab.join(";;"));
-                    qDebug() << u.toString();
                 }
 
                 if (settings->value("options/close_overview_threads", true).toBool()) {
@@ -765,6 +764,7 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
 
                 if (status.hasTitle) {
                     ui->lTitle->setText(iParser->getThreadTitle());
+                    ui->lTitle2->setText(iParser->getThreadTitle());
                 }
             }
         }
@@ -1008,4 +1008,35 @@ void UIImageOverview::updateDownloadStatus() {
 void UIImageOverview::setStatus(QString s) {
      _status = s;
      emit changed();
+}
+
+void UIImageOverview::rebuildThumbnails() {
+    deleteAllThumbnails();
+    ui->listWidget->clear();
+
+    for (int i=0; i<images.length(); i++) {
+        if (images.at(i).downloaded) {
+            createThumbnail(images.at(i).savedAs);
+        }
+    }
+}
+
+void UIImageOverview::reloadThread() {
+    _IMAGE t;
+    deleteAllThumbnails();
+    ui->listWidget->clear();
+
+    for (int i=0; i<images.length(); i++) {
+        if (images.at(i).downloaded) {
+            t = images.at(i);
+
+            t.downloaded = false;
+            t.requested = false;
+
+            images.replace(i,t);
+            QFile::remove(t.savedAs);
+        }
+    }
+
+    download(true);
 }

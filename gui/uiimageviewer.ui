@@ -179,6 +179,43 @@
        </spacer>
       </item>
       <item>
+       <widget class="QLabel" name="lImageInfo">
+        <property name="text">
+         <string>Image Information</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnSlideshow">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/icons/resources/media-playback-start.png</normaloff>:/icons/resources/media-playback-start.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="sbSlideshowPause">
+        <property name="suffix">
+         <string> seconds</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>99999</number>
+        </property>
+        <property name="value">
+         <number>3</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnOpenWithExternalViewer">
         <property name="toolTip">
          <string>Open with external viewer</string>
@@ -298,6 +335,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btnSlideshow</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>UIImageViewer</receiver>
+   <slot>toggleSlideshow(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>643</x>
+     <y>562</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>631</x>
+     <y>576</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbSlideshowPause</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>UIImageViewer</receiver>
+   <slot>setSlideshowTimeout(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>708</x>
+     <y>557</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>695</x>
+     <y>578</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>displayNextImage()</slot>
@@ -306,5 +375,7 @@
   <slot>openWithExternalViewer()</slot>
   <slot>rotateCW()</slot>
   <slot>rotateCCW()</slot>
+  <slot>toggleSlideshow(bool)</slot>
+  <slot>setSlideshowTimeout(int)</slot>
  </slots>
 </ui>

@@ -2,12 +2,15 @@
 #include <QtDebug>
 #include <QCleanlooksStyle>
 #include <QFile>
+#include <QDateTime>
 #include "mainwindow.h"
 #include "downloadmanager.h"
 #include "thumbnailthread.h"
 #include "foldershortcuts.h"
 #include "pluginmanager.h"
 #include "uiimageviewer.h"
+#include "QsLog.h"
+#include "QsLogDest.h"
 
 #if QT_VERSION < 0x040000
  #error "Sorry mate, this application needs Qt4.x.x to run properly."
@@ -20,6 +23,8 @@ MainWindow* mainWindow;
 PluginManager* pluginManager;
 QString updaterFileName;
 UIImageViewer* imageViewer;
+QFile* fLogFile;
+QTextStream logOutput;
 
 void checkEnvironment();
 
@@ -28,6 +33,24 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     a.setStyle("plastique");
+
+    // init the logging mechanism
+    QsLogging::Logger& logger = QsLogging::Logger::instance();
+    logger.setLoggingLevel(QsLogging::TraceLevel);
+    const QString sLogPath(QDir(a.applicationDirPath()).filePath("fourchan-dl.log"));
+    QsLogging::DestinationPtr fileDestination(
+       QsLogging::DestinationFactory::MakeFileDestination(sLogPath) );
+    QsLogging::DestinationPtr debugDestination(
+       QsLogging::DestinationFactory::MakeDebugOutputDestination() );
+    logger.addDestination(debugDestination.get());
+    logger.addDestination(fileDestination.get());
+#ifdef __DEBUG__
+    logger.setLoggingLevel(QsLogging::TraceLevel);
+#else
+    logger.setLoggingLevel(QsLogging::WarnLevel);
+#endif
+    QLOG_INFO() << "APP :: Program started";
+    QLOG_INFO() << "APP :: Built with Qt" << QT_VERSION_STR << "running on" << qVersion();
 
     checkEnvironment();
 
@@ -72,14 +95,14 @@ void checkEnvironment() {
 
     // Check for updater folders
     if (!updaterDir.exists()) {
-//        qDebug() << "updater directory does not exists. Creating " << QString("%1/updater").arg(dir.absolutePath());
+        QLOG_INFO() << "APP :: updater directory does not exists. Creating " << QString("%1/updater").arg(dir.absolutePath());
         dir.mkdir("updater");
     }
 
     // Check if all files are present
     foreach (QString filename, neededFiles) {
         if (!QFile::exists(QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename))) {
-//            qDebug() << filename << "does not exists - copying from application dir";
+            QLOG_INFO() << "APP :: " << filename << "does not exists - copying from application dir";
             f.copy(QString("%1/%2").arg(dir.absolutePath()).arg(filename), QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename));
         }
     }
@@ -97,12 +120,12 @@ void checkEnvironment() {
         updaterFileName = "updater/au.exe";
     }
     else {
-        qDebug() << "No updater found!";
+        QLOG_WARN() << "APP :: No updater found!";
     }
 
     // Check for plugin folders
     if (!pluginDir.exists()) {
-//        qDebug() << "plugin directory does not exists. Creating " << QString("%1/plugins").arg(dir.absolutePath());
+        QLOG_INFO()  << "APP :: Plugin directory does not exists. Creating " << QString("%1/plugins").arg(dir.absolutePath());
         dir.mkdir("plugins");
     }
 }

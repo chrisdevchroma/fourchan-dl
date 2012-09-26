@@ -11,6 +11,7 @@
 #include <QFileInfoList>
 #include <QtDebug>
 #include <QDateTime>
+#include "QsLog.h"
 
 class ThumbnailRemoverThread : public QThread
 {

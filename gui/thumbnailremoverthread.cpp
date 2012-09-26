@@ -21,8 +21,7 @@ void ThumbnailRemoverThread::run() {
         date = fi.lastModified();
         if (date.addDays(ttl) < QDateTime::currentDateTime()) {
             QFile::remove(fi.absoluteFilePath());
-            qDebug() << "removed " << fi.absoluteFilePath();
-            qDebug() << " because it was created on " << date;
+            QLOG_INFO() << "ThumbnailRemover :: removed " << fi.absoluteFilePath() << " because it was created on " << date;
         }
     }
 }

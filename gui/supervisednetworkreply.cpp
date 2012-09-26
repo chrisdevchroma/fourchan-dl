@@ -32,7 +32,7 @@ void SupervisedNetworkReply::setNetworkReply(QNetworkReply *r, qint64 uid) {
     time.start();
 
     timer->start();
-//    qDebug() << QTime::currentTime() << "Starting timer for " << reply->url().toString();
+//    QLOG_TRACE() << "SupervisedNetworkReply :: " << QTime::currentTime() << "Starting timer for " << reply->url().toString();
 //    this->setParent(reply);
     url = reply->url().toString();
 }
@@ -48,7 +48,7 @@ void SupervisedNetworkReply::removeNetworkReply() {
 }
 
 void SupervisedNetworkReply::monitorDownload(qint64 rec, qint64 tot) {
-//    qDebug() << reply->url().toString() << QString("loaded %1/%2 bytes / internal values %3/%4").arg(rec).arg(tot).arg(received).arg(total);
+//    QLOG_TRACE() << "SupervisedNetworkReply :: " << reply->url().toString() << QString("loaded %1/%2 bytes / internal values %3/%4").arg(rec).arg(tot).arg(received).arg(total);
     if (total == 0) {
         timer->stop();
         timer->setInterval(_runningTimeout);
@@ -70,8 +70,8 @@ void SupervisedNetworkReply::monitorDownload(qint64 rec, qint64 tot) {
 }
 
 void SupervisedNetworkReply::handleTimeout() {
+    QLOG_INFO() << "SupervisedNetworkReply :: " << QTime::currentTime().toString("hh:mm:ss") << _uid << "timed out after" << QString("%1 seconds").arg(time.elapsed()/1000) << "; received" << received << "of" << total << "bytes";
 
-    qDebug() << QTime::currentTime().toString("hh:mm:ss") << _uid << "timed out after" << QString("%1 seconds").arg(time.elapsed()/1000) << "; received" << received << "of" << total << "bytes";
     emit timeout(_uid);
 }
 
