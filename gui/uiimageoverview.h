@@ -87,6 +87,7 @@ private:
     bool selectParser(QUrl url=QUrl());
     void mergeImageList(QList<_IMAGE> list);
     bool addImage(_IMAGE img);
+    QString getSavepath();
 
 private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);

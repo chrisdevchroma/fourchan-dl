@@ -27,6 +27,8 @@ public:
     QUrl getRedirectURL();
     int getErrorCode();
     ParsingStatus getStatusCode();
+    QString parseSavepath(QString s);
+    QMap<QString, QString> getSupportedReplaceCharacters();
 
     QObject* createInstance() {return new Parser2chan();}
 

@@ -50,7 +50,7 @@ void PluginManager::loadPlugins(void)
                     loadedPlugins.append(interface);
                 }
                 else {
-                    QLOG_WARN() << "PluginManager || " << "Skipping plugin, because it has the wrong interface revision";
+                    QLOG_WARN() << "PluginManager || " << "Skipping plugin " << fileName << ", because it has the wrong interface revision";
                 }
             }
             else {

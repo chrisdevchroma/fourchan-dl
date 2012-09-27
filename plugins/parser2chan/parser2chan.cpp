@@ -13,7 +13,7 @@ Parser2chan::Parser2chan()
 }
 
 QString Parser2chan::getAuthor() {
-    return "Florian Born";
+    return "Mickey Fenton";
 }
 
 QString Parser2chan::getPluginName() {
@@ -147,5 +147,20 @@ QList<QUrl> Parser2chan::getUrlList() {
 void Parser2chan::setURL(QUrl url) {
     _url = url;
 }
+
+QString Parser2chan::parseSavepath(QString s) {
+    s.replace("%h", _url.host());
+
+    return s;
+}
+
+QMap<QString, QString> Parser2chan::getSupportedReplaceCharacters() {
+    QMap<QString, QString> ret;
+
+    ret.insert("%h", "Host");
+
+    return ret;
+}
+
 
 Q_EXPORT_PLUGIN2(pParser2chan, Parser2chan)
