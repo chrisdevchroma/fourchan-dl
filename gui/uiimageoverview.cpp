@@ -95,67 +95,67 @@ void UIImageOverview::start(void) {
     QDir dir;
     QString savepath;
 
-    // Check if Thread already exists
-//    if (!(mainWindow->threadExists(ui->leURI->text())))
-//    {
-        running = true;
-        setStatus("Running");
-        if (ui->leURI->text() != "") {
-            ui->leURI->setReadOnly(true);
-//            p->setURI(ui->leURI->text());
-            savepath = ui->leSavepath->text();
+    running = true;
+    setStatus("Running");
+
+    if (ui->leURI->text() != "") {
+        ui->leURI->setReadOnly(true);
+
+        // Check if we can parse this URI
+        if (selectParser()) {
+            savepath = getSavepath();
 
             if (savepath.endsWith("\\")) {
                 savepath.chop(1);
-                ui->leSavepath->setText(savepath);
+                //ui->leSavepath->setText(savepath);
             }
-
+            QLOG_TRACE() << "UIImageOverview :: Setting save path to " << savepath;
             dir.setPath(savepath);
 
             if (!dir.exists()) {
                 QDir d;
 
                 d.mkpath(savepath);
+                QLOG_INFO() << "UIImageOverview :: Directory" << savepath << " does not exist. Creating...";
             }
 
             if (dir.exists()) {
-                // Get right parser for this URI
-                if (selectParser()) {
-                    ui->leSavepath->setEnabled(false);
-                    startDownload();
+                ui->leSavepath->setEnabled(false);
+                startDownload();
 
-                    ui->btnStart->setEnabled(false);
-                    ui->btnStop->setEnabled(true);
-                    ui->cbRescan->setEnabled(false);
-                    ui->comboBox->setEnabled(false);
-                    //                ui->progressBar->setEnabled(true);
-                    ui->cbOriginalFilename->setEnabled(false);
-                    ui->btnChoosePath->setEnabled(false);
-                    ui->cbFolderShortcuts->setEnabled(false);
+                ui->btnStart->setEnabled(false);
+                ui->btnStop->setEnabled(true);
+                ui->cbRescan->setEnabled(false);
+                ui->comboBox->setEnabled(false);
+                //                ui->progressBar->setEnabled(true);
+                ui->cbOriginalFilename->setEnabled(false);
+                ui->btnChoosePath->setEnabled(false);
+                ui->cbFolderShortcuts->setEnabled(false);
 
-                    if (ui->cbRescan->isChecked()) {
-                        timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
+                if (ui->cbRescan->isChecked()) {
+                    timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
 
-                        timer->start();
-                    }
-                    // Hide thread settings
-                    if ((ui->btnToggleView->isChecked()))
-                        ui->btnToggleView->setChecked(false);
+                    timer->start();
                 }
-                else {
-                    stop();
-                    emit errorMessage("Could not find a parser for this URL (" + ui->leURI->text() + ")");
-                    setStatus("No parser available");
-                }
+                // Hide thread settings
+                if ((ui->btnToggleView->isChecked()))
+                    ui->btnToggleView->setChecked(false);
             }
             else
             {
                 stop();
                 emit errorMessage("Directory does not exist / Could not be created");
                 setStatus("Directory does not exist / Could not be created");
+                QLOG_ERROR() << "UIImageOverview :: Directory" << savepath << " does not exist and I couldn't create it.";
             }
         }
-//    }
+        else {
+            stop();
+            emit errorMessage("Could not find a parser for this URL (" + ui->leURI->text() + ")");
+            setStatus("No parser available");
+            QLOG_WARN() << "UIImageOverview :: I couldn't find a parser for uri " << ui->leURI->text();
+        }
+    }
 }
 
 void UIImageOverview::stop(void) {
@@ -347,7 +347,7 @@ void UIImageOverview::errorHandler(QUrl url, int err) {
         break;
 
     default:
-        qDebug() << "Unhandled error (" << url.toString() << "," << err << ")";
+        QLOG_ERROR() << "ImageOverview :: Unhandled error (" << url.toString() << "," << err << ")";
         break;
     }
 }
@@ -441,7 +441,7 @@ void UIImageOverview::debugButton(void) {
             slImageList << images.at(i).savedAs;
         }
     }
-    qDebug() << slImageList;
+    QLOG_TRACE() << slImageList;
     imageViewer->setImageList(slImageList);
     if (ui->listWidget->selectedItems().count() > 0 &&
         ui->listWidget->currentItem()->text() != "") {
@@ -553,7 +553,7 @@ void UIImageOverview::openURI() {
 
 void UIImageOverview::openDownloadFolder() {
     if (!ui->leSavepath->text().isEmpty())
-        QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(ui->leSavepath->text()), QUrl::TolerantMode));
+        QDesktopServices::openUrl(QUrl(QString("file:///%1").arg(getSavepath()), QUrl::TolerantMode));
 }
 
 void UIImageOverview::setBlackList(BlackList *bl) {
@@ -705,7 +705,7 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
         res = rx.capturedTexts();
 
         if (pos != -1) {
-            f.setFileName(ui->leSavepath->text()+"/"+res.at(1)+res.at(2));
+            f.setFileName(getSavepath()+"/"+res.at(1)+res.at(2));
 
             if (ui->cbOriginalFilename->isChecked()) {
                 _IMAGE tmp;
@@ -714,7 +714,7 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
                     if (images.at(i).largeURI.endsWith("/"+res.at(1)+res.at(2))) {
                         tmp = images.at(i);
 
-                        f.setFileName(ui->leSavepath->text()+"/"+tmp.originalFilename);
+                        f.setFileName(getSavepath()+"/"+tmp.originalFilename);
                         break;
                     }
                 }
@@ -736,7 +736,7 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
         status = iParser->parseHTML(ba);
 
         if (status.hasErrors) {
-            qDebug() << iParser->getErrorCode();
+            QLOG_ERROR() << "ImageOverview :: Parser error " << iParser->getErrorCode();
         }
         else {
             if (status.isFrontpage) {
@@ -750,7 +750,6 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
                 foreach (QUrl u, threadList) {
                     newTab.replace(0, u.toString());
                     emit createTabRequest(newTab.join(";;"));
-                    qDebug() << u.toString();
                 }
 
                 if (settings->value("options/close_overview_threads", true).toBool()) {
@@ -765,6 +764,7 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
 
                 if (status.hasTitle) {
                     ui->lTitle->setText(iParser->getThreadTitle());
+                    ui->lTitle2->setText(iParser->getThreadTitle());
                 }
             }
         }
@@ -828,7 +828,7 @@ bool UIImageOverview::getNextImage(QString* s) {
                 res = rx.capturedTexts();
 
                 if (pos != -1) {
-                    f.setFileName(ui->leSavepath->text()+res.at(0));
+                    f.setFileName(getSavepath()+res.at(0));
                 }
 
                 if (f.exists()) {
@@ -865,6 +865,7 @@ bool UIImageOverview::selectParser(QUrl url) {
     if (ret) {
         oParser = tmp->createInstance();
         iParser = qobject_cast<ParserPluginInterface*>(oParser);
+        iParser->setURL(url);
     }
 
     return ret;
@@ -927,7 +928,7 @@ bool UIImageOverview::addImage(_IMAGE img) {
             // Check if already downloaded
             QFile f;
             if (ui->cbOriginalFilename->isChecked())
-                f.setFileName(ui->leSavepath->text()+"/"+img.originalFilename);
+                f.setFileName(getSavepath()+"/"+img.originalFilename);
             else {
                 QRegExp rx(__IMAGEFILE_REGEXP__, Qt::CaseInsensitive, QRegExp::RegExp2);
                 QStringList res;
@@ -939,7 +940,7 @@ bool UIImageOverview::addImage(_IMAGE img) {
                 res = rx.capturedTexts();
 
                 if (pos != -1) {
-                    f.setFileName(ui->leSavepath->text()+"/"+res.at(1)+res.at(2));
+                    f.setFileName(getSavepath()+"/"+res.at(1)+res.at(2));
                 }
             }
 
@@ -1008,4 +1009,49 @@ void UIImageOverview::updateDownloadStatus() {
 void UIImageOverview::setStatus(QString s) {
      _status = s;
      emit changed();
+}
+
+void UIImageOverview::rebuildThumbnails() {
+    deleteAllThumbnails();
+    ui->listWidget->clear();
+
+    for (int i=0; i<images.length(); i++) {
+        if (images.at(i).downloaded) {
+            createThumbnail(images.at(i).savedAs);
+        }
+    }
+}
+
+void UIImageOverview::reloadThread() {
+    _IMAGE t;
+    deleteAllThumbnails();
+    ui->listWidget->clear();
+
+    for (int i=0; i<images.length(); i++) {
+        if (images.at(i).downloaded) {
+            t = images.at(i);
+
+            t.downloaded = false;
+            t.requested = false;
+
+            images.replace(i,t);
+            QFile::remove(t.savedAs);
+        }
+    }
+
+    download(true);
+}
+
+QString UIImageOverview::getSavepath() {
+    QString ret;
+
+    if (iParser) {
+        ret = iParser->parseSavepath(ui->leSavepath->text());
+    }
+    else {
+        QLOG_WARN() << "UIImageOverview :: Called getSavepath() although no parser was loaded.";
+        ret = ui->leSavepath->text();
+    }
+
+    return ret;
 }

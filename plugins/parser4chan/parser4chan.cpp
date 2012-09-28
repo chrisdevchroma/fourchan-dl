@@ -43,7 +43,10 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
     _IMAGE i;
     QUrl u;
     QString sUrl;
+<<<<<<< HEAD
     QString boardName;
+=======
+>>>>>>> 9e5463ac79f209ce668bf4c1704149a9c26b433b
 
     _html = html;
     _images.clear();
@@ -78,7 +81,10 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                         u.setUrl(QString("res/%1").arg(res.at(1)));
 
                         // build complete url
+<<<<<<< HEAD
                         boardName = _url.path().section("/", 1, 1);
+=======
+>>>>>>> 9e5463ac79f209ce668bf4c1704149a9c26b433b
 
                         if (u.isRelative()) {
                             sUrl = "";
@@ -102,6 +108,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
             else {
                 // Checking for Images
                 pos = 0;
+
                 while (pos > -1) {
                     pos = rxImagesNew.indexIn(html, pos+1);
                     res = rxImagesNew.capturedTexts();
@@ -223,6 +230,32 @@ QList<QUrl> Parser4chan::getUrlList() {
 
 void Parser4chan::setURL(QUrl url) {
     _url = url;
+
+    boardName = _url.path().section("/",1,1);
+    if (_url.path().contains("res")) {
+        threadNumber = _url.path().section("/",3,3);
+    }
+    else {
+        threadNumber = "";
+    }
+}
+
+QString Parser4chan::parseSavepath(QString s) {
+    s.replace("%n", threadNumber);
+    s.replace("%b", boardName);
+    s.replace("%h", _url.host());
+
+    return s;
+}
+
+QMap<QString, QString> Parser4chan::getSupportedReplaceCharacters() {
+    QMap<QString, QString> ret;
+
+    ret.insert("%n", "Threadnumber");
+    ret.insert("%b", "Board");
+    ret.insert("%h", "Host");
+
+    return ret;
 }
 
 Q_EXPORT_PLUGIN2(pParser4chan, Parser4chan)

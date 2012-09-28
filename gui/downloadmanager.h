@@ -10,6 +10,7 @@
 #include "supervisednetworkreply.h"
 #include "downloadrequest.h"
 #include "networkaccessmanager.h"
+#include "QsLog.h"
 
 class RequestHandler;
 class DownloadRequest;
@@ -61,8 +62,7 @@ private:
 private slots:
     void replyFinished(QNetworkReply*);
     void startRequest(qint64);
-//    void dlProgress(qint64 b, qint64 t) {/*qDebug() << QString("%1 of %2").arg(b).arg(t);*/}
-    void replyError(QNetworkReply::NetworkError e) {qDebug() << "reply error " << e;}
+    void replyError(QNetworkReply::NetworkError e) {QLOG_ERROR() << "DownloadManager :: reply error " << e;}
     void downloadTimeout(qint64);
 
 signals:

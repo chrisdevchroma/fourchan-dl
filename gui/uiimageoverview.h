@@ -87,6 +87,7 @@ private:
     bool selectParser(QUrl url=QUrl());
     void mergeImageList(QList<_IMAGE> list);
     bool addImage(_IMAGE img);
+    QString getSavepath();
 
 private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);
@@ -109,6 +110,8 @@ private slots:
     void fillShortcutComboBox();
     void checkForFolderShortcut(QString s);
     void addShortcut();
+    void rebuildThumbnails();
+    void reloadThread();
 
     void startDownload(void);
     void stopDownload(void);

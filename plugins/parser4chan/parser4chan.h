@@ -27,11 +27,15 @@ public:
     QUrl getRedirectURL();
     int getErrorCode();
     ParsingStatus getStatusCode();
+    QString parseSavepath(QString s);
+    QMap<QString, QString> getSupportedReplaceCharacters();
 
     QObject* createInstance() {return new Parser4chan();}
 
 private:
     QString _html;
+    QString boardName;
+    QString threadNumber;
     QList<_IMAGE> _images;
     QList<QUrl> _urlList;
     QUrl _redirect;

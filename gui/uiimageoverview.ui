@@ -39,6 +39,16 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="lTitle2">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btnStart">
        <property name="text">
         <string/>
@@ -208,14 +218,59 @@
        </layout>
       </item>
       <item row="3" column="0">
-       <widget class="QCheckBox" name="cbOriginalFilename">
-        <property name="text">
-         <string>Save with original filename</string>
-        </property>
-        <property name="checked">
-         <bool>false</bool>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QCheckBox" name="cbOriginalFilename">
+          <property name="text">
+           <string>Save with original filename</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnReloadThread">
+          <property name="toolTip">
+           <string>Reload thread</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/icons/resources/reload.png</normaloff>:/icons/resources/reload.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnRebuildThumbnails">
+          <property name="toolTip">
+           <string>Rebuild thumbnails</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/icons/resources/rotateCW.png</normaloff>:/icons/resources/rotateCW.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
@@ -327,12 +382,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>60</x>
-     <y>213</y>
+     <x>80</x>
+     <y>243</y>
     </hint>
     <hint type="destinationlabel">
      <x>189</x>
-     <y>214</y>
+     <y>245</y>
     </hint>
    </hints>
   </connection>
@@ -375,8 +430,8 @@
    <slot>chooseLocation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>325</x>
-     <y>179</y>
+     <x>406</x>
+     <y>208</y>
     </hint>
     <hint type="destinationlabel">
      <x>377</x>
@@ -391,7 +446,7 @@
    <slot>openURI()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
+     <x>440</x>
      <y>97</y>
     </hint>
     <hint type="destinationlabel">
@@ -407,8 +462,8 @@
    <slot>openDownloadFolder()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>359</x>
-     <y>179</y>
+     <x>440</x>
+     <y>208</y>
     </hint>
     <hint type="destinationlabel">
      <x>377</x>
@@ -455,12 +510,60 @@
    <slot>debugButton()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>423</x>
-     <y>232</y>
+     <x>406</x>
+     <y>126</y>
     </hint>
     <hint type="destinationlabel">
      <x>465</x>
      <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnRebuildThumbnails</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>rebuildThumbnails()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>438</x>
+     <y>266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnReloadThread</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>reloadThread()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>265</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>465</x>
+     <y>329</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnToggleView</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lTitle2</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>170</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>21</y>
     </hint>
    </hints>
   </connection>
@@ -473,5 +576,7 @@
   <slot>openURI()</slot>
   <slot>openDownloadFolder()</slot>
   <slot>checkForExistingThread(QString)</slot>
+  <slot>rebuildThumbnails()</slot>
+  <slot>reloadThread()</slot>
  </slots>
 </ui>

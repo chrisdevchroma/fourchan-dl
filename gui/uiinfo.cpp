@@ -25,6 +25,14 @@ UIInfo::UIInfo(QWidget *parent) :
 
     connect(timer, SIGNAL(timeout()), this, SLOT(updateStatistics()));
     connect(timer, SIGNAL(timeout()), this, SLOT(updateDebugInformation()));
+
+    logFile = new QFile();
+    logFile->setFileName("fourchan-dl.log");
+    logFile->open(QIODevice::ReadOnly | QIODevice::Unbuffered | QIODevice::Text);
+
+    if (logFile->isReadable()) {
+        connect(timer, SIGNAL(timeout()), this, SLOT(updateLogFile()));
+    }
 }
 
 void UIInfo::setCurrentVersion(QString s) {
@@ -78,6 +86,7 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
     ParserPluginInterface* p;
     QTreeWidgetItem* twi;
     QStringList keys;
+    QMap<QString,QString> replacementStrings;
 
     twi = 0;
     keys = components.keys();
@@ -113,6 +122,19 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
                 QTreeWidgetItem* domain = new QTreeWidgetItem(pluginName);
                 domain->setText(0, "Domain");
                 domain->setText(1, p->getDomain());
+
+                QTreeWidgetItem* replaceChars = new QTreeWidgetItem(pluginName);
+                replaceChars->setText(0,"Available formatting");
+                replacementStrings.clear();
+                replacementStrings = p->getSupportedReplaceCharacters();
+
+                QMapIterator<QString,QString> i(replacementStrings);
+                while (i.hasNext()) {
+                    i.next();
+                    QTreeWidgetItem* rc_twi = new QTreeWidgetItem(replaceChars);
+                    rc_twi->setText(0, i.key());
+                    rc_twi->setText(1, i.value());
+                }
             }
         }
         else {
@@ -134,7 +156,17 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
 //    ui->pluginInfo->expandAll();
 }
 
+void UIInfo::updateLogFile() {
+    if (logFile->isReadable()) {
+        while (!logFile->atEnd()) {
+            ui->textEdit->append(QString(logFile->readLine()).simplified());
+        }
+//        ui->textEdit->setText(QString(logFile->readAll()));
+    }
+}
+
 UIInfo::~UIInfo()
 {
+    logFile->close();
     delete ui;
 }

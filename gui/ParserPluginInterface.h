@@ -4,7 +4,7 @@
 #include <QUrl>
 #include "structs.h"
 
-#define _PARSER_PLUGIN_INTERFACE_REVISION "1.1"
+#define _PARSER_PLUGIN_INTERFACE_REVISION "1.2"
 
 class ParserPluginInterface
 {
@@ -15,6 +15,8 @@ public:
     virtual QString getVersion() = 0;
     virtual QString getDomain() = 0;
     virtual QString getInterfaceRevision() = 0;
+    virtual QString parseSavepath(QString s) = 0;
+    virtual QMap<QString, QString> getSupportedReplaceCharacters() = 0;
 
     virtual ParsingStatus parseHTML(QString html) = 0;
     virtual void setURL(QUrl url) = 0;

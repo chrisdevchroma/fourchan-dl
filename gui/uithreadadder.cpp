@@ -30,31 +30,22 @@ void UIThreadAdder::checkClipboard() {
     QClipboard::Mode mode;
 
     mode = QClipboard::Clipboard;
-//    switch(mode) {
-//    case QClipboard::Clipboard:     // Look only in global clipboard
-        if (clipboard->mimeData(mode)->hasText() || clipboard->mimeData(mode)->hasHtml()) {
-            text = clipboard->mimeData(mode)->text();
-            links = parseText(text);
-        }
-        else if (clipboard->mimeData(mode)->hasUrls()) {
-            urls = clipboard->mimeData(mode)->urls();
-        }
-//        break;
+    if (clipboard->mimeData(mode)->hasText() || clipboard->mimeData(mode)->hasHtml()) {
+        text = clipboard->mimeData(mode)->text();
+        links = parseText(text);
+    }
+    else if (clipboard->mimeData(mode)->hasUrls()) {
+        urls = clipboard->mimeData(mode)->urls();
+    }
 
-//    default:
-//        break;
-//    }
+    foreach(QString link, links) {
+        QListWidgetItem* item;
 
-        foreach(QString link, links) {
-            QListWidgetItem* item;
-
-            item = new QListWidgetItem(ui->listWidget);
-            item->setText(link);
-            item->setCheckState(Qt::Checked);
-            ui->listWidget->addItem(item);
-        }
-
-        qDebug() << "finished";
+        item = new QListWidgetItem(ui->listWidget);
+        item->setText(link);
+        item->setCheckState(Qt::Checked);
+        ui->listWidget->addItem(item);
+    }
 }
 
 QStringList UIThreadAdder::parseURLList(QList<QUrl> urls) {

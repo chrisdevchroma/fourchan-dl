@@ -13,8 +13,9 @@ ApplicationUpdateInterface::ApplicationUpdateInterface(QObject *parent) :
     fileToMoveTo = "";
     filesToMove.clear();
 
-    if (!udpSocket->bind(APPLICATION_PORT))
-        qDebug() << "Could not create socket (" << udpSocket->errorString() << ")";
+    if (!udpSocket->bind(APPLICATION_PORT)) {
+        QLOG_ERROR() << "ApplicationUpdateInterface :: " << "Could not create socket on port " << APPLICATION_PORT << "(" << udpSocket->errorString() << ")";
+    }
 
     connect(udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
     connect(this, SIGNAL(connectionEstablished()), this, SLOT(init()));
@@ -76,17 +77,17 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
 
     case SET_URI:
         fileToMoveFrom = QString(payload);
-        qDebug() << "from" << fileToMoveFrom;
+        QLOG_INFO() << "ApplicationUpdateInterface :: " << "from" << fileToMoveFrom;
         break;
 
     case SET_TARGET:
         fileToMoveTo = QString(payload);
-        qDebug() << "to" << fileToMoveTo;
+        QLOG_INFO() << "ApplicationUpdateInterface :: " << "to" << fileToMoveTo;
         break;
 
     case ADD_SET:
         filesToMove.append(QString("%1->%2").arg(fileToMoveFrom).arg(fileToMoveTo));
-        qDebug() << "add set";
+        QLOG_INFO() << "ApplicationUpdateInterface :: " << "add set";
         break;
 
     case UPDATE_FINISHED:
@@ -98,7 +99,7 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
         break;
 
     default:
-        qDebug() << "Don't know what to do with command " << QString::number(command);
+        QLOG_WARN() << "ApplicationUpdateInterface :: " << "Don't know what to do with command " << QString::number(command);
         break;
     }
 }
@@ -108,7 +109,7 @@ void ApplicationUpdateInterface::startUpdate() {
     writeCommand(SET_EXE, QString("%1/%2").arg(QCoreApplication::applicationDirPath()).arg(APP_NAME));
     writeCommand(START);
 #else
-    qDebug() << "This OS is not supported for automatic updating";
+    QLOG_INFO() << "ApplicationUpdateInterface :: " << "This OS is not supported for automatic updating";
 #endif
 }
 
@@ -119,7 +120,7 @@ void ApplicationUpdateInterface::init() {
             writeCommand(GET_VERSION);  // Always poll version
     }
     else {
-        qDebug() << "I am not connected to the update executable!";
+        QLOG_WARN() << "ApplicationUpdateInterface :: " << "I am not connected to the update executable!";
     }
 #endif
 }
@@ -176,7 +177,7 @@ void ApplicationUpdateInterface::exchangeFiles() {
         source.setFileName(from);
         target.setFileName(to);
 
-        qDebug() << "Moving" << source.fileName() << "to" << target.fileName();
+        QLOG_INFO() << "ApplicationUpdateInterface :: " << "Moving" << source.fileName() << "to" << target.fileName();
         success = false;
 
         while (!target.remove());
@@ -186,15 +187,15 @@ void ApplicationUpdateInterface::exchangeFiles() {
                 success = true;
             }
             else {
-                qDebug() << "rename failed";
+                QLOG_ERROR() << "ApplicationUpdateInterface :: " << "rename failed";
             }
 //        }
 
         if (!success) {
-            qDebug() << " Failed";
+            QLOG_ERROR() << "ApplicationUpdateInterface :: " << " Failed";
         }
         else {
-            qDebug() << " Success!";
+            QLOG_INFO() << "ApplicationUpdateInterface :: " << " Success!";
         }
     }
 }

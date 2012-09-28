@@ -165,7 +165,7 @@ void MainWindow::createTab(QString s) {
         w->setAttribute(Qt::WA_DeleteOnClose, true);
     }
     else {
-        qDebug() << "Prevented opening of thread" << sl.at(0) << "because it's already open.";
+        QLOG_INFO() << "MainWindow :: Prevented opening of thread" << sl.at(0) << "because it's already open.";
     }
 }
 
@@ -181,8 +181,9 @@ void MainWindow::closeTab(int i) {
         ui->tabWidget->removeTab(i);
         w->deleteLater();
     }
-    else
-        qDebug() << "Close widget event not accepted";
+    else {
+        QLOG_WARN() << "MainWindow :: Close widget event not accepted";
+    }
 
     if (ui->tabWidget->count() == 0) {
         addTab();
@@ -384,7 +385,7 @@ void MainWindow::processRequestResponse(QUrl url, QByteArray ba) {
         checkForUpdates(QString(ba));
     }
     else {
-        qDebug() << "MainWindow should only ask for webupdate.xml but response was for" << url.toString();
+        QLOG_WARN() << "MainWindow :: MainWindow should only ask for webupdate.xml but response was for" << url.toString();
     }
 }
 
@@ -425,7 +426,7 @@ void MainWindow::newComponentsAvailable() {
 
         fi.setFile(updaterFileName);
 
-        qDebug() << "Starting updater " << fi.absoluteFilePath();
+        QLOG_INFO() << "MainWindow :: Starting updater " << fi.absoluteFilePath();
 
         if (process.startDetached(QString("\"%1\"").arg(fi.absoluteFilePath()))) {
             ui->statusBar->showMessage("Starting updater");
@@ -519,7 +520,7 @@ void MainWindow::updateThreadOverview() {
     QStringList sl;
 
     if (ui->threadOverview->isVisible()) {
-//        qDebug() << "updating thread overview";
+//        QLOG_TRACE() << "MainWindow :: updating thread overview";
 //        ui->threadOverview->clear();
 
         for (int i=0; i<ui->tabWidget->count(); i++) {
@@ -600,14 +601,14 @@ void MainWindow::addToHistory(QString s, QString title="") {
             a->setIcon(QIcon(":/icons/resources/reload.png"));
             a->setStatusTip(QString("Reopen thread %1").arg(key));
             a->setToolTip(key); // Abusing the tooltip for saving the historyList key
-            //        qDebug() << QString("Adding (%1, %2) to history").arg(key).arg(s);
+            QLOG_TRACE() << "MainWindow :: " << QString("Adding (%1, %2) to history").arg(key).arg(s);
         }
     }
 }
 
 void MainWindow::removeFromHistory(QString key) {
     historyList.remove(key);
-//    qDebug() << QString("Removing (%1) from history").arg(key);
+    QLOG_TRACE() << "MainWindow :: " << QString("Removing (%1) from history").arg(key);
 }
 
 void MainWindow::restoreFromHistory(QAction* a) {
@@ -689,7 +690,7 @@ void MainWindow::checkForUpdates(QString xml) {
 
         if (local.filename == remote.filename) {
             if (checkIfNewerVersion(remote.version, local.version)) {
-                qDebug() << "New version available for " << local.type << ":" << local.filename;
+                QLOG_INFO() << "MainWindow :: New version available for " << local.type << ":" << local.filename;
                 updateableComponents.append(key);
                 local.src = remote.src;
                 local.target = remote.target;
@@ -709,7 +710,7 @@ void MainWindow::checkForUpdates(QString xml) {
     }
 
     if (runUpdate) newComponentsAvailable();
-//    qDebug() << xml;
+    QLOG_TRACE() << "MainWindow :: " << xml;
 }
 
 bool MainWindow::checkIfNewerVersion(QString _new, QString _old) {
@@ -744,7 +745,7 @@ void MainWindow::createComponentList() {
     QString version;
 #endif
 
-    qtFiles << "QtCore4" << "QtGui4" << "QtNetwork4";
+    qtFiles << "QtCore4" << "QtGui4" << "QtNetwork4" << "QtXml4";
 
     components.clear();
 
@@ -890,11 +891,19 @@ void MainWindow::createTrayIcon() {
 
         trayIcon->setIcon(QIcon(":/icons/resources/4chan.ico"));
         trayIcon->show();
+
+        connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
     }
 }
 
 void MainWindow::removeTrayIcon() {
     if (QSystemTrayIcon::isSystemTrayAvailable() && settings->value("options/close_to_tray", false).toBool() && trayIcon) {
         trayIcon->hide();
+    }
+}
+
+void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason ar) {
+    if (ar == QSystemTrayIcon::DoubleClick) {
+        restoreAction->trigger();
     }
 }

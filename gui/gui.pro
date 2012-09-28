@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network xml
 
 win32:TARGET = ../../fourchan-dl
 else:TARGET = ../fourchan-dl
@@ -73,12 +73,14 @@ FORMS    += mainwindow.ui \
 RESOURCES += \
     resources.qrc
 
+include(QsLog.pri)
+
 win32: RC_FILE = fourchan-dl-win.rc
 os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.4.0\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.4.experimental\\\""
 
 win32: LIBS += libole32
 

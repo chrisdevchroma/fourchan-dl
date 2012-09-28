@@ -12,6 +12,12 @@ UIImageViewer::UIImageViewer(QWidget *parent) :
     rotation = 0;
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     loadSettings();
+    runSlideshow = false;
+    slideshowTimer = new QTimer(this);
+    slideshowTimer->setSingleShot(false);
+    slideshowTimer->setInterval(ui->sbSlideshowPause->value()*1000);
+
+    connect(slideshowTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
 }
 
 UIImageViewer::~UIImageViewer()
@@ -59,13 +65,14 @@ void UIImageViewer::loadImage(int i) {
 
     if (!this->isVisible()) show();
 
-    qDebug() << "Loading image " << currentImage << "from" << imagesToDisplay.count();
+    QLOG_TRACE() << "ImageViewer :: Loading image " << currentImage << "from" << imagesToDisplay.count();
     rotation = 0;
 
     if (imagesToDisplay.count() > i) {
         filename = imagesToDisplay.value(i);
 
         if (f.exists(filename)) {
+            f.setFileName(filename);
             ui->statusbar->showMessage("Working...");
             if (ui->image->movie() != 0) ui->image->movie()->stop();
 
@@ -76,6 +83,7 @@ void UIImageViewer::loadImage(int i) {
                 movie->start();
                 ui->statusbar->showMessage("Loaded image" + filename, 2000);
                 ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
+                ui->lImageInfo->setText("");
             }
             else {
                 if (p.load(filename)) {
@@ -84,12 +92,21 @@ void UIImageViewer::loadImage(int i) {
                     fitImage();
                     ui->statusbar->showMessage("Loaded image" + filename, 2000);
                     ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
+                    ui->lImageInfo->setText(QString("Resolution: %1x%2, Size: %3kB")
+                                            .arg(originalPixmap.width())
+                                            .arg(originalPixmap.height())
+                                            .arg(f.size()/1024)
+                                            );
                 }
                 else {
-                    qDebug() << "Error loading image" << filename;
+                    QLOG_ERROR() << "ImageViewer :: Error loading image" << filename;
                 }
             }
         }
+
+        if (runSlideshow)
+            slideshowTimer->start();
+
     }
 }
 
@@ -116,20 +133,16 @@ void UIImageViewer::fitImage() {
     p = QPixmap(2,2);
     ui->image->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     ui->image->setPixmap(p);
-//    ui->image->repaint();
-//    ui->scrollArea->ensureWidgetVisible(ui->image);
-    qDebug() << "\nScrollWidgetSize: " << ui->scrollArea->size() << "\npixmapSize: "<<originalPixmap.size();
+    QLOG_TRACE() << "ImageViewer :: ScrollWidgetSize: " << ui->scrollArea->size() << "; pixmapSize: "<<originalPixmap.size();
 
     if (ui->btnFitImage->isChecked()) {
-        //ui->image->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         if (transformedPixmap.size().height() <= ui->scrollArea->size().height() &&
             transformedPixmap.size().width() <= ui->scrollArea->size().width()) {
-//            qDebug() << "Not scaling image";
+            QLOG_TRACE() << "ImageViewer :: Not scaling image";
             ui->image->setPixmap(transformedPixmap);
         }
         else {
-//            ui->image->setPixmap(originalPixmap.scaled(ui->scrollAreaWidgetContents->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
-//            qDebug() << "Scaling image to " << ui->scrollArea->size();
+            QLOG_TRACE() << "ImageViewer :: Scaling image to " << ui->scrollArea->size();
             ui->image->setPixmap(transformedPixmap.scaled(ui->scrollArea->size()-QSize(5,5), Qt::KeepAspectRatio, Qt::SmoothTransformation));
         }
     }
@@ -137,7 +150,7 @@ void UIImageViewer::fitImage() {
         ui->image->setPixmap(transformedPixmap);
     }
 
-//    qDebug() << "PixmapLabel Size: " << ui->image->pixmap()->size();
+    QLOG_TRACE() << "ImageViewer :: PixmapLabel Size: " << ui->image->pixmap()->size();
 }
 
 void UIImageViewer::openWithExternalViewer() {
@@ -189,7 +202,7 @@ void UIImageViewer::transformPixmap() {
 
     rot = rotation % 360;
     if (rot != 0) {
-        qDebug() << "Rotating " << (qreal)rot << "deg (rotation:"<<rotation<<")";
+        QLOG_TRACE() << "ImageViewer :: Rotating " << (qreal)rot << "deg (rotation:"<<rotation<<")";
         transformedPixmap = originalPixmap.transformed(t.rotate((qreal)rot));
     }
     else {
@@ -207,4 +220,18 @@ void UIImageViewer::rotateCCW() {
     rotation -= 90;
     transformPixmap();
     fitImage();
+}
+
+void UIImageViewer::toggleSlideshow(bool run) {
+    runSlideshow  = run;
+    if (run) {
+        slideshowTimer->start(ui->sbSlideshowPause->value()*1000);
+    }
+    else  {
+        slideshowTimer->stop();
+    }
+}
+
+void UIImageViewer::setSlideshowTimeout(int v) {
+    slideshowTimer->setInterval(v*1000);
 }
