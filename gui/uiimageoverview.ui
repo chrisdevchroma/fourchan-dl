@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>UIImageOverview</class>
+ <widget class="QWidget" name="UIImageOverview">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>470</width>
+    <height>676</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_4">
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="btnToggleView">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Toggle Thread settings</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lTitle2">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnStart">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/media-playback-start.png</normaloff>:/icons/resources/media-playback-start.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnStop">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/media-playback-stop.png</normaloff>:/icons/resources/media-playback-stop.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Thread</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QLineEdit" name="leURI">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="btnOpenThread">
+           <property name="toolTip">
+            <string>Open thread in browser</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/open.png</normaloff>:/icons/resources/open.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0" colspan="2">
+          <widget class="QLabel" name="lTitle">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="btnDebug">
+           <property name="text">
+            <string>DEBUG</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QGroupBox" name="group">
+        <property name="title">
+         <string>Save Images to</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="0">
+          <widget class="QLineEdit" name="leSavepath">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QPushButton" name="btnChoosePath">
+           <property name="toolTip">
+            <string>Choose download folder</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/search.png</normaloff>:/icons/resources/search.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
+          <widget class="QPushButton" name="btnOpenDownloadFolder">
+           <property name="toolTip">
+            <string>Open download folder</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/open.png</normaloff>:/icons/resources/open.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QComboBox" name="cbFolderShortcuts"/>
+         </item>
+         <item row="0" column="1">
+          <widget class="QPushButton" name="btnAddShortcut">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/icons/resources/add.png</normaloff>:/icons/resources/add.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="cbRescan">
+          <property name="text">
+           <string>Rescan Thread</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="3" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QCheckBox" name="cbOriginalFilename">
+          <property name="text">
+           <string>Save with original filename</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnReloadThread">
+          <property name="toolTip">
+           <string>Reload thread</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/icons/resources/reload.png</normaloff>:/icons/resources/reload.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnRebuildThumbnails">
+          <property name="toolTip">
+           <string>Rebuild thumbnails</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/icons/resources/rotateCW.png</normaloff>:/icons/resources/rotateCW.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="ThumbnailView" name="listWidget">
+     <property name="contextMenuPolicy">
+      <enum>Qt::CustomContextMenu</enum>
+     </property>
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>60</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="movement">
+      <enum>QListView::Static</enum>
+     </property>
+     <property name="isWrapping" stdset="0">
+      <bool>true</bool>
+     </property>
+     <property name="resizeMode">
+      <enum>QListView::Adjust</enum>
+     </property>
+     <property name="layoutMode">
+      <enum>QListView::SinglePass</enum>
+     </property>
+     <property name="gridSize">
+      <size>
+       <width>60</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="viewMode">
+      <enum>QListView::IconMode</enum>
+     </property>
+     <property name="selectionRectVisible">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QProgressBar" name="progressBar">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="value">
+      <number>13</number>
+     </property>
+     <property name="textVisible">
+      <bool>true</bool>
+     </property>
+     <property name="format">
+      <string>%v/%m (%p%)</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionDeleteFile">
+   <property name="text">
+    <string>deleteFile</string>
+   </property>
+  </action>
+  <action name="actionReloadFile">
+   <property name="text">
+    <string>reloadFile</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ThumbnailView</class>
+   <extends>QListWidget</extends>
+   <header>thumbnailview.h</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>btnToggleView</tabstop>
+  <tabstop>btnStart</tabstop>
+  <tabstop>btnStop</tabstop>
+  <tabstop>leURI</tabstop>
+  <tabstop>btnOpenThread</tabstop>
+  <tabstop>leSavepath</tabstop>
+  <tabstop>cbFolderShortcuts</tabstop>
+  <tabstop>btnChoosePath</tabstop>
+  <tabstop>btnOpenDownloadFolder</tabstop>
+  <tabstop>cbRescan</tabstop>
+  <tabstop>comboBox</tabstop>
+  <tabstop>cbOriginalFilename</tabstop>
+  <tabstop>listWidget</tabstop>
+ </tabstops>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>cbRescan</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>comboBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>80</x>
+     <y>243</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>189</x>
+     <y>245</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnStart</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>start()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>425</x>
+     <y>33</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>247</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnStop</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>stop()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>459</x>
+     <y>33</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>97</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnChoosePath</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>chooseLocation()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>406</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnOpenThread</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>openURI()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>440</x>
+     <y>97</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>11</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnOpenDownloadFolder</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>openDownloadFolder()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>440</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>377</x>
+     <y>132</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnToggleView</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frame</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>10</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>11</x>
+     <y>41</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>leURI</sender>
+   <signal>textChanged(QString)</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>checkForExistingThread(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>217</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>234</x>
+     <y>337</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnDebug</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>debugButton()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>406</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>465</x>
+     <y>252</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnRebuildThumbnails</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>rebuildThumbnails()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>438</x>
+     <y>266</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>468</x>
+     <y>288</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnReloadThread</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>reloadThread()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>401</x>
+     <y>265</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>465</x>
+     <y>329</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnToggleView</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lTitle2</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>170</x>
+     <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>21</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>start()</slot>
+  <slot>stop()</slot>
+  <slot>chooseLocation()</slot>
+  <slot>debugButton()</slot>
+  <slot>openURI()</slot>
+  <slot>openDownloadFolder()</slot>
+  <slot>checkForExistingThread(QString)</slot>
+  <slot>rebuildThumbnails()</slot>
+  <slot>reloadThread()</slot>
+ </slots>
+</ui>
