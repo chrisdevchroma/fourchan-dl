@@ -43,10 +43,6 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
     _IMAGE i;
     QUrl u;
     QString sUrl;
-<<<<<<< HEAD
-    QString boardName;
-=======
->>>>>>> 9e5463ac79f209ce668bf4c1704149a9c26b433b
 
     _html = html;
     _images.clear();
@@ -81,10 +77,6 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                         u.setUrl(QString("res/%1").arg(res.at(1)));
 
                         // build complete url
-<<<<<<< HEAD
-                        boardName = _url.path().section("/", 1, 1);
-=======
->>>>>>> 9e5463ac79f209ce668bf4c1704149a9c26b433b
 
                         if (u.isRelative()) {
                             sUrl = "";

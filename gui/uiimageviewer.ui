@@ -179,8 +179,6 @@
        </spacer>
       </item>
       <item>
-<<<<<<< HEAD
-=======
        <widget class="QLabel" name="lImageInfo">
         <property name="text">
          <string>Image Information</string>
@@ -218,7 +216,6 @@
        </widget>
       </item>
       <item>
->>>>>>> 9e5463ac79f209ce668bf4c1704149a9c26b433b
        <widget class="QPushButton" name="btnOpenWithExternalViewer">
         <property name="toolTip">
          <string>Open with external viewer</string>
@@ -338,8 +335,6 @@
     </hint>
    </hints>
   </connection>
-<<<<<<< HEAD
-=======
   <connection>
    <sender>btnSlideshow</sender>
    <signal>toggled(bool)</signal>
@@ -372,7 +367,6 @@
     </hint>
    </hints>
   </connection>
->>>>>>> 9e5463ac79f209ce668bf4c1704149a9c26b433b
  </connections>
  <slots>
   <slot>displayNextImage()</slot>
@@ -381,10 +375,7 @@
   <slot>openWithExternalViewer()</slot>
   <slot>rotateCW()</slot>
   <slot>rotateCCW()</slot>
-<<<<<<< HEAD
-=======
   <slot>toggleSlideshow(bool)</slot>
   <slot>setSlideshowTimeout(int)</slot>
->>>>>>> 9e5463ac79f209ce668bf4c1704149a9c26b433b
  </slots>
 </ui>
