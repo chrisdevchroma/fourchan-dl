@@ -233,7 +233,7 @@ void Parser4chan::setURL(QUrl url) {
 }
 
 QString Parser4chan::parseSavepath(QString s) {
-    s.replace("%t", threadNumber);
+    s.replace("%n", threadNumber);
     s.replace("%b", boardName);
     s.replace("%h", _url.host());
 
@@ -243,7 +243,7 @@ QString Parser4chan::parseSavepath(QString s) {
 QMap<QString, QString> Parser4chan::getSupportedReplaceCharacters() {
     QMap<QString, QString> ret;
 
-    ret.insert("%t", "Threadnumber");
+    ret.insert("%n", "Threadnumber");
     ret.insert("%b", "Board");
     ret.insert("%h", "Host");
 

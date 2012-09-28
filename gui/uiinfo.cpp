@@ -124,7 +124,7 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
                 domain->setText(1, p->getDomain());
 
                 QTreeWidgetItem* replaceChars = new QTreeWidgetItem(pluginName);
-                replaceChars->setText(0,"Replacement strings");
+                replaceChars->setText(0,"Available formatting");
                 replacementStrings.clear();
                 replacementStrings = p->getSupportedReplaceCharacters();
 
