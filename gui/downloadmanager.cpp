@@ -5,6 +5,7 @@
 DownloadManager::DownloadManager(QObject *parent) :
     QObject(parent)
 {
+    setMaxPriority(0);
     nams.clear();
     nams.append(new NetworkAccessManager(this));    // Add at least one AccessManager
     settings = new QSettings("settings.ini", QSettings::IniFormat);
@@ -193,43 +194,57 @@ void DownloadManager::downloadTimeout(qint64 uid) {
 
 void DownloadManager::processRequests() {
     QList<qint64> uids;
+    int lowest_prio;
 
     if (!downloadsPaused) {
 
         //    uids = requestList.keys();
-        uids = priorities.values();
+        lowest_prio = -1;
+        QMapIterator<int, qint64> i(priorities);
+        if (i.hasNext()) {
+            i.next();
+            lowest_prio = i.key();
+        }
 
-        if (uids.count() > 0) {
-            foreach (qint64 uid, uids) {
-                //            if (currentRequests >= maxRequests) {
-                if (activeReplies.count() >= maxRequests) {
-                    break;
-                }
-                else {
-                    if (requestList.count(uid)>0) {
-                        if (!(requestList.value(uid)->finished()) && !(requestList.value(uid)->processing())) {
-                            startRequest(uid);
-//                            QLOG_TRACE() << "DownloadManager :: " << "addRequest (" << uid << ")";
+
+        if (lowest_prio > _max_priority && _max_priority > 0) {
+            QLOG_INFO() << "DownloadManager :: Dowloads stopped because of max_priority";
+        }
+        else {
+            uids = priorities.values();
+
+            if (uids.count() > 0) {
+                foreach (qint64 uid, uids) {
+                    //            if (currentRequests >= maxRequests) {
+                    if (activeReplies.count() >= maxRequests) {
+                        break;
+                    }
+                    else {
+                        if (requestList.count(uid)>0) {
+                            if (!(requestList.value(uid)->finished()) && !(requestList.value(uid)->processing())) {
+                                startRequest(uid);
+                                //                            QLOG_TRACE() << "DownloadManager :: " << "addRequest (" << uid << ")";
+                            }
                         }
                     }
                 }
             }
-        }
-        else {
-            if (requestList.count() > 0) {
-                // This should not happen but if there are no (more) priorities set for some downloads, reset them
-                uids = requestList.keys();
-                foreach(qint64 uid, uids) {
-                    priorities.insertMulti(uid, 0);
-                }
-
-                processRequests();
-            }
             else {
-                // We are finished
-                totalRequests = 0;
-                finishedRequests = 0;
-                emit totalRequestsChanged(totalRequests);
+                if (requestList.count() > 0) {
+                    // This should not happen but if there are no (more) priorities set for some downloads, reset them
+                    uids = requestList.keys();
+                    foreach(qint64 uid, uids) {
+                        priorities.insertMulti(uid, 0);
+                    }
+
+                    processRequests();
+                }
+                else {
+                    // We are finished
+                    totalRequests = 0;
+                    finishedRequests = 0;
+                    emit totalRequestsChanged(totalRequests);
+                }
             }
         }
     }
@@ -436,4 +451,13 @@ int DownloadManager::getFinishedRequests() {
 
 void DownloadManager::pauseDownloads() {
     downloadsPaused = true;
+}
+
+void DownloadManager::setMaxPriority(int mp) {
+    _max_priority = mp;
+
+    QLOG_INFO() << "DownloadManager :: Setting max priority to " << mp;
+    if (!downloadsPaused) {
+        processRequests();
+    }
 }

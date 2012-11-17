@@ -221,6 +221,10 @@ void UIImageOverview::addThumbnail(QString filename, QString tnFilename) {
 
     ui->listWidget->addItem(item);
     thumbnailsizeLocked = true;
+
+    if (ui->listWidget->count() >= images.count()) {
+        updateDownloadStatus();
+    }
 }
 
 void UIImageOverview::on_listWidget_customContextMenuRequested(QPoint pos)

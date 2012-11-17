@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menuBar->addAction(ui->actionStop_all);
 
     ui->menuBar->addAction(ui->actionOpen_Configuration);
-    ui->actionOpen_Configuration->setCheckable(true);
+//    ui->actionOpen_Configuration->setCheckable(true);
 
     historyMenu = new QMenu(ui->menuBar);
     historyMenu->setTitle("History");
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     pendingThumbnailsChanged(0);
 
     // Thread overview
-    connect(ui->dockWidget, SIGNAL(visibilityChanged(bool)), ui->actionTabOverview, SLOT(setChecked(bool)));
+//    connect(ui->dockWidget, SIGNAL(visibilityChanged(bool)), ui->actionTabOverview, SLOT(setChecked(bool)));
     connect(ui->actionTabOverview, SIGNAL(triggered()), this, SLOT(scheduleOverviewUpdate()));
 
     loadOptions();
@@ -908,5 +908,14 @@ void MainWindow::removeTrayIcon() {
 void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason ar) {
     if (ar == QSystemTrayIcon::DoubleClick) {
         restoreAction->trigger();
+    }
+}
+
+void MainWindow::toggleThreadOverview() {
+    if (ui->dockWidget->isVisible()) {
+        ui->dockWidget->setVisible(false);
+    }
+    else {
+        ui->threadOverview->setVisible(true);
     }
 }

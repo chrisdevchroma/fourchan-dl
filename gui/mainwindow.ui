@@ -73,8 +73,14 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QDockWidget" name="dockWidget">
+   <property name="floating">
+    <bool>false</bool>
+   </property>
    <property name="features">
     <set>QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
    <property name="windowTitle">
     <string>Thread overview</string>
@@ -344,17 +350,17 @@
   </connection>
   <connection>
    <sender>actionTabOverview</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>dockWidget</receiver>
-   <slot>setVisible(bool)</slot>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>toggleThreadOverview()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>641</x>
-     <y>311</y>
+     <x>342</x>
+     <y>304</y>
     </hint>
    </hints>
   </connection>
@@ -416,5 +422,6 @@
   <slot>showTab(QTreeWidgetItem*,int)</slot>
   <slot>debugButton()</slot>
   <slot>addForegroundTab()</slot>
+  <slot>toggleThreadOverview()</slot>
  </slots>
 </ui>

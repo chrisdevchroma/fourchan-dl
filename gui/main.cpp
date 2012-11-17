@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
     checkEnvironment();
 
     downloadManager = new DownloadManager();
+//    downloadManager->setMaxPriority(10);
     downloadManager->pauseDownloads();  // Do not download anything until we are fully set
 
     tnt = new ThumbnailThread();
@@ -74,11 +75,12 @@ int main(int argc, char *argv[])
     pluginManager = new PluginManager();
 
     mainWindow = new MainWindow();
+    imageViewer = new UIImageViewer(mainWindow);
+
     mainWindow->show();
     mainWindow->restoreTabs();
 
-    imageViewer = new UIImageViewer(mainWindow);
-
+//    downloadManager->setMaxPriority(0);
     downloadManager->resumeDownloads();
 
     a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(saveSettings()));
