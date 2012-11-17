@@ -5,7 +5,6 @@
 #include <QList>
 #include <QRegExp>
 #include <QtDebug>
-#include <QtXml>
 #include "../../gui/ParserPluginInterface.h"
 #include "../../gui/structs.h"
 

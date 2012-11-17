@@ -5,7 +5,6 @@
 #-------------------------------------------------
 
 QT -= gui
-QT += xml
 
 win32:TARGET = ../../parserchanarchive
 else:TARGET = ../parserchanarchive
