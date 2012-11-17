@@ -48,8 +48,11 @@ void ThumbnailThread::run() {
         cacheFolder = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
                                       .arg("tncache")).toString();
 
-        if (useCache && !(dir.exists(cacheFolder)))
+//        QLOG_ALWAYS() << "ThumbnailThread :: Using thumbnail folder " << cacheFolder;
+        if (useCache && !(dir.exists(cacheFolder))) {
+            QLOG_TRACE() << "ThumbnailThread :: Creating thumbnail cache folder " << cacheFolder;
             dir.mkpath(cacheFolder);
+        }
 
         if (newImages) {
             bool useCachedThumbnail;
@@ -58,6 +61,7 @@ void ThumbnailThread::run() {
             cacheFile = getCacheFile(currentFilename);
             // Check if thumbnail exists
             if (useCache && QFile::exists(cacheFile)) {
+                QLOG_TRACE() << "ThumbnailThread :: Cached thumbnail available for " << currentFilename;
                 tn.load(cacheFile);
 
                 if (tn.width() == iconWidth || tn.height() == iconHeight) {
@@ -66,6 +70,7 @@ void ThumbnailThread::run() {
             }
 
             if (!useCachedThumbnail){
+                QLOG_TRACE() << "ThumbnailThread :: Creating new thumbnail for " << currentFilename;
                 original.load(currentFilename);
 
                 if (original.width()<iconWidth
@@ -73,20 +78,24 @@ void ThumbnailThread::run() {
                     && !(enlargeThumbnails)) {
                     tn = original;
                 } else {
-                    if (hqRendering)
+                    QLOG_TRACE() << "ThumbnailThread :: Rendering thumbnail";
+                    if (hqRendering) {
                         tn = original.scaled(*iconSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
-                    else
+                    }
+                    else {
                         tn = original.scaled(*iconSize,Qt::KeepAspectRatio,Qt::FastTransformation);
+                    }
                 }
-//                if (useCache)
+
                 tn.save(cacheFile, "PNG");
             }
 
             uis = callingUIs.values(currentFilename);
 
             foreach(UIImageOverview* ui, uis) {
-                if (!canceled)
+                if (!canceled) {
                     ui->addThumbnail(currentFilename, cacheFile);
+                }
                 callingUIs.remove(currentFilename, ui);
             }
 //            emit thumbnailCreated(currentFilename, tn);

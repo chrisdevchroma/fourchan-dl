@@ -33,10 +33,10 @@ private:
     int currentImage;
     QPixmap originalPixmap;
     QPixmap transformedPixmap;
-    QSettings* settings;
     int rotation;
     QTimer* slideshowTimer;
     bool runSlideshow;
+    QSettings* settings;
 
     void loadImage(int);
     void loadSettings();

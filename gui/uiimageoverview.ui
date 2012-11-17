@@ -245,7 +245,7 @@
         <item>
          <widget class="QPushButton" name="btnReloadThread">
           <property name="toolTip">
-           <string>Reload thread</string>
+           <string>Reload all images</string>
           </property>
           <property name="text">
            <string/>

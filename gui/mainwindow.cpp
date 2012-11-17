@@ -239,6 +239,9 @@ void MainWindow::restoreWindowSettings(void) {
 
     if (!ba.isEmpty())
         this->restoreState(ba);
+
+//    ui->threadOverview->setVisible(settings->value("thread_overview/visible", true).toBool());
+    ui->actionTabOverview->setChecked(settings->value("thread_overview/visible", true).toBool());
 }
 
 void MainWindow::restoreTabs() {
@@ -291,6 +294,7 @@ void MainWindow::saveSettings(void) {
     settings->setValue("col_name_width", ui->threadOverview->columnWidth(1));
     settings->setValue("col_images_width", ui->threadOverview->columnWidth(2));
     settings->setValue("col_status_width", ui->threadOverview->columnWidth(3));
+    settings->setValue("visible", ui->threadOverview->isVisible());
     settings->endGroup();
 
     // Options
@@ -362,7 +366,6 @@ void MainWindow::loadOptions(void) {
     ui->threadOverview->setColumnWidth(2, settings->value("col_images_width", 60).toInt());
     ui->threadOverview->setColumnWidth(3, settings->value("col_status_width", 70).toInt());
     settings->endGroup();
-
 }
 
 void MainWindow::processCloseRequest(UIImageOverview* w, int reason) {

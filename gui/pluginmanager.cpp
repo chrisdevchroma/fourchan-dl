@@ -22,14 +22,14 @@ void PluginManager::loadPlugins(void)
 #endif
 #endif
     if (!pluginDir.cd("plugins")) {
-        QLOG_WARN() << "PluginManager || " << "Plugin directory not found: " << pluginDir.path();
+        QLOG_WARN() << "PluginManager :: " << "Plugin directory not found: " << pluginDir.path();
     }
     else {
-        QLOG_INFO() << "PluginManager || " << "Plugin Search path: " << pluginDir.path();
+        QLOG_INFO() << "PluginManager :: " << "Plugin Search path: " << pluginDir.path();
 
         foreach (QString fileName, pluginDir.entryList(QDir::Files))
         {
-            QLOG_INFO() << "PluginManager || " << "Checking file " << pluginDir.absoluteFilePath(fileName);
+            QLOG_INFO() << "PluginManager :: " << "Checking file " << pluginDir.absoluteFilePath(fileName);
             QPluginLoader loader(pluginDir.absoluteFilePath(fileName));
 //            QLOG_ERROR() << loader.errorString();
             QString str;
@@ -50,14 +50,14 @@ void PluginManager::loadPlugins(void)
                     loadedPlugins.append(interface);
                 }
                 else {
-                    QLOG_WARN() << "PluginManager || " << "Skipping plugin " << fileName << ", because it has the wrong interface revision";
+                    QLOG_WARN() << "PluginManager :: " << "Skipping plugin " << fileName << ", because it has the wrong interface revision";
                 }
             }
             else {
-                 QLOG_ERROR() << "PluginManager || " << "error loading lib" << loader.errorString();
+                 QLOG_ERROR() << "PluginManager :: " << "error loading lib" << loader.errorString();
             }
         }
-        QLOG_TRACE() << "PluginManager || " << "PluginList" << pluginList;
+        QLOG_TRACE() << "PluginManager :: " << "PluginList" << pluginList;
     }
 }
 

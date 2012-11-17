@@ -321,6 +321,7 @@ void UIImageOverview::openFile(void) {
 
 void UIImageOverview::errorHandler(QUrl url, int err) {
     switch (err) {
+    case 202:
     case 404:
         if (isImage(url)) {
             setCompleted(url.toString(), "");
@@ -689,6 +690,7 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
     QList<QUrl>     threadList;
     ParsingStatus   status;
     QString         path;
+    qint64 bytesWritten;
 
     requestURI = url.toString();
     path = url.path();
@@ -721,12 +723,16 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
             }
 
             f.open(QIODevice::ReadWrite);
-
-            f.write(ba);
+            bytesWritten = f.write(ba);
             f.close();
 
-            createThumbnail(f.fileName());
-            setCompleted(requestURI, f.fileName());
+            if (bytesWritten == ba.size()) {
+                createThumbnail(f.fileName());
+                setCompleted(requestURI, f.fileName());
+            }
+            else {
+                QLOG_ERROR() << "UIImageOverview :: Couldn't save file from URI " << url.toString();
+            }
         }
 
     }
@@ -737,6 +743,15 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
 
         if (status.hasErrors) {
             QLOG_ERROR() << "ImageOverview :: Parser error " << iParser->getErrorCode();
+            switch (iParser->getErrorCode()) {
+            case 404:
+                stopDownload();
+                processCloseRequest();
+                break;
+
+            default:
+                break;
+            }
         }
         else {
             if (status.isFrontpage) {
@@ -998,9 +1013,17 @@ void UIImageOverview::updateDownloadStatus() {
         ui->progressBar->setMaximum(t);
     }
     else {
-        setTabTitle("Finished");
-        setStatus("Finished");
         ui->progressBar->setVisible(false);
+
+        QLOG_DEBUG() << "UIImageOverview :: updateDownloadStatus() :: item count: " << ui->listWidget->count() << "; images.count " << images.count();
+        if (ui->listWidget->count() == images.count()) {
+            setTabTitle("Finished");
+            setStatus("Finished");
+        }
+        else {
+            setTabTitle("Rendering");
+            setStatus("Rendering");
+        }
     }
 
     emit changed();

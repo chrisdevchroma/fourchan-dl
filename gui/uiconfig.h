@@ -7,6 +7,7 @@
 #include "uilisteditor.h"
 #include "dialogfoldershortcut.h"
 #include "foldershortcuts.h"
+#include "QsLog.h"
 
 extern FolderShortcuts* folderShortcuts;
 

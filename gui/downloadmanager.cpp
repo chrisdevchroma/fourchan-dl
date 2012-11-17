@@ -273,11 +273,11 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
     DownloadRequest* dr;
     dr = requestList.value(uid);
 
-    QLOG_WARN() << "DownloadManager :: " << uid << "received error" << r->error() << ":" << r->errorString();
+    QLOG_WARN() << "DownloadManager :: " << r->url().toString() << "received error" << r->error() << ":" << r->errorString();
 
     switch (r->error()) {
     case 404:
-    case 203:
+    case 203:       // Not found
         dr->requestHandler()->error(uid, 404);
 
         currentRequests--;

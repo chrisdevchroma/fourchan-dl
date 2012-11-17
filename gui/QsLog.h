@@ -111,6 +111,8 @@ private:
       else QsLogging::Logger::Helper(QsLogging::ErrorLevel).stream()
    #define QLOG_FATAL() \
       QsLogging::Logger::Helper(QsLogging::FatalLevel).stream()
+    #define QLOG_ALWAYS() \
+      QsLogging::Logger::Helper(QsLogging::InfoLevel).stream()
 #else
    #define QLOG_TRACE() \
       if( QsLogging::Logger::instance().loggingLevel() > QsLogging::TraceLevel ){} \
@@ -129,6 +131,8 @@ private:
       else QsLogging::Logger::Helper(QsLogging::ErrorLevel).stream() << __FILE__ << '@' << __LINE__
    #define QLOG_FATAL() \
       QsLogging::Logger::Helper(QsLogging::FatalLevel).stream() << __FILE__ << '@' << __LINE__
+   #define QLOG_ALWAYS() \
+     QsLogging::Logger::Helper(QsLogging::InfoLevel).stream() << __FILE__ << '@' << __LINE__
 #endif
 
 #endif // QSLOG_H
