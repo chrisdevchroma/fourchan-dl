@@ -6,13 +6,13 @@
 
 QT -= gui
 
-win32:TARGET = ../../parserchanarchive
-else:TARGET = ../parserchanarchive
+win32:TARGET = ../../parser.archive.foolz.us
+else:TARGET = ../parser.archive.foolz.us
 TEMPLATE = lib
 CONFIG += dll plugin
 
-DEFINES += _LIB_VERSION="\\\"0.2\\\""
+DEFINES += _LIB_VERSION="\\\"0.1\\\""
 
-SOURCES += parserchanarchive.cpp
+SOURCES += parser.archive.foolz.us.cpp
 
-HEADERS += parserchanarchive.h
+HEADERS += parser.archive.foolz.us.h
