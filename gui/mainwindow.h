@@ -125,6 +125,7 @@ private slots:
     void updateDownloadProgress();
     void removeTrayIcon();
     void trayIconActivated(QSystemTrayIcon::ActivationReason ar);
+    void toggleThreadOverview();
 
 signals:
     void removeFiles(QStringList);

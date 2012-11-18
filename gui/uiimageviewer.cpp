@@ -28,6 +28,11 @@ UIImageViewer::~UIImageViewer()
 void UIImageViewer::setImageList(QStringList imageList) {
     if (imageList.count() > 0) {
         imagesToDisplay = imageList;
+        imagesToDisplay.removeDuplicates();
+        if (imagesToDisplay.contains("")) {
+            imagesToDisplay.removeOne("");
+        }
+
         if (currentImage == -1) {
             currentImage = 0;
         }
@@ -172,6 +177,7 @@ void UIImageViewer::loadSettings() {
         state = settings->value("state",0).toInt();
         s = settings->value("size",QSize(0,0)).toSize();
         ui->btnFitImage->setChecked(settings->value("fit_image", false).toBool());
+//        ui->sbSlideshowPause->setValue(settings->value("slideshow_pause", 3).toInt());
     settings->endGroup();
 
     if (p != QPoint(0,0))
@@ -191,6 +197,7 @@ void UIImageViewer::saveSettings() {
             settings->setValue("size", this->size());
         settings->setValue("state", QString("%1").arg(this->windowState()));
         settings->setValue("fit_image", ui->btnFitImage->isChecked());
+        settings->setValue("slideshow_pause", ui->sbSlideshowPause->value());
     settings->endGroup();
 
     settings->sync();

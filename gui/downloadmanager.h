@@ -30,6 +30,7 @@ public:
     int getTotalRequests();
     int getFinishedRequests();
     void pauseDownloads();
+    void setMaxPriority(int);
 
 private:
     QList<NetworkAccessManager*> nams;
@@ -57,6 +58,7 @@ private:
     void processRequests();
     inline qint64 getUID() {return ++lastid;}
     qint64 lastid;
+    int _max_priority;
 
 
 private slots:

@@ -34,7 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menuBar->addAction(ui->actionStop_all);
 
     ui->menuBar->addAction(ui->actionOpen_Configuration);
-    ui->actionOpen_Configuration->setCheckable(true);
+//    ui->actionOpen_Configuration->setCheckable(true);
 
     historyMenu = new QMenu(ui->menuBar);
     historyMenu->setTitle("History");
@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     pendingThumbnailsChanged(0);
 
     // Thread overview
-    connect(ui->dockWidget, SIGNAL(visibilityChanged(bool)), ui->actionTabOverview, SLOT(setChecked(bool)));
+//    connect(ui->dockWidget, SIGNAL(visibilityChanged(bool)), ui->actionTabOverview, SLOT(setChecked(bool)));
     connect(ui->actionTabOverview, SIGNAL(triggered()), this, SLOT(scheduleOverviewUpdate()));
 
     loadOptions();
@@ -239,6 +239,9 @@ void MainWindow::restoreWindowSettings(void) {
 
     if (!ba.isEmpty())
         this->restoreState(ba);
+
+//    ui->threadOverview->setVisible(settings->value("thread_overview/visible", true).toBool());
+    ui->actionTabOverview->setChecked(settings->value("thread_overview/visible", true).toBool());
 }
 
 void MainWindow::restoreTabs() {
@@ -291,6 +294,7 @@ void MainWindow::saveSettings(void) {
     settings->setValue("col_name_width", ui->threadOverview->columnWidth(1));
     settings->setValue("col_images_width", ui->threadOverview->columnWidth(2));
     settings->setValue("col_status_width", ui->threadOverview->columnWidth(3));
+    settings->setValue("visible", ui->threadOverview->isVisible());
     settings->endGroup();
 
     // Options
@@ -362,7 +366,6 @@ void MainWindow::loadOptions(void) {
     ui->threadOverview->setColumnWidth(2, settings->value("col_images_width", 60).toInt());
     ui->threadOverview->setColumnWidth(3, settings->value("col_status_width", 70).toInt());
     settings->endGroup();
-
 }
 
 void MainWindow::processCloseRequest(UIImageOverview* w, int reason) {
@@ -905,5 +908,14 @@ void MainWindow::removeTrayIcon() {
 void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason ar) {
     if (ar == QSystemTrayIcon::DoubleClick) {
         restoreAction->trigger();
+    }
+}
+
+void MainWindow::toggleThreadOverview() {
+    if (ui->dockWidget->isVisible()) {
+        ui->dockWidget->setVisible(false);
+    }
+    else {
+        ui->dockWidget->setVisible(true);
     }
 }

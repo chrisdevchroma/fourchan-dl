@@ -31,6 +31,8 @@ void checkEnvironment();
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QSettings settings("settings.ini", QSettings::IniFormat);
+    int logLevel;
 
     a.setStyle("plastique");
 
@@ -49,12 +51,20 @@ int main(int argc, char *argv[])
 #else
     logger.setLoggingLevel(QsLogging::WarnLevel);
 #endif
+
+    logLevel = settings.value("options/log_level", -1).toInt();
+    if (logLevel != -1) {
+        logger.setLoggingLevel((QsLogging::Level)logLevel);
+        QLOG_ALWAYS() << "APP :: Setting logging level to " << logLevel;
+    }
+
     QLOG_INFO() << "APP :: Program started";
     QLOG_INFO() << "APP :: Built with Qt" << QT_VERSION_STR << "running on" << qVersion();
 
     checkEnvironment();
 
     downloadManager = new DownloadManager();
+//    downloadManager->setMaxPriority(10);
     downloadManager->pauseDownloads();  // Do not download anything until we are fully set
 
     tnt = new ThumbnailThread();
@@ -65,11 +75,12 @@ int main(int argc, char *argv[])
     pluginManager = new PluginManager();
 
     mainWindow = new MainWindow();
+    imageViewer = new UIImageViewer(mainWindow);
+
     mainWindow->show();
     mainWindow->restoreTabs();
 
-    imageViewer = new UIImageViewer(mainWindow);
-
+//    downloadManager->setMaxPriority(0);
     downloadManager->resumeDownloads();
 
     a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(saveSettings()));
