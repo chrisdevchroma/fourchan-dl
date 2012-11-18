@@ -54,7 +54,7 @@ void PluginManager::loadPlugins(void)
                 }
             }
             else {
-                 QLOG_ERROR() << "PluginManager :: " << "error loading lib" << loader.errorString();
+                 QLOG_WARN() << "PluginManager :: " << "Could not load plugin " << loader.errorString();
             }
         }
         QLOG_TRACE() << "PluginManager :: " << "PluginList" << pluginList;

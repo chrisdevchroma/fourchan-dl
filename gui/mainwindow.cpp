@@ -916,6 +916,6 @@ void MainWindow::toggleThreadOverview() {
         ui->dockWidget->setVisible(false);
     }
     else {
-        ui->threadOverview->setVisible(true);
+        ui->dockWidget->setVisible(true);
     }
 }
