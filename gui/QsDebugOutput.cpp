@@ -50,9 +50,10 @@ void QsDebugOutput::output( const QString& message )
    fflush(stderr);
 }
 #else
+
 #include <QtDebug>
 void QsDebugOutput::output(const QString &a_message)
 {
-    qDebug() << *a_message;
+    qDebug() << a_message;
 }
 #endif
