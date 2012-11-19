@@ -1091,7 +1091,6 @@ QString UIImageOverview::getSavepath() {
 
 void UIImageOverview::updateExpectedThumbnailCount() {
     expectedThumbnailCount=0;
-
     for (int i=0; i<images.length(); i++) {
         if (images.at(i).downloaded &&
                 images.at(i).savedAs != "") {
