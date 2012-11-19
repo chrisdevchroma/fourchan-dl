@@ -75,6 +75,7 @@ private:
     bool running;
     bool closeWhenFinished;
     bool downloading;
+    int expectedThumbnailCount;
 
     void loadSettings(void);
     void setStatus(QString s);
@@ -88,6 +89,7 @@ private:
     void mergeImageList(QList<_IMAGE> list);
     bool addImage(_IMAGE img);
     QString getSavepath();
+    void updateExpectedThumbnailCount();
 
 private slots:
     void on_listWidget_customContextMenuRequested(QPoint pos);
