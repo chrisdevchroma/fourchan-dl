@@ -160,7 +160,7 @@ QMap<QString, QString> ParserArchiveFoolzUs::getSupportedReplaceCharacters() {
 
 //    ret.insert("%n", "Threadnumber");
 //    ret.insert("%b", "Board");
-    ret.insert("%h", "Host (chanarchive.org)");
+    ret.insert("%h", "Host (archive.foolz.us)");
 //    ret.insert("%a", "Archive (e. g. 4chan)");
 
     return ret;
