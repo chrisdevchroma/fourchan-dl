@@ -69,6 +69,7 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
 
     loadSettings();
     fillShortcutComboBox();
+    expectedThumbnailCount = 0;
 }
 
 UIImageOverview::~UIImageOverview()
@@ -328,6 +329,7 @@ void UIImageOverview::errorHandler(QUrl url, int err) {
     case 202:
     case 404:
         if (isImage(url)) {
+            blackList->add(url.toString());
             setCompleted(url.toString(), "");
         }
         else {
@@ -667,8 +669,9 @@ bool UIImageOverview::isDownloadFinished() {
 
     ret = false;
 
-    if (getDownloadedImagesCount() == getTotalImagesCount())
+    if (getDownloadedImagesCount() == getTotalImagesCount()) {
         ret=true;
+    }
 
     return ret;
 }
@@ -806,7 +809,10 @@ void UIImageOverview::setCompleted(QString uri, QString filename) {
 
             if (isDownloadFinished()) {
                 download(false);
+                updateExpectedThumbnailCount();
             }
+
+            break;
         }
     }
 }
@@ -1081,4 +1087,14 @@ QString UIImageOverview::getSavepath() {
     }
 
     return ret;
+}
+
+void UIImageOverview::updateExpectedThumbnailCount() {
+    expectedThumbnailCount=0;
+    for (int i=0; i<images.length(); i++) {
+        if (images.at(i).downloaded &&
+                images.at(i).savedAs != "") {
+            expectedThumbnailCount++;
+        }
+    }
 }

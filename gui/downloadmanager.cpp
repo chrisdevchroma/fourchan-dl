@@ -206,7 +206,6 @@ void DownloadManager::processRequests() {
             lowest_prio = i.key();
         }
 
-
         if (lowest_prio > _max_priority && _max_priority > 0) {
             QLOG_INFO() << "DownloadManager :: Dowloads stopped because of max_priority";
         }
