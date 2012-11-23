@@ -102,6 +102,13 @@ void UIImageOverview::start(void) {
     if (ui->leURI->text() != "") {
         ui->leURI->setReadOnly(true);
 
+        if (!ui->leURI->text().startsWith("http")) {
+            QString s;
+            s = ui->leURI->text();
+            s.prepend("http://");
+            ui->leURI->setText(s);
+        }
+
         // Check if we can parse this URI
         if (selectParser()) {
             savepath = getSavepath();

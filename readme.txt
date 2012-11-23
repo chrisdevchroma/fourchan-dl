@@ -5,6 +5,18 @@ As of version 0.9.6 each release is tested under Windows 7 professional (amd64) 
 When updating from 1.2.0 to 1.3.0 please close the updater executable manually.
 
 Release notes
+Version 1.4.2
+* Small bugfix release
+
+Version 1.4.1
+* Added slideshow for the internal viewer
+* Save path now supports formatting
+ - e.g. C:/%b/%n will result in C:/wg/1234678
+ - details on what formattings strings are supported are in the info dialog for each plugin
+* Added proper debug system
+* Added possibility to rebuild thumbnails for each thread and re-download a complete thread
+* Some UI tweaks
+
 Version 1.4.0
 * Added internal image viewer
 * Added "Close to systray"
@@ -129,3 +141,7 @@ Version 0.9
 * Rembering of savepath in one program instance (not persistent yet)
 * Image preview and simple file operations
 * When deleting a file it will not be downloaded again, despite of watching the image thread in a new tab
+
+
+For convenience for older versions:
+Current version 1.3.0
