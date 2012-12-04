@@ -96,6 +96,10 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
     executableTree->setText(0, "Executables");
     QTreeWidgetItem* qtTree = new QTreeWidgetItem(ui->pluginInfo);
     qtTree->setText(0, "Qt");
+    QTreeWidgetItem* libTree = new QTreeWidgetItem(ui->pluginInfo);
+    libTree->setText(0, "External libraries");
+    QTreeWidgetItem* unknownTree = new QTreeWidgetItem(ui->pluginInfo);
+    unknownTree->setText(0, "Not categorized");
 
     foreach (QString key, keys) {
         c = components.value(key);
@@ -138,19 +142,28 @@ void UIInfo::loadComponentInfo(QMap<QString, component_information> components) 
             }
         }
         else {
-            if (c.type.startsWith("executable")) twi = executableTree;
-            else if (c.type.startsWith("qt")) twi = qtTree;
+            if (c.type.startsWith("executable")) {
+                twi = executableTree;
+            } else if (c.type.startsWith("qt")) {
+                twi = qtTree;
+            } else if (c.type.startsWith("library")) {
+                twi = libTree;
+            } else {
+                twi = unknownTree;
+            }
 
             QTreeWidgetItem* componentName = new QTreeWidgetItem(twi);
             componentName->setText(0, c.componentName);
 
-            QTreeWidgetItem* version = new QTreeWidgetItem(componentName);
-            version->setText(0, "Version");
-            version->setText(1, c.version);
+            if (!c.version.isEmpty()) {
+                QTreeWidgetItem* version = new QTreeWidgetItem(componentName);
+                version->setText(0, "Version");
+                version->setText(1, c.version);
+            }
         }
-        ui->pluginInfo->addTopLevelItem(pluginTree);
-        ui->pluginInfo->addTopLevelItem(qtTree);
-        ui->pluginInfo->addTopLevelItem(executableTree);
+//        ui->pluginInfo->addTopLevelItem(pluginTree);
+//        ui->pluginInfo->addTopLevelItem(qtTree);
+//        ui->pluginInfo->addTopLevelItem(executableTree);
     }
 
 //    ui->pluginInfo->expandAll();

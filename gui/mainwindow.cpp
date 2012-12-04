@@ -650,7 +650,7 @@ void MainWindow::handleRequestError(QUrl url, int error) {
 
 void MainWindow::checkForUpdates(QString xml) {
     QRegExp rx(QString("<%1>([\\w\\W]+[^<])+</%1>").arg(UPDATE_TREE), Qt::CaseInsensitive, QRegExp::RegExp2);
-    QRegExp rxFile("<file name=\"([^\\\"]+)\" filename=\"([\\w\\.\\-_]+)\" type=\"([^\\\"]+)\" version=\"([\\w\\.]+)\" source=\"([\\w:\\-\\./]+)\" target=\"([\\w\\.\\-/]*)\" />", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rxFile("<file name=\"([^\\\"]+)\" filename=\"([\\w\\.\\-_]+)\" type=\"([^\\\"]+)\" version=\"([\\w\\.]*)\" source=\"([\\w:\\-\\./]+)\" target=\"([\\w\\.\\-/]*)\" />", Qt::CaseInsensitive, QRegExp::RegExp2);
     int pos, posFile;
     QStringList res, resFile;
     QMap<QString, component_information> comp;
@@ -744,11 +744,17 @@ void MainWindow::createComponentList() {
     component_information c;
     QStringList plugins;
     QStringList qtFiles;
+    QStringList neededLibraries;
+
 #ifdef USE_UPDATER
     QString version;
 #endif
 
     qtFiles << "QtCore4" << "QtGui4" << "QtNetwork4" << "QtXml4";
+
+#ifdef Q_OS_WIN32
+    neededLibraries << "libeay32.dll" << "ssleay32.dll";
+#endif
 
     components.clear();
 
@@ -758,6 +764,16 @@ void MainWindow::createComponentList() {
     c.version = PROGRAM_VERSION;
 
     components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+
+    foreach (QString libFile, neededLibraries) {
+        c.filename = libFile;
+        c.componentName = libFile;
+        c.type = "library";
+        c.version = "";
+        if (QFile::exists(QString("%1/%2").arg(QApplication::applicationDirPath()).arg(libFile))) {
+            components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+        }
+    }
 
 #ifdef USE_UPDATER
     // TODO: use updaterFileName (but without the path)

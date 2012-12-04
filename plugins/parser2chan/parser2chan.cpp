@@ -76,7 +76,7 @@ ParsingStatus Parser2chan::parseHTML(QString html) {
                     sUrl = QString("%1/%2").arg(_url.host()).arg(u.path());
                 }
                 else if (u.path().startsWith("res")) {
-                    sUrl = QString("http://boards.2chan.net/%1/%2").arg(boardName).arg(u.path());
+                    sUrl = QString("%1://boards.2chan.net/%2/%3").arg(_url.scheme()).arg(boardName).arg(u.path());
                 }
                 else {
                     qDebug() << "Parsing front page and don't know what to do. Found url" << u.toString();
