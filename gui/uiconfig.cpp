@@ -111,7 +111,7 @@ void UIConfig::loadSettings(void) {
     else ui->cbRescanInterval->setCurrentIndex(0);
 
     ui->cbCloseToTray->setChecked(settings->value("close_to_tray", false).toBool());
-    ui->cbLoggingLevel->setCurrentIndex(settings->value("log_level",0).toInt());
+    ui->cbLoggingLevel->setCurrentIndex(settings->value("log_level",3).toInt());
     settings->endGroup();
 
     settings->beginGroup("blacklist");
