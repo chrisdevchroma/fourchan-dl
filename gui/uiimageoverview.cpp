@@ -70,6 +70,7 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     loadSettings();
     fillShortcutComboBox();
     expectedThumbnailCount = 0;
+    thumbnailCount = 0;
 }
 
 UIImageOverview::~UIImageOverview()
@@ -231,7 +232,8 @@ void UIImageOverview::addThumbnail(QString filename, QString tnFilename) {
     ui->listWidget->addItem(item);
     thumbnailsizeLocked = true;
 
-    if (ui->listWidget->count() >= expectedThumbnailCount) {
+    if (++thumbnailCount >= expectedThumbnailCount) {
+//    if (isDownloadFinished()) {
         updateDownloadStatus();
     }
 }
@@ -1055,6 +1057,8 @@ void UIImageOverview::setStatus(QString s) {
 void UIImageOverview::rebuildThumbnails() {
     deleteAllThumbnails();
     ui->listWidget->clear();
+    expectedThumbnailCount = 0;
+    thumbnailCount = 0;
 
     for (int i=0; i<images.length(); i++) {
         if (images.at(i).downloaded && !images.at(i).savedAs.isEmpty()) {

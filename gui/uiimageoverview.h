@@ -76,6 +76,7 @@ private:
     bool closeWhenFinished;
     bool downloading;
     int expectedThumbnailCount;
+    int thumbnailCount;
 
     void loadSettings(void);
     void setStatus(QString s);
