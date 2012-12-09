@@ -217,6 +217,7 @@ void UIImageOverview::triggerRescan(void) {
 void UIImageOverview::createThumbnail(QString s) {
         tnt->addToList(this, s);
         tnt->createThumbnails();
+        expectedThumbnailCount++;
 }
 
 void UIImageOverview::addThumbnail(QString filename, QString tnFilename) {
@@ -230,7 +231,7 @@ void UIImageOverview::addThumbnail(QString filename, QString tnFilename) {
     ui->listWidget->addItem(item);
     thumbnailsizeLocked = true;
 
-    if (ui->listWidget->count() >= images.count()) {
+    if (ui->listWidget->count() >= expectedThumbnailCount) {
         updateDownloadStatus();
     }
 }
@@ -816,7 +817,6 @@ void UIImageOverview::setCompleted(QString uri, QString filename) {
 
             if (isDownloadFinished()) {
                 download(false);
-                updateExpectedThumbnailCount();
             }
 
             break;
@@ -1021,6 +1021,7 @@ void UIImageOverview::updateDownloadStatus() {
 
     d = getDownloadedImagesCount();
     t = getTotalImagesCount();
+//    updateExpectedThumbnailCount();
 
     if (!isDownloadFinished()) {
         setTabTitle(QString("%1/%2").arg(d).arg(t));
@@ -1032,8 +1033,8 @@ void UIImageOverview::updateDownloadStatus() {
     else {
         ui->progressBar->setVisible(false);
 
-        QLOG_DEBUG() << "UIImageOverview :: updateDownloadStatus() :: item count: " << ui->listWidget->count() << "; images.count " << images.count();
-        if (ui->listWidget->count() == images.count()) {
+        QLOG_DEBUG() << "UIImageOverview :: updateDownloadStatus() :: item count: " << ui->listWidget->count() << "; expectedThumbnailCount " << expectedThumbnailCount;
+        if (ui->listWidget->count() >= expectedThumbnailCount) {
             setTabTitle("Finished");
             setStatus("Finished");
         }
@@ -1056,7 +1057,7 @@ void UIImageOverview::rebuildThumbnails() {
     ui->listWidget->clear();
 
     for (int i=0; i<images.length(); i++) {
-        if (images.at(i).downloaded) {
+        if (images.at(i).downloaded && !images.at(i).savedAs.isEmpty()) {
             createThumbnail(images.at(i).savedAs);
         }
     }
