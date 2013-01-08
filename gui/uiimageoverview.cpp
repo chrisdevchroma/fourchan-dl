@@ -65,6 +65,8 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     connect(ui->listWidget, SIGNAL(deleteItem()), this, SLOT(deleteFile()));
     connect(ui->listWidget, SIGNAL(reloadItem()), this, SLOT(reloadFile()));
 
+    connect(tnt, SIGNAL(thumbnailAvailable(QString,QString)), this, SLOT(addThumbnail(QString,QString)));
+
     setTabTitle("idle");
 
     loadSettings();
@@ -216,25 +218,28 @@ void UIImageOverview::triggerRescan(void) {
 }
 
 void UIImageOverview::createThumbnail(QString s) {
-        tnt->addToList(this, s);
-        tnt->createThumbnails();
+        tnt->addToList(s);
+        pendingThumbnails.append(s);
         expectedThumbnailCount++;
 }
 
 void UIImageOverview::addThumbnail(QString filename, QString tnFilename) {
     QListWidgetItem* item;
 
-    item = new QListWidgetItem(
-                QIcon(tnFilename),
-                filename,
-                ui->listWidget);
+    if (pendingThumbnails.contains(filename)) {     // The generated thumbnail is needed
+        pendingThumbnails.removeAll(filename);
+        item = new QListWidgetItem(
+                    QIcon(tnFilename),
+                    filename,
+                    ui->listWidget);
 
-    ui->listWidget->addItem(item);
-    thumbnailsizeLocked = true;
+        ui->listWidget->addItem(item);
+        thumbnailsizeLocked = true;
 
-    if (++thumbnailCount >= expectedThumbnailCount) {
-//    if (isDownloadFinished()) {
-        updateDownloadStatus();
+        if (++thumbnailCount >= expectedThumbnailCount) {
+    //    if (isDownloadFinished()) {
+            updateDownloadStatus();
+        }
     }
 }
 
@@ -245,7 +250,7 @@ void UIImageOverview::on_listWidget_customContextMenuRequested(QPoint pos)
     contextMenu.addAction(openFileAction);
     contextMenu.addAction(deleteFileAction);
     contextMenu.addAction(reloadFileAction);
-    contextMenu.exec(ui->listWidget->mapTo(this,mapToGlobal(pos)));
+    contextMenu.exec(ui->listWidget->mapTo(this, mapToGlobal(pos)));
 }
 
 void UIImageOverview::deleteFile(void) {

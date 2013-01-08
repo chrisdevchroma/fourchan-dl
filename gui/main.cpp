@@ -3,9 +3,11 @@
 #include <QCleanlooksStyle>
 #include <QFile>
 #include <QDateTime>
+#include <QThread>
 #include "mainwindow.h"
 #include "downloadmanager.h"
-#include "thumbnailthread.h"
+//#include "thumbnailthread.h"
+#include "thumbnailcreator.h"
 #include "foldershortcuts.h"
 #include "pluginmanager.h"
 #include "uiimageviewer.h"
@@ -17,7 +19,7 @@
 #endif
 
 DownloadManager* downloadManager;
-ThumbnailThread* tnt;
+ThumbnailCreator* tnt;
 FolderShortcuts* folderShortcuts;
 MainWindow* mainWindow;
 PluginManager* pluginManager;
@@ -67,8 +69,13 @@ int main(int argc, char *argv[])
 //    downloadManager->setMaxPriority(10);
     downloadManager->pauseDownloads();  // Do not download anything until we are fully set
 
-    tnt = new ThumbnailThread();
-    tnt->start(QThread::NormalPriority);
+    QThread thumbnailThread;
+    thumbnailThread.setPriority(QThread::NormalPriority);
+    tnt = new ThumbnailCreator();
+    tnt->moveToThread(&thumbnailThread);
+
+    a.connect(&thumbnailThread, SIGNAL(started()), tnt, SLOT(go()));
+    thumbnailThread.start();
 
     folderShortcuts = new FolderShortcuts();
 

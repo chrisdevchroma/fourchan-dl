@@ -12,7 +12,7 @@
 #include <QCloseEvent>
 #include "defines.h"
 #include "mainwindow.h"
-#include "thumbnailthread.h"
+#include "thumbnailcreator.h"
 #include "blacklist.h"
 #include "downloadmanager.h"
 #include "foldershortcuts.h"
@@ -20,10 +20,10 @@
 #include "requesthandler.h"
 #include "uiimageviewer.h"
 
-class ThumbnailThread;
+class ThumbnailCreator;
 class MainWindow;
 
-extern ThumbnailThread* tnt;
+extern ThumbnailCreator* tnt;
 extern FolderShortcuts* folderShortcuts;
 extern MainWindow* mainWindow;
 extern PluginManager* pluginManager;

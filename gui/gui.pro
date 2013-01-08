@@ -16,7 +16,6 @@ SOURCES += main.cpp\
     uiimageoverview.cpp \
     uiinfo.cpp \
     uiconfig.cpp \
-    thumbnailthread.cpp \
     uilisteditor.cpp \
     applicationupdateinterface.cpp \
     ../updater/commands.cpp \
@@ -33,13 +32,13 @@ SOURCES += main.cpp\
     networkaccessmanager.cpp \
     pluginmanager.cpp \
     ecwin7.cpp \
-    uiimageviewer.cpp
+    uiimageviewer.cpp \
+    thumbnailcreator.cpp
 
 HEADERS  += mainwindow.h \
     uiimageoverview.h \
     uiinfo.h \
     uiconfig.h \
-    thumbnailthread.h \
     uilisteditor.h \
     defines.h \
     applicationupdateinterface.h \
@@ -59,7 +58,8 @@ HEADERS  += mainwindow.h \
     ParserPluginInterface.h \
     structs.h \
     ecwin7.h \
-    uiimageviewer.h
+    uiimageviewer.h \
+    thumbnailcreator.h
 
 FORMS    += mainwindow.ui \
     uiimageoverview.ui \
