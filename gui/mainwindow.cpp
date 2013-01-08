@@ -753,7 +753,10 @@ void MainWindow::createComponentList() {
     qtFiles << "QtCore4" << "QtGui4" << "QtNetwork4" << "QtXml4";
 
 #ifdef Q_OS_WIN32
-    neededLibraries << "libeay32.dll" << "ssleay32.dll";
+    neededLibraries << "libeay32.dll" << "ssleay32.dll" << "imageformats/qgif4.dll"
+                    << "imageformats/qico4.dll" << "imageformats/qjpeg4.dll"
+                    << "imageformats/qmng4.dll" << "imageformats/qsvg4.dll"
+                    << "imageformats/qtiff4.dll";
 #endif
 
     components.clear();
@@ -770,8 +773,12 @@ void MainWindow::createComponentList() {
         c.componentName = libFile;
         c.type = "library";
         c.version = "";
+        QLOG_ALWAYS() << "Mainwidow :: createComponentList :: Checking for " << QString("%1/%2").arg(QApplication::applicationDirPath()).arg(libFile);
         if (QFile::exists(QString("%1/%2").arg(QApplication::applicationDirPath()).arg(libFile))) {
             components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
+        }
+        else {
+            QLOG_WARN() << "Mainwidow :: createComponentList :: Needed library " << libFile << "does not exist.";
         }
     }
 

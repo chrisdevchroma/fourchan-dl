@@ -100,11 +100,13 @@ ParsingStatus ParserKrautchan::parseHTML(QString html) {
               res = rxImageName.capturedTexts();
               i.originalFilename = res.at(1);
             }
-          pos = rxThumbnail.indexIn(*image);
-          if (pos > -1) {
-              res = rxThumbnail.capturedTexts();
-              i.thumbURI = "http://krautchan.net/thumbnails/"+res.at(1);
-            }
+
+//          pos = rxThumbnail.indexIn(*image);
+//          if (pos > -1) {
+//              res = rxThumbnail.capturedTexts();
+//              i.thumbURI = "http://krautchan.net/thumbnails/"+res.at(1);
+//            }
+
           pos = rxImage.indexIn(*image);
           if (pos > -1) {
               res = rxImage.capturedTexts();
