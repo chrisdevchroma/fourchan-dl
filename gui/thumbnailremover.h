@@ -1,7 +1,7 @@
-#ifndef THUMBNAILREMOVERTHREAD_H
-#define THUMBNAILREMOVERTHREAD_H
+#ifndef THUMBNAILREMOVER_H
+#define THUMBNAILREMOVER_H
 
-#include <QThread>
+#include <QObject>
 #include <QSettings>
 #include <QDir>
 #include <QFile>
@@ -13,11 +13,12 @@
 #include <QDateTime>
 #include "QsLog.h"
 
-class ThumbnailRemoverThread : public QThread
+class ThumbnailRemover : public QObject
 {
     Q_OBJECT
 public:
-    explicit ThumbnailRemoverThread(QObject *parent = 0);
+    explicit ThumbnailRemover(QObject *parent = 0);
+    
 private:
     QSettings* settings;
     int ttl;
@@ -25,15 +26,14 @@ private:
     QDir dir;
     QMutex mutex;
     QFileInfoList fileInfoList;
-protected:
-    void run();
 
 signals:
-
+    
 public slots:
     void removeFiles(QStringList fileList);
     void removeAll();
-
+    void removeOutdated();
+    
 };
 
-#endif // THUMBNAILREMOVERTHREAD_H
+#endif // THUMBNAILREMOVER_H

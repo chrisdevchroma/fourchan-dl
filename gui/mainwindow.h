@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QTreeWidget>
 #include <QSystemTrayIcon>
+#include <QThread>
 #include "uiimageoverview.h"
 #include "uiinfo.h"
 #include "uiconfig.h"
@@ -14,9 +15,9 @@
 #include "ecwin7.h"
 #include "defines.h"
 #include "blacklist.h"
-#include "thumbnailremoverthread.h"
 #include "downloadmanager.h"
 #include "uithreadadder.h"
+#include "thumbnailremover.h"
 #include "QsLog.h"
 
 class UIImageOverview;
@@ -54,7 +55,8 @@ private:
     QSize thumbnailSize;
     int maxDownloads;
     RequestHandler* requestHandler;
-    ThumbnailRemoverThread* thumbnailRemover;
+    QThread* thumbnailRemoverThread;
+    ThumbnailRemover* thumbnailRemover;
     int oldActiveTabIndex;
     QTimer* overviewUpdateTimer;
     QMenu* historyMenu;
@@ -126,6 +128,7 @@ private slots:
     void removeTrayIcon();
     void trayIconActivated(QSystemTrayIcon::ActivationReason ar);
     void toggleThreadOverview();
+    void aboutToQuit();
 
 signals:
     void removeFiles(QStringList);

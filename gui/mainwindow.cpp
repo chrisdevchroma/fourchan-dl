@@ -11,9 +11,12 @@ MainWindow::MainWindow(QWidget *parent) :
     aui = new ApplicationUpdateInterface(this);
     requestHandler = new RequestHandler(this);
     blackList = new BlackList(this);
-    thumbnailRemover = new ThumbnailRemoverThread(this);
 
-    thumbnailRemover->start(QThread::LowPriority);
+    thumbnailRemoverThread = new QThread();
+    thumbnailRemover = new ThumbnailRemover();
+    thumbnailRemover->moveToThread(thumbnailRemoverThread);
+    connect(thumbnailRemoverThread, SIGNAL(started()), thumbnailRemover, SLOT(removeOutdated()));
+    thumbnailRemoverThread->start(QThread::LowPriority);
 
     overviewUpdateTimer = new QTimer(this);
     overviewUpdateTimer->setInterval(1000);
@@ -941,4 +944,10 @@ void MainWindow::toggleThreadOverview() {
     else {
         ui->dockWidget->setVisible(true);
     }
+}
+
+void MainWindow::aboutToQuit() {
+    saveSettings();
+    removeTrayIcon();
+    thumbnailRemoverThread->terminate();
 }

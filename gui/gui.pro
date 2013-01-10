@@ -20,7 +20,6 @@ SOURCES += main.cpp\
     applicationupdateinterface.cpp \
     ../updater/commands.cpp \
     blacklist.cpp \
-    thumbnailremoverthread.cpp \
     downloadmanager.cpp \
     requesthandler.cpp \
     supervisednetworkreply.cpp \
@@ -33,7 +32,8 @@ SOURCES += main.cpp\
     pluginmanager.cpp \
     ecwin7.cpp \
     uiimageviewer.cpp \
-    thumbnailcreator.cpp
+    thumbnailcreator.cpp \
+    thumbnailremover.cpp
 
 HEADERS  += mainwindow.h \
     uiimageoverview.h \
@@ -44,7 +44,6 @@ HEADERS  += mainwindow.h \
     applicationupdateinterface.h \
     ../updater/commands.h \
     blacklist.h \
-    thumbnailremoverthread.h \
     downloadmanager.h \
     requesthandler.h \
     supervisednetworkreply.h \
@@ -59,7 +58,8 @@ HEADERS  += mainwindow.h \
     structs.h \
     ecwin7.h \
     uiimageviewer.h \
-    thumbnailcreator.h
+    thumbnailcreator.h \
+    thumbnailremover.h
 
 FORMS    += mainwindow.ui \
     uiimageoverview.ui \
@@ -80,7 +80,7 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.4.4\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"1.5.0\\\""
 
 win32: LIBS += libole32
 

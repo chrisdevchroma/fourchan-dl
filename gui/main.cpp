@@ -90,8 +90,8 @@ int main(int argc, char *argv[])
 //    downloadManager->setMaxPriority(0);
     downloadManager->resumeDownloads();
 
-    a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(saveSettings()));
-    a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(removeTrayIcon()));
+    a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(aboutToQuit()));
+    a.connect(&a, SIGNAL(aboutToQuit()), &thumbnailThread, SLOT(terminate()));
 
     return a.exec();
 }

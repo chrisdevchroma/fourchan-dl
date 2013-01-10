@@ -1,12 +1,12 @@
-#include "thumbnailremoverthread.h"
+#include "thumbnailremover.h"
 
-ThumbnailRemoverThread::ThumbnailRemoverThread(QObject *parent) :
-    QThread(parent)
+ThumbnailRemover::ThumbnailRemover(QObject *parent) :
+    QObject(parent)
 {
     settings = new QSettings("settings.ini", QSettings::IniFormat);
 }
 
-void ThumbnailRemoverThread::run() {
+void ThumbnailRemover::removeOutdated() {
     QDateTime date;
     mutex.lock();
     dirName = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
@@ -26,13 +26,13 @@ void ThumbnailRemoverThread::run() {
     }
 }
 
-void ThumbnailRemoverThread::removeFiles(QStringList fileList) {
+void ThumbnailRemover::removeFiles(QStringList fileList) {
     foreach (QString s, fileList) {
         QFile::remove(s);
     }
 }
 
-void ThumbnailRemoverThread::removeAll() {
+void ThumbnailRemover::removeAll() {
     if (dir.exists())//QDir::NoDotAndDotDot
     {
         fileInfoList = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);

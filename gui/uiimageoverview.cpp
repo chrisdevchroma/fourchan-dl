@@ -487,8 +487,6 @@ void UIImageOverview::closeEvent(QCloseEvent *event)
     }
     emit removeFiles(fileList);
 
-    while (!tnt->cancelAll(this));
-
     event->accept();
 }
 
