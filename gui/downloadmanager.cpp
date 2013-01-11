@@ -310,6 +310,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
 //        }
 
 //        waitTimer->start();
+        reschedule(uid);
         break;
     case 205:
     case 99:
@@ -359,7 +360,7 @@ void DownloadManager::reschedule(qint64 uid) {
 
         // "decrease priority for rescheduled downloads"
         priorities.remove(prio, uid);
-        prio++;
+        prio+=10;
         QLOG_INFO() << "DownloadManager :: " << uid << ":" << "setting new priority" << prio;
         dr->setPriority(prio);
         priorities.insertMulti(prio,uid);

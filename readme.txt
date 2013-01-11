@@ -5,6 +5,10 @@ As of version 0.9.6 each release is tested under Windows 7 professional (amd64) 
 When updating from 1.2.0 to 1.3.0 please close the updater executable manually.
 
 Release notes
+Version 1.5.0
+* Addressed instability issues
+* More debug capabilities 
+
 Version 1.4.3
 * SSL error on windows7 fixed
 * Download status now working correctly
