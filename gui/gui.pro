@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     ecwin7.cpp \
     uiimageviewer.cpp \
     thumbnailcreator.cpp \
-    thumbnailremover.cpp
+    thumbnailremover.cpp \
+    uipendingrequests.cpp
 
 HEADERS  += mainwindow.h \
     uiimageoverview.h \
@@ -59,7 +60,8 @@ HEADERS  += mainwindow.h \
     ecwin7.h \
     uiimageviewer.h \
     thumbnailcreator.h \
-    thumbnailremover.h
+    thumbnailremover.h \
+    uipendingrequests.h
 
 FORMS    += mainwindow.ui \
     uiimageoverview.ui \
@@ -68,7 +70,8 @@ FORMS    += mainwindow.ui \
     uilisteditor.ui \
     uithreadadder.ui \
     dialogfoldershortcut.ui \
-    uiimageviewer.ui
+    uiimageviewer.ui \
+    uipendingrequests.ui
 
 RESOURCES += \
     resources.qrc

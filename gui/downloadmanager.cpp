@@ -460,3 +460,16 @@ void DownloadManager::setMaxPriority(int mp) {
         processRequests();
     }
 }
+
+QMap<qint64, QString> DownloadManager::getPendingRequestMap() {
+    QMap<qint64, QString> ret;
+    QHashIterator<qint64, DownloadRequest*>  requests(requestList);
+
+    while (requests.hasNext()) {
+        requests.next();
+
+        ret.insertMulti(requests.value()->priority(), requests.value()->url().toString());
+    }
+
+    return ret;
+}

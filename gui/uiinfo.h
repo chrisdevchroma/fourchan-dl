@@ -7,6 +7,7 @@
 #include <QFile>
 #include "downloadmanager.h"
 #include "pluginmanager.h"
+#include "uipendingrequests.h"
 
 extern DownloadManager* downloadManager;
 extern PluginManager* pluginManager;
@@ -29,12 +30,15 @@ private:
     Ui::UIInfo *ui;
     QTimer* timer;
     QFile* logFile;
+    UIPendingRequests* uiPendingRequests;
 
 
 private slots:
     void updateStatistics();
     void updateDebugInformation();
     void updateLogFile();
+    void showRequests();
+    void reloadRequests();
 
 signals:
 };

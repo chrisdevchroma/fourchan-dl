@@ -17,7 +17,7 @@ void RequestHandler::request(QUrl u) {
     sUrl = u.toString();
     if (sUrl.indexOf(QRegExp(__IMAGE_REGEXP__, Qt::CaseInsensitive)) != -1) {
         //Image requested
-        prio = 10;
+        prio = 100;
     }
     else {
         // HTML page requested

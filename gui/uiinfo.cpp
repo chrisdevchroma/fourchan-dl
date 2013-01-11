@@ -7,6 +7,7 @@ UIInfo::UIInfo(QWidget *parent) :
     QString text;
     ui->setupUi(this);
     updateStatistics();
+    uiPendingRequests = new UIPendingRequests(this);
 
     timer = new QTimer(this);
     timer->setInterval(3000);
@@ -25,6 +26,10 @@ UIInfo::UIInfo(QWidget *parent) :
 
     connect(timer, SIGNAL(timeout()), this, SLOT(updateStatistics()));
     connect(timer, SIGNAL(timeout()), this, SLOT(updateDebugInformation()));
+
+    connect(ui->btnShowRequests, SIGNAL(clicked()), this, SLOT(showRequests()));
+    connect(uiPendingRequests, SIGNAL(reloadRequested()), this, SLOT(reloadRequests()));
+    connect(this, SIGNAL(rejected()), uiPendingRequests, SLOT(hide()));
 
     logFile = new QFile();
     logFile->setFileName("fourchan-dl.log");
@@ -182,4 +187,13 @@ UIInfo::~UIInfo()
 {
     logFile->close();
     delete ui;
+}
+
+void UIInfo::showRequests() {
+    reloadRequests();
+    uiPendingRequests->show();
+}
+
+void UIInfo::reloadRequests() {
+    uiPendingRequests->showRequestList(downloadManager->getPendingRequestMap());
 }
