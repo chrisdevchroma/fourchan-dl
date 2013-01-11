@@ -9,19 +9,24 @@ RequestHandler::RequestHandler(QObject *parent) :
     }
 }
 
-void RequestHandler::request(QUrl u) {
+void RequestHandler::request(QUrl u, int priority) {
     qint64 uid;
     int prio;
     QString sUrl;
 
     sUrl = u.toString();
-    if (sUrl.indexOf(QRegExp(__IMAGE_REGEXP__, Qt::CaseInsensitive)) != -1) {
-        //Image requested
-        prio = 100;
+    if (priority < 0) {
+        if (sUrl.indexOf(QRegExp(__IMAGE_REGEXP__, Qt::CaseInsensitive)) != -1) {
+            //Image requested
+            prio = 100;
+        }
+        else {
+            // HTML page requested
+            prio = 10;
+        }
     }
     else {
-        // HTML page requested
-        prio = 0;
+        prio = priority;
     }
 
     if (downloadManager != 0) {

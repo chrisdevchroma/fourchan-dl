@@ -639,7 +639,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
 
 void MainWindow::createSupervisedDownload(QUrl url) {
     if (url.isValid()) {
-        requestHandler->request(url);
+        requestHandler->request(url, 0);
     }
 }
 

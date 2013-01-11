@@ -300,16 +300,16 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
         break;
 
     case 301:   // Service unavailable
-        QLOG_INFO() << "DownloadManager :: " << "Service unavailable";
-        emit error("Service unavailable");
+        QLOG_INFO() << "DownloadManager :: " << "Service unavailable" << r->url().host();
+        emit error(QString("%1: Service unavailable").arg(r->url().host()));
         // Pause downloading to let the server relax
-        pauseDownloads();
+//        pauseDownloads();
         // Abort all downloads
-        foreach (QNetworkReply* r, activeReplies) {
-            r->abort();
-        }
+//        foreach (QNetworkReply* r, activeReplies) {
+//            r->abort();
+//        }
 
-        waitTimer->start();
+//        waitTimer->start();
         break;
     case 205:
     case 99:

@@ -13,7 +13,7 @@ class RequestHandler : public QObject
     Q_OBJECT
 public:
     explicit RequestHandler(QObject *parent = 0);
-    void request(QUrl);
+    void request(QUrl, int priority=-1);
     void cancel(QUrl url);
     void cancelAll();
     void requestFinished(qint64);
