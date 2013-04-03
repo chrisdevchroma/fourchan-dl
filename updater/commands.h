@@ -1,8 +1,8 @@
 #ifndef COMMANDS_H
 #define COMMANDS_H
 
-#define APPLICATION_PORT    60001
-#define UPDATER_PORT        60000
+//#define APPLICATION_PORT    60001
+//#define UPDATER_PORT        60000
 #define HOST_ADDRESS        QHostAddress::LocalHost
 
 #include <QByteArray>
@@ -19,7 +19,7 @@ enum COMMANDS { PING=0,
                 STOP,           // Stop the update
                 CLOSE_REQUEST,  // Request the other program to close
                 DISPLAY_MSG,    // Display a message
-                ERROR,          // Indicate an error
+                ERROR_CMD,     // Indicate an error
                 UPDATE_FINISHED, //
                 GET_VERSION,
                 VERSION

@@ -5,6 +5,7 @@
 #include <QtNetwork/QUdpSocket>
 #include <iostream>
 #include <QTimer>
+#include <QSettings>
 #include "commands.h"
 #include "types.h"
 
@@ -13,6 +14,7 @@
 
 extern QTextStream* output;
 extern QTextStream* foutput;
+extern QSettings*   settings;
 
 class ApplicationInterface : public QObject
 {

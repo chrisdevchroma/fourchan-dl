@@ -4,6 +4,7 @@ ApplicationUpdateInterface::ApplicationUpdateInterface(QObject *parent) :
     QObject(parent)
 {
     udpSocket = new QUdpSocket();
+    settings = new QSettings("settings.ini", QSettings::IniFormat);
     pinging = false;
     connected = false;
     answerPing = false;
@@ -13,8 +14,8 @@ ApplicationUpdateInterface::ApplicationUpdateInterface(QObject *parent) :
     fileToMoveTo = "";
     filesToMove.clear();
 
-    if (!udpSocket->bind(APPLICATION_PORT)) {
-        QLOG_ERROR() << "ApplicationUpdateInterface :: " << "Could not create socket on port " << APPLICATION_PORT << "(" << udpSocket->errorString() << ")";
+    if (!udpSocket->bind(settings->value("updater/application_port", 60000).toInt())) {
+        QLOG_ERROR() << "ApplicationUpdateInterface :: " << "Could not create socket on port " << settings->value("updater/application_port", 60000).toInt() << "(" << udpSocket->errorString() << ")";
     }
 
     connect(udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
@@ -55,7 +56,7 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
         if (pinging)
             pinging=false;
         else
-            writeCommand(ERROR);
+            writeCommand(ERROR_CMD);
 
     case CLOSE_REQUEST:
         exit(0);
@@ -65,7 +66,7 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
         QMessageBox::information(0, "Updater Message", QString(payload));
         break;
 
-    case ERROR:
+    case ERROR_CMD:
         QMessageBox::critical(0, "Update Error", QString(payload));
         break;
 
@@ -126,17 +127,15 @@ void ApplicationUpdateInterface::init() {
 }
 
 void ApplicationUpdateInterface::writeCommand(int c, QByteArray a) {
-    qint64 bytesSent;
-
-    bytesSent = udpSocket->writeDatagram(
+    udpSocket->writeDatagram(
             createCommand(c, a),
             QHostAddress(HOST_ADDRESS),
-            UPDATER_PORT
+            settings->value("updater/updater_port", 60001).toInt()
             );
 }
 
 void ApplicationUpdateInterface::writeCommand(int c, QString s) {
-    writeCommand(c, s.toAscii());
+    writeCommand(c, s.toLatin1());
 }
 
 void ApplicationUpdateInterface::writeCommand(int c) {

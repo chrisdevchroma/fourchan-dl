@@ -10,7 +10,7 @@ QByteArray createCommand(int c, QByteArray a) {
 }
 
 QByteArray createCommand(int c, QString s) {
-    return createCommand(c, s.toAscii());
+    return createCommand(c, s.toLatin1());
 }
 
 QByteArray createCommand(int c) {

@@ -39,7 +39,16 @@
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
-        <property name="margin">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
          <number>0</number>
         </property>
         <property name="spacing">
@@ -82,6 +91,9 @@
          <iconset resource="resources.qrc">
           <normaloff>:/icons/resources/go-previous.png</normaloff>:/icons/resources/go-previous.png</iconset>
         </property>
+        <property name="shortcut">
+         <string>Left</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -92,6 +104,9 @@
         <property name="icon">
          <iconset resource="resources.qrc">
           <normaloff>:/icons/resources/go-next.png</normaloff>:/icons/resources/go-next.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>Right</string>
         </property>
        </widget>
       </item>

@@ -7,6 +7,7 @@ ThumbnailCreator::ThumbnailCreator(QObject *parent) :
     hq = true;
     newImages = false;
     settings = new QSettings("settings.ini", QSettings::IniFormat);
+    halted = false;
 }
 
 void ThumbnailCreator::go() {
@@ -21,7 +22,7 @@ void ThumbnailCreator::go() {
 
     forever {
         mutex.lock();
-            if (list.count()>0) {
+            if (list.count()>0 && !halted) {
                 currentFilename = list.front();
                 list.pop_front();
                 newImages = true;
@@ -34,7 +35,6 @@ void ThumbnailCreator::go() {
         iconHeight = iconSize->height();
         enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
         hqRendering = settings->value("options/hq_thumbnails", false).toBool();
-//        useCache = settings->value("options/use_thumbnail_cache", true).toBool();
         useCache = true;
         cacheFolder = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
                                       .arg("tncache")).toString();
@@ -127,4 +127,16 @@ QString ThumbnailCreator::getCacheFile(QString filename) {
     ret= QString("%1/%2.tn").arg(cacheFolder).arg(tmp);
 
     return ret;
+}
+
+void ThumbnailCreator::halt() {
+    mutex.lock();
+    halted = true;
+    mutex.unlock();
+}
+
+void ThumbnailCreator::resume() {
+    mutex.lock();
+    halted = false;
+    mutex.unlock();
 }

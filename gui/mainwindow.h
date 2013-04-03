@@ -120,7 +120,6 @@ private slots:
     void scheduleOverviewUpdate();
     void restoreFromHistory(QAction*);
     void processRequestResponse(QUrl url, QByteArray ba);
-    void handleRequestError(QUrl url, int error);
     void updaterConnected();
     void updateFinished();
     void setUpdaterVersion(QString);

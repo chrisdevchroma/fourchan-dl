@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
 #ifdef Q_OS_WIN
-    win7.init(this->winId());
+    win7.init((HWND)this->winId());
 #endif
 
     createTrayIcon();
@@ -281,6 +281,8 @@ void MainWindow::restoreTabs() {
 void MainWindow::saveSettings(void) {
     int downloadedFiles;
     float downloadedKB;
+
+    QLOG_INFO() << "MainWindow :: Saving settings";
     // Window related stuff
     settings->beginGroup("window");
         settings->setValue("position", this->pos());
@@ -293,10 +295,10 @@ void MainWindow::saveSettings(void) {
     // Dock widget
     settings->beginGroup("thread_overview");
 //    settings->setValue("size", ui->dockWidget->size());
-    settings->setValue("col_uri_width", ui->threadOverview->columnWidth(0));
-    settings->setValue("col_name_width", ui->threadOverview->columnWidth(1));
-    settings->setValue("col_images_width", ui->threadOverview->columnWidth(2));
-    settings->setValue("col_status_width", ui->threadOverview->columnWidth(3));
+    settings->setValue("col_uri_width", ui->threadOverview->columnWidth(3));
+    settings->setValue("col_name_width", ui->threadOverview->columnWidth(0));
+    settings->setValue("col_images_width", ui->threadOverview->columnWidth(1));
+    settings->setValue("col_status_width", ui->threadOverview->columnWidth(2));
     settings->setValue("visible", ui->threadOverview->isVisible());
     settings->endGroup();
 
@@ -324,6 +326,13 @@ void MainWindow::saveSettings(void) {
 
     settings->sync();
 
+    if (settings->status() == QSettings::NoError) {
+        QLOG_INFO() << "MainWindow :: Settings saved successfully";
+    }
+    else {
+        QLOG_ERROR() << "MainWindow :: Saving settings failed";
+        QLOG_ERROR() << "MainWindow ::  error: " << settings->status();
+    }
     imageViewer->saveSettings();
 }
 
@@ -364,10 +373,10 @@ void MainWindow::loadOptions(void) {
     settings->beginGroup("thread_overview");
 //    ui->dockWidget->resize();
 //    settings->setValue("width", ui->dockWidget->width());
-    ui->threadOverview->setColumnWidth(0, settings->value("col_uri_width", 170).toInt());
-    ui->threadOverview->setColumnWidth(1, settings->value("col_name_width", 190).toInt());
-    ui->threadOverview->setColumnWidth(2, settings->value("col_images_width", 60).toInt());
-    ui->threadOverview->setColumnWidth(3, settings->value("col_status_width", 70).toInt());
+    ui->threadOverview->setColumnWidth(3, settings->value("col_uri_width", 170).toInt());
+    ui->threadOverview->setColumnWidth(0, settings->value("col_name_width", 190).toInt());
+    ui->threadOverview->setColumnWidth(1, settings->value("col_images_width", 60).toInt());
+    ui->threadOverview->setColumnWidth(2, settings->value("col_status_width", 70).toInt());
     settings->endGroup();
 }
 
@@ -419,7 +428,7 @@ void MainWindow::newComponentsAvailable() {
         msg.append("<br>");
         msg.append(QString("&nbsp;&nbsp;%1:%2 (installed: %3, available: %4)").arg(c.type).arg(c.componentName).arg(c.version).arg(c.remote_version));
     }
-    ui->statusBar->showMessage(msg);
+//    ui->statusBar->showMessage(msg);
 
 #ifdef USE_UPDATER
     msg.append("<br>Do you want to update now?");
@@ -493,7 +502,7 @@ void MainWindow::addMultipleTabs() {
     threadAdder->show();
 }
 
-void MainWindow::showTab(QTreeWidgetItem* item, int column) {
+void MainWindow::showTab(QTreeWidgetItem* item, int idx) {
     int index;
 
     index = ui->threadOverview->indexOfTopLevelItem(item);
@@ -535,10 +544,10 @@ void MainWindow::updateThreadOverview() {
             sl.clear();
 
             tab = (UIImageOverview*)(ui->tabWidget->widget(i));
-            sl << tab->getURI();
             sl << tab->getTitle();
             sl << QString("%1/%2").arg(tab->getDownloadedImagesCount()).arg(tab->getTotalImagesCount());
             sl << tab->getStatus();
+            sl << tab->getURI();
 
             if (ui->threadOverview->topLevelItemCount() > i) {                   // If there is an entry for the i-th tab
                 item = ui->threadOverview->topLevelItem(i);     //  change its content
@@ -645,10 +654,6 @@ void MainWindow::createSupervisedDownload(QUrl url) {
 
 void MainWindow::removeSupervisedDownload(QUrl url) {
     requestHandler->cancel(url);
-}
-
-void MainWindow::handleRequestError(QUrl url, int error) {
-
 }
 
 void MainWindow::checkForUpdates(QString xml) {
@@ -947,6 +952,8 @@ void MainWindow::toggleThreadOverview() {
 }
 
 void MainWindow::aboutToQuit() {
+    tnt->halt();
+    tnt->deleteLater();
     saveSettings();
     removeTrayIcon();
     thumbnailRemoverThread->terminate();

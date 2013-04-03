@@ -104,7 +104,6 @@ private slots:
     void messageHandler(QString);
     void setTabTitle(QString);
     void debugButton(void);
-    void setRescheduleInterval(int);
     void processCloseRequest();
     void openURI();
     void openDownloadFolder();

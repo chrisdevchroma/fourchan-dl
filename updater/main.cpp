@@ -3,15 +3,19 @@
 #include <QFile>
 #include <QDateTime>
 #include <QtNetwork>
+#include <QSettings>
 #include "updater.h"
 
 QTextStream* output;
 QTextStream* foutput;
+QSettings* settings;
 
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     output = new QTextStream(stdout);
+
+    settings = new QSettings("../settings.ini", QSettings::IniFormat);
 
     QFile f;
 

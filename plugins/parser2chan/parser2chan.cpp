@@ -33,8 +33,6 @@ ParsingStatus Parser2chan::parseHTML(QString html) {
     QRegExp rx("</small>([\\n|\\r|\\t]*)<br>([\\n|\\r|\\t]*)<a href=\"http://([^\\.])+\\.2chan\\.net/([^\"]+)\"(?:[^<]+)<img src=\"([^\\s]+)\"(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp boardPage("<a href=\"res/(\\d+)\">Reply</a>", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitle("<span class=\"filetitle\">([^<]+)</span>");
-    bool imagesAdded;
-    bool pageIsFrontpage;
     int pos;
     _IMAGE i;
     QString tempFilename;
@@ -51,19 +49,15 @@ ParsingStatus Parser2chan::parseHTML(QString html) {
     _statusCode.hasTitle = false;
     _statusCode.isFrontpage = false;
 
-    imagesAdded = false;
     pos = 0;
     i.downloaded = false;
     i.requested = false;
-    pageIsFrontpage = false;
 
     while (pos > -1) {
         pos = boardPage.indexIn(html, pos+1);
         res = boardPage.capturedTexts();
 
         if (res.at(1) != "") {
-            pageIsFrontpage=true;
-
             u.setUrl(QString("res/%1").arg(res.at(1)));
 
             // build complete url
@@ -162,5 +156,6 @@ QMap<QString, QString> Parser2chan::getSupportedReplaceCharacters() {
     return ret;
 }
 
-
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(pParser2chan, Parser2chan)
+#endif

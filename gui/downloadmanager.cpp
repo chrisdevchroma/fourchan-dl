@@ -5,6 +5,7 @@
 DownloadManager::DownloadManager(QObject *parent) :
     QObject(parent)
 {
+    downloadsPaused = true;
     setMaxPriority(0);
     nams.clear();
     nams.append(new NetworkAccessManager(this));    // Add at least one AccessManager
@@ -25,7 +26,6 @@ DownloadManager::DownloadManager(QObject *parent) :
     statistic_downloadedKBytes = 0;
 
     loadSettings();
-    downloadsPaused = false;
 
     connect(nams.at(0), SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     connect(waitTimer, SIGNAL(timeout()), this, SLOT(resumeDownloads()));
@@ -51,7 +51,6 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
     qint64 uid;
     QList<QNetworkReply*> replies;
     DownloadRequest* dr;
-    int repliesRemoved;
     QList<QByteArray> bal;
 
 
@@ -61,8 +60,7 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
     replies = activeReplies.values();
     uid = activeReplies.key(reply, -1);
     dr = requestList.value(uid,0);
-    repliesRemoved = activeReplies.remove(uid);
-    supervisors.value(uid)->deleteLater();
+    //supervisors.value(uid)->deleteLater();
     supervisors.remove(uid);
     priorities.remove(priorities.key(uid), uid);
 
@@ -144,6 +142,7 @@ void DownloadManager::freeRequest(qint64 uid) {
     if (dr != 0) {
         dr->deleteLater();
         requestList.remove(uid);
+        activeReplies.remove(uid);
     }
 //    QLOG_TRACE() << "DownloadManager :: " << "open requests" << requestList.keys();
 //    QLOG_TRACE() << "DownloadManager :: " << "priorities" << priorities;
@@ -290,7 +289,6 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
     QLOG_WARN() << "DownloadManager :: " << r->url().toString() << "received error" << r->error() << ":" << r->errorString();
 
     switch (r->error()) {
-    case 404:
     case 203:       // Not found
         dr->requestHandler()->error(uid, 404);
 
@@ -374,7 +372,7 @@ void DownloadManager::reschedule(qint64 uid) {
 void DownloadManager::resumeDownloads() {
     QList<qint64> uids;
 
-    QLOG_INFO() << "DownloadManager :: " << "rechecking service status";
+    QLOG_INFO() << "DownloadManager :: " << "resuming downloads";
     // Start only one request to check if service is available again
     downloadsPaused = false;
     uids = priorities.values();

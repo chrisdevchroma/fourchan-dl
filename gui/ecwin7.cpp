@@ -35,7 +35,7 @@ EcWin7::EcWin7()
 }
 
 // Init taskbar communication
-void EcWin7::init(WId wid)
+void EcWin7::init(HWND wid)
 {
     mWindowId = wid;
 #ifdef Q_OS_WIN
@@ -100,7 +100,7 @@ void EcWin7::setOverlayIcon(QString iconName, QString description)
                                  IMAGE_ICON,
                                  0,
                                  0,
-                                 NULL);
+                                 0);
         mTaskbar->SetOverlayIcon(mWindowId, mOverlayIcon, description.toStdWString().c_str());
     }
     if ((oldIcon != NULL) && (oldIcon != mOverlayIcon))

@@ -1,6 +1,10 @@
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QtDebug>
+
+#if QT_VERSION < 0x050000
 #include <QCleanlooksStyle>
+#endif
+
 #include <QFile>
 #include <QDateTime>
 #include <QThread>
@@ -21,12 +25,12 @@
 DownloadManager* downloadManager;
 ThumbnailCreator* tnt;
 FolderShortcuts* folderShortcuts;
-MainWindow* mainWindow;
 PluginManager* pluginManager;
 QString updaterFileName;
 UIImageViewer* imageViewer;
 QFile* fLogFile;
 QTextStream logOutput;
+MainWindow* mainWindow;
 
 void checkEnvironment();
 
@@ -36,7 +40,11 @@ int main(int argc, char *argv[])
     QSettings settings("settings.ini", QSettings::IniFormat);
     int logLevel;
 
-    a.setStyle("plastique");
+#if QT_VERSION >= 0x050000
+    a.setStyle("fusion");
+#else
+    a.setStyle("cleanlooks");
+#endif
 
     // init the logging mechanism
     QsLogging::Logger& logger = QsLogging::Logger::instance();
@@ -64,9 +72,10 @@ int main(int argc, char *argv[])
     QLOG_INFO() << "APP :: Built with Qt" << QT_VERSION_STR << "running on" << qVersion();
 
     checkEnvironment();
-
     downloadManager = new DownloadManager();
-//    downloadManager->setMaxPriority(10);
+    folderShortcuts = new FolderShortcuts();
+    pluginManager = new PluginManager();
+
     downloadManager->pauseDownloads();  // Do not download anything until we are fully set
 
     QThread thumbnailThread;
@@ -75,20 +84,16 @@ int main(int argc, char *argv[])
     tnt->moveToThread(&thumbnailThread);
 
     a.connect(&thumbnailThread, SIGNAL(started()), tnt, SLOT(go()));
+    downloadManager->resumeDownloads();
+
+
     thumbnailThread.start();
-
-    folderShortcuts = new FolderShortcuts();
-
-    pluginManager = new PluginManager();
 
     mainWindow = new MainWindow();
     imageViewer = new UIImageViewer(mainWindow);
 
     mainWindow->show();
     mainWindow->restoreTabs();
-
-//    downloadManager->setMaxPriority(0);
-    downloadManager->resumeDownloads();
 
     a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(aboutToQuit()));
     a.connect(&a, SIGNAL(aboutToQuit()), &thumbnailThread, SLOT(terminate()));

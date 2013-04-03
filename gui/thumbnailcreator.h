@@ -23,12 +23,15 @@ public:
     void setIconSize(QSize s);
     void addToList(QString s);
     QString getCacheFile(QString);
+    void halt();
+    void resume();
 
 private:
     QStringList list;
     QSize* iconSize;
     bool hq;
     volatile bool canceled;
+    volatile bool halted;
     QSettings* settings;
     bool newImages;
     QString cacheFolder;

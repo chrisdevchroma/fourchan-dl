@@ -37,8 +37,8 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
     QRegExp rxThreadsOld("<a href=\"res/(\\d+)\">Reply</a>", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitleOld("<span class=\"filetitle\">([^<]+)</span>");
 
-    bool imagesAdded;
-    bool pageIsFrontpage;
+    //bool imagesAdded;
+    //bool pageIsFrontpage;
     int pos;
     _IMAGE i;
     QUrl u;
@@ -53,11 +53,9 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
     _statusCode.hasTitle = false;
     _statusCode.isFrontpage = false;
 
-    imagesAdded = false;
     pos = 0;
     i.downloaded = false;
     i.requested = false;
-    pageIsFrontpage = false;
 
     if (html.contains("<title>4chan - Banned</title>")) {
         _statusCode.hasErrors = true;
@@ -73,7 +71,6 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                     res = rxThreadsNew.capturedTexts();
 
                     if (res.at(1) != "") {
-                        pageIsFrontpage=true;
                         u.setUrl(QString("res/%1").arg(res.at(1)));
 
                         // build complete url
@@ -142,7 +139,6 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                 res = rxThreadsOld.capturedTexts();
 
                 if (res.at(1) != "") {
-                    pageIsFrontpage=true;
                     u.setUrl(QString("res/%1").arg(res.at(1)));
 
                     // build complete url
@@ -172,7 +168,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
             while (pos > -1) {
                 pos = rxImagesOld.indexIn(html, pos+1);
                 res = rxImagesOld.capturedTexts();
-                QUrl temp = QUrl::fromEncoded(res.at(1).toAscii());
+                QUrl temp = QUrl::fromEncoded(res.at(1).toLatin1());
 
                 i.originalFilename = temp.toString();
                 i.largeURI = "http://images.4chan.org/"+res.at(3);
@@ -255,4 +251,6 @@ QMap<QString, QString> Parser4chan::getSupportedReplaceCharacters() {
     return ret;
 }
 
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(pParser4chan, Parser4chan)
+#endif

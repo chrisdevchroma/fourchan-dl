@@ -94,11 +94,6 @@
       <widget class="QTreeWidget" name="threadOverview">
        <column>
         <property name="text">
-         <string>URI</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
          <string>Name</string>
         </property>
        </column>
@@ -110,6 +105,11 @@
        <column>
         <property name="text">
          <string>Status</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>URI</string>
         </property>
        </column>
       </widget>
@@ -263,8 +263,8 @@
    <property name="statusTip">
     <string>History of closed threads</string>
    </property>
-   <property name="softKeyRole">
-    <enum>QAction::PositiveSoftKey</enum>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
    </property>
   </action>
   <action name="actionExit">

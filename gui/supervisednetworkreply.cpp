@@ -32,7 +32,7 @@ void SupervisedNetworkReply::setNetworkReply(QNetworkReply *r, qint64 uid) {
     time.start();
 
     timer->start();
-//    QLOG_TRACE() << "SupervisedNetworkReply :: " << QTime::currentTime() << "Starting timer for " << reply->url().toString();
+    QLOG_TRACE() << "SupervisedNetworkReply :: " << QTime::currentTime() << "Starting timer for " << reply->url().toString();
 //    this->setParent(reply);
     url = reply->url().toString();
 }

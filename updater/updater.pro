@@ -38,4 +38,4 @@ RESOURCES += \
 OTHER_FILES += \
     updater.rc
 
-DEFINES += PROGRAM_VERSION="\\\"1.1\\\""
+DEFINES += PROGRAM_VERSION="\\\"1.2\\\""

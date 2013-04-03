@@ -79,7 +79,7 @@ void BlackList::cleanUp() {
 
 void BlackList::replyFinished(QNetworkReply* r) {
     switch (r->error()) {
-    case 404:
+    //case 404:
     case 203:
         remove(r->url().toString());
         break;

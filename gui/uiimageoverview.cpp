@@ -554,7 +554,6 @@ void UIImageOverview::loadSettings() {
 
 void UIImageOverview::updateSettings() {
     setThumbnailSize(QSize(settings->value("options/thumbnail_width",150).toInt(),settings->value("options/thumbnail_height",150).toInt()));
-    setRescheduleInterval(settings->value("options/reschedule_interval", 600).toInt()*1000);
 }
 
 void UIImageOverview::useOriginalFilenames(bool b) {
@@ -887,10 +886,6 @@ bool UIImageOverview::getNextImage(QString* s) {
     return ret;
 }
 
-void UIImageOverview::setRescheduleInterval(int i) {
-    //TODO
-}
-
 bool UIImageOverview::selectParser(QUrl url) {
     bool ret;
     ParserPluginInterface* tmp;
@@ -935,12 +930,13 @@ bool UIImageOverview::addImage(_IMAGE img) {
     bool alreadyInList;
     bool fileExists;
 
+    fileExists = false;
+
     if (blackList->contains(img.largeURI)) {
         alreadyInList = true;
     }
     else {
         alreadyInList = false;
-        fileExists = false;
         k = 2;
         for (i=0; i<images.length(); i++) {
             if (images.at(i).largeURI == img.largeURI) {

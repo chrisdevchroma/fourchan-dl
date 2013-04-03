@@ -56,9 +56,6 @@ void UIConfig::loadSettings(void) {
     b = settings->value("remember_directory",false).toBool();
         ui->cbRememberDirectory->setChecked(b);
 
-    b = settings->value("use_thumbnail_cache",true).toBool();
-        ui->cbUseThumbnailCache->setChecked(b);
-
     ui->cbCloseOverviewThreads->setChecked(settings->value("close_overview_threads", true).toBool());
     ui->cbUseInternalViewer->setChecked(settings->value("use_internal_viewer", false).toBool());
 
@@ -157,7 +154,6 @@ void UIConfig::accept(void) {
         settings->setValue("hq_thumbnails", ui->cbHQThumbnail->isChecked());
         settings->setValue("default_original_filename", ui->cbDefaultOriginalFilename->isChecked());
         settings->setValue("remember_directory", ui->cbRememberDirectory->isChecked());
-        settings->setValue("use_thumbnail_cache", ui->cbUseThumbnailCache->isChecked());
 
         settings->setValue("concurrent_downloads", ui->sbConcurrentDownloads->value());
         settings->setValue("reschedule_interval", ui->sbRescheduleInterval->value());

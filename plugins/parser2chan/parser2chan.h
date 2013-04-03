@@ -11,6 +11,9 @@
 class Parser2chan : public QObject, public ParserPluginInterface {
     Q_OBJECT
     Q_INTERFACES(ParserPluginInterface)
+#if QT_VERSION >= 0x050000
+    Q_PLUGIN_METADATA(IID "Parser2chan" FILE "Parser2chan.json")
+#endif
 
 public:
     Parser2chan();

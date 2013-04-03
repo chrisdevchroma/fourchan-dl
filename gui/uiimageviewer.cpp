@@ -46,11 +46,16 @@ void UIImageViewer::setImageList(QStringList imageList) {
 }
 
 void UIImageViewer::displayNextImage() {
-    if (imagesToDisplay.count() > 0) {
-        currentImage++;
-        if (currentImage >= imagesToDisplay.count())
-            currentImage = 0;
-        loadImage(currentImage);
+    if (this->isVisible()) {
+        if (imagesToDisplay.count() > 0) {
+            currentImage++;
+            if (currentImage >= imagesToDisplay.count())
+                currentImage = 0;
+            loadImage(currentImage);
+        }
+    }
+    else {
+        ui->btnSlideshow->setChecked(false);
     }
 }
 
@@ -68,7 +73,10 @@ void UIImageViewer::loadImage(int i) {
     QPixmap p;
     QString filename;
 
-    if (!this->isVisible()) show();
+    if (!this->isVisible()) {
+        ui->image->clear();
+        show();
+    }
 
     QLOG_TRACE() << "ImageViewer :: Loading image " << currentImage << "from" << imagesToDisplay.count();
     rotation = 0;
@@ -86,7 +94,7 @@ void UIImageViewer::loadImage(int i) {
                 QMovie *movie = new QMovie(filename);
                 ui->image->setMovie(movie);
                 movie->start();
-                ui->statusbar->showMessage("Loaded image" + filename, 2000);
+                ui->statusbar->showMessage("Loaded image " + filename, 2000);
                 ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
                 ui->lImageInfo->setText("");
             }
@@ -95,7 +103,7 @@ void UIImageViewer::loadImage(int i) {
                     originalPixmap = p;
                     transformPixmap();
                     fitImage();
-                    ui->statusbar->showMessage("Loaded image" + filename, 2000);
+                    ui->statusbar->showMessage("Loaded image " + filename, 2000);
                     ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
                     ui->lImageInfo->setText(QString("Resolution: %1x%2, Size: %3kB")
                                             .arg(originalPixmap.width())

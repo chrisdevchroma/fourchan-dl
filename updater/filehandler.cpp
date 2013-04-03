@@ -6,7 +6,7 @@ FileHandler::FileHandler(QObject *parent) :
 }
 
 void FileHandler::startExchange(QList<FileUpdate> l) {
-    bool filesRemaining;
+    //bool filesRemaining;
     bool errors;
     QString sourceFilename;
     QString targetFilename;
@@ -15,7 +15,7 @@ void FileHandler::startExchange(QList<FileUpdate> l) {
     updateList = l;
     errors = false;
 
-    filesRemaining = false;
+    //filesRemaining = false;
 
     for (int i=0; i<updateList.count(); i++) {
             sourceFilename = updateList.at(i).tmpFilename;

@@ -7,6 +7,7 @@
 #include <QtNetwork/QUdpSocket>
 #include <QDir>
 #include <QMessageBox>
+#include <QSettings>
 #include "../updater/commands.h"
 #include "defines.h"
 #include "QsLog.h"
@@ -30,6 +31,7 @@ private:
     QString version;
     QString fileToMoveFrom, fileToMoveTo;
     QStringList filesToMove;
+    QSettings* settings;
 
     void processCommand(QByteArray a);
     void writeCommand(int c, QByteArray a);

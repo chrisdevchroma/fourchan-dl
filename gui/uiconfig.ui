@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>426</width>
-    <height>441</height>
+    <height>467</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -33,13 +33,44 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
-       <string>UI</string>
+       <string>General</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
+       <item row="7" column="0">
+        <widget class="QCheckBox" name="cbCloseToTray">
+         <property name="text">
+          <string>Close to tray</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QCheckBox" name="cbRememberDirectory">
+         <property name="text">
+          <string>Remember directory during session</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="cbUseInternalViewer">
+         <property name="text">
+          <string>Use internal viewer</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="0">
+        <widget class="QLabel" name="label_16">
+         <property name="toolTip">
+          <string>Thumbnail Time to live</string>
+         </property>
+         <property name="text">
+          <string>Thumbnail TTL</string>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
@@ -160,48 +191,14 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="QCheckBox" name="cbRememberDirectory">
-         <property name="text">
-          <string>Remember directory during session</string>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="0">
-        <widget class="QCheckBox" name="cbUseInternalViewer">
-         <property name="text">
-          <string>Use internal viewer</string>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0">
-        <widget class="QCheckBox" name="cbUseThumbnailCache">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Use Thumbnail Cache</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
        <item row="8" column="0">
-        <widget class="QCheckBox" name="cbCloseToTray">
-         <property name="text">
-          <string>Close to tray</string>
-         </property>
-        </widget>
-       </item>
-       <item row="9" column="0">
         <widget class="QLabel" name="label_14">
          <property name="text">
           <string>Thumbnail cache folder</string>
          </property>
         </widget>
        </item>
-       <item row="9" column="1">
+       <item row="8" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QLineEdit" name="leThumbnailCacheFolder"/>
@@ -219,17 +216,7 @@
          </item>
         </layout>
        </item>
-       <item row="10" column="0">
-        <widget class="QLabel" name="label_16">
-         <property name="toolTip">
-          <string>Thumbnail Time to live</string>
-         </property>
-         <property name="text">
-          <string>Thumbnail TTL</string>
-         </property>
-        </widget>
-       </item>
-       <item row="10" column="1">
+       <item row="9" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QSpinBox" name="sbThumbnailTTL">
@@ -252,7 +239,7 @@
          </item>
         </layout>
        </item>
-       <item row="11" column="0" colspan="2">
+       <item row="10" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
           <widget class="QPushButton" name="btnDeleteAllThumbnails">
@@ -276,14 +263,14 @@
          </item>
         </layout>
        </item>
-       <item row="12" column="0">
+       <item row="11" column="0">
         <widget class="QLabel" name="label_19">
          <property name="text">
           <string>Logging Level</string>
          </property>
         </widget>
        </item>
-       <item row="12" column="1">
+       <item row="11" column="1">
         <widget class="QComboBox" name="cbLoggingLevel">
          <item>
           <property name="text">
@@ -317,7 +304,7 @@
          </item>
         </widget>
        </item>
-       <item row="13" column="0" colspan="2">
+       <item row="12" column="0" colspan="2">
         <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -423,14 +410,14 @@
          </item>
         </layout>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="4" column="0" colspan="2">
         <widget class="QCheckBox" name="cbAutoClose">
          <property name="text">
           <string>Close tabs automatically after 404</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="0">
+       <item row="8" column="0">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -443,18 +430,39 @@
          </property>
         </spacer>
        </item>
-       <item row="5" column="0" colspan="2">
+       <item row="6" column="0" colspan="2">
         <widget class="QCheckBox" name="cbCloseOverviewThreads">
          <property name="text">
           <string>Close overview threads (e. g. http://boards.4chan.org/o/2)</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="7" column="0">
         <widget class="QCheckBox" name="cbDefaultOriginalFilename">
          <property name="text">
           <string>Save with original filename as default</string>
          </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>What shall happen when a thread dies?</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QComboBox" name="comboBox">
+         <item>
+          <property name="text">
+           <string>Overview closes</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Overview stays open</string>
+          </property>
+         </item>
         </widget>
        </item>
       </layout>
@@ -518,7 +526,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="4" column="0" colspan="2">
         <spacer name="verticalSpacer_5">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -530,6 +538,13 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QCheckBox" name="cbKeepLocalHTMLCopy">
+         <property name="text">
+          <string>Keep local HTML copy of threads</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

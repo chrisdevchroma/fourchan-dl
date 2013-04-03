@@ -35,7 +35,6 @@ ParsingStatus ParserChanArchive::parseHTML(QString html) {
     QRegExp rxThreads("<div id=\"ca_ctl_title\">[^<]*<a href=\"([^\"]+)\">([^<]+)</a>", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitle("<span class=\"subject\">([^<]+)</span>");
 
-    bool imagesAdded;
     bool pageIsFrontpage;
     int pos;
     _IMAGE i;
@@ -51,7 +50,6 @@ ParsingStatus ParserChanArchive::parseHTML(QString html) {
     _statusCode.hasTitle = false;
     _statusCode.isFrontpage = false;
 
-    imagesAdded = false;
     pos = 0;
     i.downloaded = false;
     i.requested = false;
@@ -178,4 +176,6 @@ QMap<QString, QString> ParserChanArchive::getSupportedReplaceCharacters() {
     return ret;
 }
 
+#if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(pParserChanArchive, ParserChanArchive)
+#endif

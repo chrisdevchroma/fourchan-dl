@@ -39,7 +39,7 @@ ParsingStatus ParserKrautchan::parseHTML(QString html) {
   QRegExp rxTitle("<span class=\"postsubject\">([^<]+)</span>");
   QRegExp rxThreadPage("<h2>Antwortmodus\\s+\\(Thread \\d+\\)</h2>");
 
-  bool imagesAdded;
+  //bool imagesAdded;
   bool pageIsFrontpage;
   int pos;
   _IMAGE i;
@@ -55,7 +55,6 @@ ParsingStatus ParserKrautchan::parseHTML(QString html) {
   _statusCode.hasTitle = false;
   _statusCode.isFrontpage = false;
 
-  imagesAdded = false;
   pos = 0;
   i.downloaded = false;
   i.requested = false;
