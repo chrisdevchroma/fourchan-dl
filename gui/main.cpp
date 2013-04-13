@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     int logLevel;
 
 #if QT_VERSION >= 0x050000
-    a.setStyle("fusion");
+    a.setStyle("windowsvista");
 #else
     a.setStyle("cleanlooks");
 #endif
@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
 
     a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(aboutToQuit()));
     a.connect(&a, SIGNAL(aboutToQuit()), &thumbnailThread, SLOT(terminate()));
+    a.connect(&a, SIGNAL(aboutToQuit()), downloadManager, SLOT(deleteLater()));
 
     return a.exec();
 }

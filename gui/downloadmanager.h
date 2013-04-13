@@ -31,7 +31,8 @@ public:
     int getFinishedRequests();
     void pauseDownloads();
     void setMaxPriority(int);
-    QMap<qint64, QString> getPendingRequestMap();
+    QMap<qint64, QString> getPendingRequestsMap();
+    QMap<qint64, QString> getRunningRequestsMap();
 
 private:
     QList<NetworkAccessManager*> nams;

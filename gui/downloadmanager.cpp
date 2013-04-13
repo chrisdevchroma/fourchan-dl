@@ -63,6 +63,7 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
     //supervisors.value(uid)->deleteLater();
     supervisors.remove(uid);
     priorities.remove(priorities.key(uid), uid);
+    activeReplies.remove(uid);
 
     QLOG_TRACE() << "DownloadManager :: " << "Finished request" << uid << reply->url().toString() << "reply" << (qint64)reply;
 
@@ -378,7 +379,8 @@ void DownloadManager::resumeDownloads() {
     uids = priorities.values();
 
     foreach (qint64 uid, uids) {
-        if (currentRequests >= maxRequests) {
+        if (activeReplies.count() >= maxRequests) {
+//        if (currentRequests >= maxRequests) {
             break;
         }
         else {
@@ -460,7 +462,7 @@ void DownloadManager::setMaxPriority(int mp) {
     }
 }
 
-QMap<qint64, QString> DownloadManager::getPendingRequestMap() {
+QMap<qint64, QString> DownloadManager::getPendingRequestsMap() {
     QMap<qint64, QString> ret;
     QHashIterator<qint64, DownloadRequest*>  requests(requestList);
 
@@ -470,5 +472,18 @@ QMap<qint64, QString> DownloadManager::getPendingRequestMap() {
         ret.insertMulti(requests.value()->priority(), requests.value()->url().toString());
     }
 
+    return ret;
+}
+
+QMap<qint64, QString> DownloadManager::getRunningRequestsMap() {
+    QMap<qint64, QString> ret;
+    QHashIterator<qint64, QNetworkReply*>  requests(activeReplies);
+/*
+    while (requests.hasNext()) {
+        requests.next();
+
+        ret.insertMulti(0, requests.value()->url().toString());
+    }
+*/
     return ret;
 }

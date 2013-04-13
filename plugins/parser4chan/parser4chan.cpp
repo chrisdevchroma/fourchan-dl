@@ -91,6 +91,8 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
 
                         _urlList << QUrl(sUrl);
                         _statusCode.isFrontpage = true;
+                        _threadTitle = _url.toString();
+                        _statusCode.hasTitle = true;
                     }
                 }
             }
@@ -192,6 +194,11 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
 
             }
         }
+    }
+
+    if (_threadTitle.trimmed().isEmpty() && !_statusCode.isFrontpage) {
+        _threadTitle = QString("Thread# %1").arg(threadNumber);
+        _statusCode.hasTitle = true;
     }
 
     return _statusCode;

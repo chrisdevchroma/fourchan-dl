@@ -73,6 +73,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(downloadManager, SIGNAL(error(QString)), ui->statusBar, SLOT(showMessage(QString)));
     connect(downloadManager, SIGNAL(finishedRequestsChanged(int)), this, SLOT(updateDownloadProgress()));
     connect(downloadManager, SIGNAL(totalRequestsChanged(int)), this, SLOT(updateDownloadProgress()));
+    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(addThreadOverviewMark(int)));
 
     connect(overviewUpdateTimer, SIGNAL(timeout()), this, SLOT(overviewTimerTimeout()));
     connect(historyMenu, SIGNAL(triggered(QAction*)), this, SLOT(restoreFromHistory(QAction*)));
@@ -957,4 +958,25 @@ void MainWindow::aboutToQuit() {
     saveSettings();
     removeTrayIcon();
     thumbnailRemoverThread->terminate();
+}
+
+void MainWindow::removeThreadOverviewMark() {
+    for (int i=0; i<ui->threadOverview->topLevelItemCount(); i++) {
+        ui->threadOverview->topLevelItem(i)->setIcon(0, QIcon());
+    }
+}
+
+void MainWindow::addThreadOverviewMark(QTreeWidgetItem* item) {
+    removeThreadOverviewMark();
+
+    item->setIcon(0, QIcon(":/icons/resources/go-next.png"));
+}
+
+void MainWindow::addThreadOverviewMark(int index) {
+    QList<QTreeWidgetItem*> foundItems;
+
+    foundItems = ui->threadOverview->findItems(((UIImageOverview*)(ui->tabWidget->widget(index)))->getURI(), Qt::MatchExactly, 3 );
+    if (foundItems.count() == 1) {
+        addThreadOverviewMark(foundItems.at(0));
+    }
 }

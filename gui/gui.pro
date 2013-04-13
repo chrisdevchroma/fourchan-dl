@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     uiimageviewer.cpp \
     thumbnailcreator.cpp \
     thumbnailremover.cpp \
-    uipendingrequests.cpp
+    uipendingrequests.cpp \
+    httprequest.cpp
 
 HEADERS  += mainwindow.h \
     uiimageoverview.h \
@@ -61,7 +62,8 @@ HEADERS  += mainwindow.h \
     uiimageviewer.h \
     thumbnailcreator.h \
     thumbnailremover.h \
-    uipendingrequests.h
+    uipendingrequests.h \
+    httprequest.h
 
 FORMS    += mainwindow.ui \
     uiimageoverview.ui \

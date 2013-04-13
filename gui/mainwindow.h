@@ -128,6 +128,9 @@ private slots:
     void trayIconActivated(QSystemTrayIcon::ActivationReason ar);
     void toggleThreadOverview();
     void aboutToQuit();
+    void removeThreadOverviewMark();
+    void addThreadOverviewMark(QTreeWidgetItem *item);
+    void addThreadOverviewMark(int index);
 
 signals:
     void removeFiles(QStringList);
