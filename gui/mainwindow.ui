@@ -35,7 +35,7 @@
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="tabPosition">
-       <enum>QTabWidget::East</enum>
+       <enum>QTabWidget::North</enum>
       </property>
       <property name="tabShape">
        <enum>QTabWidget::Rounded</enum>
@@ -47,7 +47,7 @@
        <bool>true</bool>
       </property>
       <property name="movable">
-       <bool>true</bool>
+       <bool>false</bool>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -276,6 +276,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionPauseAll">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/media-playback-pause.png</normaloff>:/icons/resources/media-playback-pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>PauseAll</string>
+   </property>
+   <property name="toolTip">
+    <string>Pause downloads and thumbnail creation</string>
+   </property>
+   <property name="statusTip">
+    <string>Pause downloads and thumbnail creation</string>
    </property>
   </action>
  </widget>

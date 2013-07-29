@@ -63,11 +63,17 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
         break;
 
     case DISPLAY_MSG:
+        QLOG_ALWAYS() << "Updater Message :: " << QString(payload);
+#ifdef __GUI__
         QMessageBox::information(0, "Updater Message", QString(payload));
+#endif
         break;
 
     case ERROR_CMD:
+        QLOG_ALWAYS() << "Updater Error :: " << QString(payload);
+#ifdef __GUI__
         QMessageBox::critical(0, "Update Error", QString(payload));
+#endif
         break;
 
     case CLEAR:

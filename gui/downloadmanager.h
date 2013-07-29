@@ -21,6 +21,7 @@ class DownloadManager : public QObject
 public:
     explicit DownloadManager(QObject *parent = 0);
     QByteArray getByteArray(qint64);
+    bool cached(qint64);
     void freeRequest(qint64);
     void removeRequest(qint64);
     qint64 requestDownload(RequestHandler* caller, QUrl url, int prio=0);
@@ -33,6 +34,7 @@ public:
     void setMaxPriority(int);
     QMap<qint64, QString> getPendingRequestsMap();
     QMap<qint64, QString> getRunningRequestsMap();
+    QString getFilenameForURL(QUrl);
 
 private:
     QList<NetworkAccessManager*> nams;
@@ -43,6 +45,7 @@ private:
     QSettings* settings;
     QTimer* waitTimer;
     NetworkAccessManager* getFreeNAM();
+//    QNetworkAccessManager* _manager;
     void setupNetworkAccessManagers(int count);
     int maxRequests;
     int currentRequests;
@@ -53,12 +56,20 @@ private:
     bool downloadsPaused;
     int statistic_downloadedFiles;
     float statistic_downloadedKBytes;
+    bool _useThreadCache;
+    QString _threadCachePath;
 
     void addRequest(qint64, DownloadRequest*);
     void handleError(qint64, QNetworkReply*);
     void reschedule(qint64);
     void processRequests();
     inline qint64 getUID() {return ++lastid;}
+
+    bool cacheAvailable(QUrl url);
+    QByteArray getCachedReply(QUrl url);
+    QString encodeURL(QString);
+    QString decodeURL(QString);
+
     qint64 lastid;
     int _max_priority;
 

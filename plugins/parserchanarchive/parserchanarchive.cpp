@@ -30,8 +30,25 @@ QString ParserChanArchive::getDomain() {
 
 ParsingStatus ParserChanArchive::parseHTML(QString html) {
     QStringList res;
-    QRegExp rxImages("<span class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)/([^\"]+)\"(?:[^<]+)</a>[^<]*<span title=\"([^\"]+)\">[^<]+</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
-    QRegExp rxImagesOld("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QList<QRegExp> imageRegExps;
+    QList<RegExpPosition> imageRegExpsPos;
+    RegExpPosition rep;
+
+    rep.filename = -1;
+    rep.imagelink = -1;
+
+    imageRegExps << QRegExp("<span class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)/([^\"]+)\"(?:[^<]+)</a>[^<]*<span title=\"([^\"]+)\">[^<]+</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    rep.filename  = 3;
+    rep.imagelink = 2;
+    imageRegExpsPos << rep;
+
+    imageRegExps << QRegExp("<span class=\"filesize\"[^>]*>[^<]*<a href=\"([^/]*)/([^\"]+)\"(?:[^<]+)</a>[^<]*<span title=\"([^\"]+)\">[^<]+</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    imageRegExpsPos << rep;
+
+    imageRegExps << QRegExp("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    imageRegExpsPos << rep;
+
+
     QRegExp rxThreads("<div id=\"ca_ctl_title\">[^<]*<a href=\"([^\"]+)\">([^<]+)</a>", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitle("<span class=\"subject\">([^<]+)</span>");
 
@@ -74,32 +91,29 @@ ParsingStatus ParserChanArchive::parseHTML(QString html) {
         // Checking for Images
         pos = 0;
 
-        while (pos > -1) {
-            pos = rxImages.indexIn(html, pos+1);
-            res = rxImages.capturedTexts();
+        if (imageRegExps.count() > 0) {
+            QRegExp rx;
 
-            i.originalFilename = res.at(3);
-            i.largeURI = QString("%1://%2/%3").arg(_url.scheme()).arg(_url.host()).arg(res.at(2));
-            i.thumbURI = "";
+            for (int k=0; k<imageRegExps.count(); k++){
+                rx = imageRegExps.value(k);
+                rep = imageRegExpsPos.value(k);
+                pos = 0;
 
-            if (pos != -1) {
-                _images.append(i);
-                _statusCode.hasImages = true;
-            }
-        }
+                while ( pos > -1 ) {
+                    pos = rx.indexIn(html, pos+1);
+                    res = rx.capturedTexts();
+                    if (rep.filename != -1) {
+                        i.originalFilename = res.at(rep.filename);
+                    }
+                    if (rep.imagelink != -1) {
+                        i.largeURI = QString("%1://%2/%3").arg(_url.scheme()).arg(_url.host()).arg(res.at(rep.imagelink));
+                    }
 
-        pos = 0;
-        while (pos > -1) {
-            pos = rxImagesOld.indexIn(html, pos+1);
-            res = rxImagesOld.capturedTexts();
-
-            i.originalFilename = res.at(3);
-            i.largeURI = QString("%1://%2/%3").arg(_url.scheme()).arg(_url.host()).arg(res.at(2));
-            i.thumbURI = "";
-
-            if (pos != -1) {
-                _images.append(i);
-                _statusCode.hasImages = true;
+                    if (pos != -1) {
+                        _images.append(i);
+                        _statusCode.hasImages = true;
+                    }
+                }
             }
         }
 

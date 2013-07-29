@@ -11,11 +11,11 @@ UIImageViewer::UIImageViewer(QWidget *parent) :
     currentImage = -1;
     rotation = 0;
     settings = new QSettings("settings.ini", QSettings::IniFormat);
-    loadSettings();
     runSlideshow = false;
     slideshowTimer = new QTimer(this);
     slideshowTimer->setSingleShot(false);
     slideshowTimer->setInterval(ui->sbSlideshowPause->value()*1000);
+    loadSettings();
 
     connect(slideshowTimer, SIGNAL(timeout()), this, SLOT(displayNextImage()));
 }
@@ -185,7 +185,7 @@ void UIImageViewer::loadSettings() {
         state = settings->value("state",0).toInt();
         s = settings->value("size",QSize(0,0)).toSize();
         ui->btnFitImage->setChecked(settings->value("fit_image", false).toBool());
-//        ui->sbSlideshowPause->setValue(settings->value("slideshow_pause", 3).toInt());
+        ui->sbSlideshowPause->setValue(settings->value("slideshow_pause", 3).toInt());
     settings->endGroup();
 
     if (p != QPoint(0,0))

@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent) :
     overviewUpdateTimer->setInterval(1000);
     overviewUpdateTimer->setSingleShot(true);
     _updateOverview = false;
+    _paused = false;
 
     runUpdate = false;
 
@@ -34,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menuBar->addAction(ui->actionTabOverview);
 
     ui->menuBar->addAction(ui->actionStart_all);
+    ui->menuBar->addAction(ui->actionPauseAll);
     ui->menuBar->addAction(ui->actionStop_all);
 
     ui->menuBar->addAction(ui->actionOpen_Configuration);
@@ -59,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
     restoreWindowSettings();
     updateWidgetSettings();
 
-    connect(requestHandler, SIGNAL(response(QUrl,QByteArray)), this, SLOT(processRequestResponse(QUrl,QByteArray)));
+    connect(requestHandler, SIGNAL(response(QUrl,QByteArray,bool)), this, SLOT(processRequestResponse(QUrl,QByteArray,bool)));
     connect(requestHandler, SIGNAL(responseError(QUrl,int)), this, SLOT(handleRequestError(QUrl,int)));
 
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
@@ -69,6 +71,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(uiConfig, SIGNAL(deleteAllThumbnails()), thumbnailRemover, SLOT(removeAll()));
     connect(ui->actionStart_all, SIGNAL(triggered()), this, SLOT(startAll()));
     connect(ui->actionStop_all, SIGNAL(triggered()), this, SLOT(stopAll()));
+    connect(ui->actionPauseAll, SIGNAL(triggered()), this, SLOT(pauseAll()));
     connect(threadAdder, SIGNAL(addTab(QString)), this, SLOT(createTab(QString)));
     connect(downloadManager, SIGNAL(error(QString)), ui->statusBar, SLOT(showMessage(QString)));
     connect(downloadManager, SIGNAL(finishedRequestsChanged(int)), this, SLOT(updateDownloadProgress()));
@@ -395,7 +398,7 @@ void MainWindow::processCloseRequest(UIImageOverview* w, int reason) {
     }
 }
 
-void MainWindow::processRequestResponse(QUrl url, QByteArray ba) {
+void MainWindow::processRequestResponse(QUrl url, QByteArray ba, bool cached) {
 
     if (url.toString().contains("webupdate.xml")) {
         checkForUpdates(QString(ba));
@@ -474,6 +477,21 @@ void MainWindow::startAll() {
         ((UIImageOverview*)ui->tabWidget->widget(i))->start();
         ui->pbOpenRequests->setValue((i+1));
     }
+}
+
+void MainWindow::pauseAll() {
+    if (_paused) {
+        ui->actionPauseAll->setIcon(QIcon(":/icons/resources/media-playback-pause.png"));
+        downloadManager->resumeDownloads();
+        tnt->resume();
+    }
+    else {
+        ui->actionPauseAll->setIcon(QIcon(":/icons/resources/media-playback-pause-red.png"));
+        downloadManager->pauseDownloads();
+        tnt->halt();
+    }
+
+    _paused = !_paused;
 }
 
 void MainWindow::stopAll() {
@@ -759,13 +777,20 @@ void MainWindow::createComponentList() {
     QString version;
 #endif
 
-    qtFiles << "QtCore4" << "QtGui4" << "QtNetwork4" << "QtXml4";
-
 #ifdef Q_OS_WIN32
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    qtFiles << "Qt5Core" << "Qt5Gui" << "Qt5Widgets" << "Qt5Network" << "Qt5Xml";
+    neededLibraries << "libeay32.dll" << "ssleay32.dll" << "imageformats/qgif.dll"
+                    << "imageformats/qico.dll" << "imageformats/qjpeg.dll" << "imageformats/qsvg.dll"
+                    << "libgcc_s_sjlj-1.dll" << "libwinpthread-1.dll";
+
+#else
+    qtFiles << "QtCore4" << "QtGui4" << "QtNetwork4" << "QtXml4";
     neededLibraries << "libeay32.dll" << "ssleay32.dll" << "imageformats/qgif4.dll"
                     << "imageformats/qico4.dll" << "imageformats/qjpeg4.dll"
                     << "imageformats/qmng4.dll" << "imageformats/qsvg4.dll"
                     << "imageformats/qtiff4.dll";
+#endif
 #endif
 
     components.clear();
@@ -789,6 +814,14 @@ void MainWindow::createComponentList() {
         else {
             QLOG_WARN() << "Mainwidow :: createComponentList :: Needed library " << libFile << "does not exist.";
         }
+    }
+
+    if (QFile::exists(QString("%1/%2").arg(QApplication::applicationDirPath()).arg(CONSOLE_APPNAME))) {
+        c.filename = CONSOLE_APPNAME;
+        c.componentName = "Console";
+        c.type = "executable";
+        c.version = settings->value("console/version", "0.1.0").toString();
+        components.insert(QString("%1:%2").arg(c.type).arg(c.filename), c);
     }
 
 #ifdef USE_UPDATER
@@ -953,11 +986,15 @@ void MainWindow::toggleThreadOverview() {
 }
 
 void MainWindow::aboutToQuit() {
+    downloadManager->pauseDownloads();
     tnt->halt();
     tnt->deleteLater();
     saveSettings();
     removeTrayIcon();
+    cleanThreadCache();
     thumbnailRemoverThread->terminate();
+
+    emit quitAll();
 }
 
 void MainWindow::removeThreadOverviewMark() {
@@ -978,5 +1015,39 @@ void MainWindow::addThreadOverviewMark(int index) {
     foundItems = ui->threadOverview->findItems(((UIImageOverview*)(ui->tabWidget->widget(index)))->getURI(), Qt::MatchExactly, 3 );
     if (foundItems.count() == 1) {
         addThreadOverviewMark(foundItems.at(0));
+    }
+}
+
+void MainWindow::cleanThreadCache() {
+    QStringList threadCachesToRemove;
+    QStringList dirContents;
+    QString cacheFolder;
+    QString url;
+    QString cacheFile;
+    QDir dir;
+
+    if (settings->value("download_manager/use_thread_cache", false).toBool()) {
+        cacheFolder = settings->value("download_manager/thread_cache_path", "").toString();
+
+        if (!cacheFolder.isEmpty()) {
+            dir.setPath(cacheFolder);
+            if (dir.isReadable()) {
+                dirContents = dir.entryList(QStringList() << "*.tcache");
+            }
+        }
+
+        foreach (cacheFile, dirContents) {
+            threadCachesToRemove << QString("%1/%2").arg(cacheFolder, cacheFile);
+        }
+
+        for (int i=0; i<ui->tabWidget->count(); i++) {
+            url = ((UIImageOverview*)ui->tabWidget->widget(i))->getURI();
+            cacheFile = downloadManager->getFilenameForURL(QUrl(url));
+            threadCachesToRemove.removeAll(cacheFile);
+        }
+
+        foreach (cacheFile, threadCachesToRemove) {
+            QFile::remove(cacheFile);
+        }
     }
 }

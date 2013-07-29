@@ -34,6 +34,7 @@ private slots:
     void reject(void);
     void chooseLocation(void);
     void chooseThumbnailCacheLocation(void);
+    void chooseThreadCacheLocation(void);
     void editTimeoutValues(void);
     void loadSettings(void);
     void toggleProxy(bool);
@@ -42,6 +43,7 @@ private slots:
     void deleteShortcut();
     void editShortcutItem(QListWidgetItem*);
     void loadShortcuts();
+    void toggleLogLevelWarning(QString);
 signals:
     void configurationChanged(void);
     void deleteAllThumbnails();

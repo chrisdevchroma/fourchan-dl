@@ -21,7 +21,10 @@
 #define ECWIN7_H
 
 #include <QtGlobal>
+#include <QString>
+#ifdef __GUI__
 #include <QWidget>
+#endif
 
 // Windows only data definitions
 #ifdef Q_OS_WIN

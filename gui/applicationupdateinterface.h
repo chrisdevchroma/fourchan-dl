@@ -6,8 +6,12 @@
 #include <QByteArray>
 #include <QtNetwork/QUdpSocket>
 #include <QDir>
-#include <QMessageBox>
 #include <QSettings>
+
+#ifdef __GUI__
+#include <QMessageBox>
+#endif
+
 #include "../updater/commands.h"
 #include "defines.h"
 #include "QsLog.h"

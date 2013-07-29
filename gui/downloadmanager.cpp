@@ -27,6 +27,9 @@ DownloadManager::DownloadManager(QObject *parent) :
 
     loadSettings();
 
+//    _manager = new QNetworkAccessManager(this);
+//    connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
+
     connect(nams.at(0), SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     connect(waitTimer, SIGNAL(timeout()), this, SLOT(resumeDownloads()));
 }
@@ -36,6 +39,8 @@ void DownloadManager::loadSettings() {
         maxRequests = settings->value("concurrent_downloads", 20).toInt();
         initialTimeout = settings->value("initial_timeout", 30).toInt()*1000;
         runningTimeout = settings->value("running_timeout", 20).toInt()*1000;
+        _useThreadCache = settings->value("use_thread_cache", false).toBool();
+        _threadCachePath = settings->value("thread_cache_path", "").toString();
     settings->endGroup();
 
     settings->beginGroup("statistics");
@@ -52,11 +57,13 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
     QList<QNetworkReply*> replies;
     DownloadRequest* dr;
     QList<QByteArray> bal;
+    QFile f;
+    QString threadCacheFilename;
 
 
     // Search in requestList for this reply
     bal = reply->rawHeaderList();
-//    QLOG_TRACE() << "DownloadManager :: " << reply->url().toString() << "rawHeader: " << bal;
+    QLOG_TRACE() << "DownloadManager :: " << reply->url().toString() << "rawHeader: " << bal;
     replies = activeReplies.values();
     uid = activeReplies.key(reply, -1);
     dr = requestList.value(uid,0);
@@ -97,6 +104,20 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
                         statistic_downloadedFiles++;
                         statistic_downloadedKBytes += ((reply->header(QNetworkRequest::ContentLengthHeader).toFloat())/1024);
                     }
+                    else {
+                        if (_useThreadCache) {
+                            threadCacheFilename = getFilenameForURL(reply->url());
+                            if (threadCacheFilename != ".") {
+                                f.setFileName(threadCacheFilename);
+                                f.open(QIODevice::WriteOnly | QIODevice::Truncate);
+                                if (f.isOpen() && f.isWritable()) {
+                                    f.write(qCompress(dr->response()));
+                                    QLOG_DEBUG() << "DownloadManager :: Writing cache file " << threadCacheFilename;
+                                }
+                                f.close();
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -135,6 +156,20 @@ QByteArray DownloadManager::getByteArray(qint64 uid) {
     return ret;
 }
 
+bool DownloadManager::cached(qint64 uid) {
+    DownloadRequest* dr;
+    bool ret;
+
+    dr = requestList.value(uid,0);
+
+    ret = false;
+    if (dr != 0) {
+        ret = dr->cached();
+    }
+
+    return ret;
+}
+
 void DownloadManager::freeRequest(qint64 uid) {
     DownloadRequest* dr;
     dr = requestList.value(uid, 0);
@@ -157,6 +192,8 @@ qint64 DownloadManager::requestDownload(RequestHandler* caller, QUrl url, int pr
     dr->setRequestHandler(caller);
     dr->setUrl(url);
     dr->setPriority(prio);
+
+    connect(dr, SIGNAL(requestUnpaused()), this, SLOT(resumeDownloads()));
 
     uid = getUID();
 
@@ -194,56 +231,42 @@ void DownloadManager::downloadTimeout(qint64 uid) {
 
 void DownloadManager::processRequests() {
     QList<qint64> uids;
-    int lowest_prio;
 
     if (!downloadsPaused) {
+        uids = priorities.values();
 
-        //    uids = requestList.keys();
-        lowest_prio = -1;
-        QMapIterator<int, qint64> i(priorities);
-        if (i.hasNext()) {
-            i.next();
-            lowest_prio = i.key();
-        }
-
-        if (lowest_prio > _max_priority && _max_priority > 0) {
-            QLOG_INFO() << "DownloadManager :: Dowloads stopped because of max_priority";
-        }
-        else {
-            uids = priorities.values();
-
-            if (uids.count() > 0) {
-                foreach (qint64 uid, uids) {
-                    //            if (currentRequests >= maxRequests) {
-                    if (activeReplies.count() >= maxRequests) {
-                        break;
-                    }
-                    else {
-                        if (requestList.count(uid)>0) {
-                            if (!(requestList.value(uid)->finished()) && !(requestList.value(uid)->processing())) {
-                                startRequest(uid);
-                                //                            QLOG_TRACE() << "DownloadManager :: " << "addRequest (" << uid << ")";
-                            }
+        if (uids.count() > 0) {
+            foreach (qint64 uid, uids) {
+                if (activeReplies.count() >= maxRequests) {
+                    break;
+                }
+                else {
+                    if (requestList.count(uid) > 0) {
+                        if (!(requestList.value(uid)->finished()) &&
+                            !(requestList.value(uid)->processing()) &&
+                            !(requestList.value(uid)->paused())) {
+                            startRequest(uid);
+                            //                            QLOG_TRACE() << "DownloadManager :: " << "addRequest (" << uid << ")";
                         }
                     }
                 }
             }
-            else {
-                if (requestList.count() > 0) {
-                    // This should not happen but if there are no (more) priorities set for some downloads, reset them
-                    uids = requestList.keys();
-                    foreach(qint64 uid, uids) {
-                        priorities.insertMulti(uid, 0);
-                    }
+        }
+        else {
+            if (requestList.count() > 0) {
+                // This should not happen but if there are no (more) priorities set for some downloads, reset them
+                uids = requestList.keys();
+                foreach(qint64 uid, uids) {
+                    priorities.insertMulti(uid, 0);
+                }
 
-                    processRequests();
-                }
-                else {
-                    // We are finished
-                    totalRequests = 0;
-                    finishedRequests = 0;
-                    emit totalRequestsChanged(totalRequests);
-                }
+                processRequests();
+            }
+            else {
+                // We are finished
+                totalRequests = 0;
+                finishedRequests = 0;
+                emit totalRequestsChanged(totalRequests);
             }
         }
     }
@@ -271,6 +294,7 @@ void DownloadManager::startRequest(qint64 uid) {
         currentRequests++;
         nam = getFreeNAM();
         rep = nam->get(req);
+//        rep = _manager->get(req);
 
         sup->setNetworkReply(rep, uid);
         supervisors.insert(uid, sup);
@@ -291,7 +315,14 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
 
     switch (r->error()) {
     case 203:       // Not found
-        dr->requestHandler()->error(uid, 404);
+        if (_useThreadCache && cacheAvailable(dr->url())) {
+                dr->setResponse(getCachedReply(dr->url()));
+                dr->setCached(true);
+                dr->requestHandler()->requestFinished(uid);
+        }
+        else {
+            dr->requestHandler()->error(uid, 404);
+        }
 
         currentRequests--;
         processRequests();
@@ -309,6 +340,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
 //        }
 
 //        waitTimer->start();
+        dr->pause(10);
         reschedule(uid);
         break;
     case 205:
@@ -318,6 +350,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
     case 2:         // Connection closed
         //        QLOG_TRACE() << "DownloadManager :: " << "response:" << QString(r->readAll());
         //        QLOG_TRACE() << "DownloadManager :: " << "finished:" << r->isFinished();
+        dr->pause(10);
         reschedule(uid);
 
 //        emit message(QString("Rescheduled %1").arg(r->url().toString()));
@@ -332,6 +365,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
     case 3:
         QLOG_WARN() << "DownloadManager :: " << "Host not found error for URL" << r->url().toString();
         currentRequests--;
+        dr->pause(10);
         reschedule(uid);    // Try harder
         processRequests();
         break;
@@ -339,6 +373,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
     default:
         QLOG_ERROR() << "DownloadManager :: " << "Unhandled error " << r->error();
 //        r.caller->error(r.uid, 404);
+        dr->pause(10);
         reschedule(uid);        // Since we don't know what happened, try harder
         currentRequests--;
         processRequests();
@@ -371,25 +406,10 @@ void DownloadManager::reschedule(qint64 uid) {
 }
 
 void DownloadManager::resumeDownloads() {
-    QList<qint64> uids;
-
     QLOG_INFO() << "DownloadManager :: " << "resuming downloads";
-    // Start only one request to check if service is available again
     downloadsPaused = false;
-    uids = priorities.values();
 
-    foreach (qint64 uid, uids) {
-        if (activeReplies.count() >= maxRequests) {
-//        if (currentRequests >= maxRequests) {
-            break;
-        }
-        else {
-            if (!(requestList.value(uid)->finished()) && !(requestList.value(uid)->processing())) {
-                startRequest(uid);
-                break;
-            }
-        }
-    }
+    processRequests();
 }
 
 void DownloadManager::removeRequest(qint64 uid) {
@@ -487,3 +507,69 @@ QMap<qint64, QString> DownloadManager::getRunningRequestsMap() {
 */
     return ret;
 }
+
+bool DownloadManager::cacheAvailable(QUrl url) {
+    bool ret;
+    QFile f;
+
+    ret = false;
+
+    if (_useThreadCache && !_threadCachePath.isEmpty()) {
+        if (QFile::exists(getFilenameForURL(url))) {
+            ret = true;
+        }
+    }
+
+    return ret;
+}
+
+QByteArray DownloadManager::getCachedReply(QUrl url) {
+    QByteArray ret;
+    QFile f;
+
+    if (cacheAvailable(url)) {
+        f.setFileName(getFilenameForURL(url));
+        f.open(QIODevice::ReadOnly);
+
+        if (f.isOpen() && f.isReadable()) {
+            ret = qUncompress(f.readAll());
+            QLOG_DEBUG() << "DownloadManager :: reading cache file for " << url.toString();
+        }
+        f.close();
+    }
+
+    return ret;
+}
+
+QString DownloadManager::encodeURL(QString in) {
+    QString ret;
+
+    ret = QUrl::toPercentEncoding(in);
+    QLOG_DEBUG() << "DownloadManager :: encoding URL from " << in << " to " << ret;
+
+    return ret;
+}
+
+QString DownloadManager::decodeURL(QString in) {
+    QString ret;
+
+    ret = QUrl::fromPercentEncoding(in.toUtf8());
+    QLOG_DEBUG() << "DownloadManager :: decoding URL from " << in << " to " << ret;
+
+    return ret;
+}
+
+QString DownloadManager::getFilenameForURL(QUrl url) {
+    QString ret;
+
+    if (!_threadCachePath.isEmpty()) {
+        ret = QString("%1/%2.tcache").arg(_threadCachePath, encodeURL(url.toString()));
+    }
+    else {
+        ret = ".";
+    }
+
+    QLOG_DEBUG() << "DownloadManager :: threadCache filename=" << ret;
+    return ret;
+}
+

@@ -28,5 +28,7 @@
         <file>resources/go-previous.png</file>
         <file>resources/fit-image.png</file>
         <file>resources/rotateCW.png</file>
+        <file>resources/media-playback-pause.png</file>
+        <file>resources/media-playback-pause-red.png</file>
     </qresource>
 </RCC>

@@ -31,22 +31,22 @@ void ThumbnailCreator::go() {
             }
         mutex.unlock();
 
-        iconWidth = iconSize->width();
-        iconHeight = iconSize->height();
-        enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
-        hqRendering = settings->value("options/hq_thumbnails", false).toBool();
-        useCache = true;
-        cacheFolder = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
-                                      .arg("tncache")).toString();
-
-//        QLOG_ALWAYS() << "ThumbnailCreator :: Using thumbnail folder " << cacheFolder;
-        if (useCache && !(dir.exists(cacheFolder))) {
-            QLOG_TRACE() << "ThumbnailCreator :: Creating thumbnail cache folder " << cacheFolder;
-            dir.mkpath(cacheFolder);
-        }
-
         if (newImages) {
             bool useCachedThumbnail;
+
+            iconWidth = iconSize->width();
+            iconHeight = iconSize->height();
+            enlargeThumbnails = settings->value("options/enlarge_thumbnails", false).toBool();
+            hqRendering = settings->value("options/hq_thumbnails", false).toBool();
+            useCache = true;
+            cacheFolder = settings->value("options/thumbnail_cache_folder", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
+                                          .arg("tncache")).toString();
+
+    //        QLOG_ALWAYS() << "ThumbnailCreator :: Using thumbnail folder " << cacheFolder;
+            if (useCache && !(dir.exists(cacheFolder))) {
+                QLOG_TRACE() << "ThumbnailCreator :: Creating thumbnail cache folder " << cacheFolder;
+                dir.mkpath(cacheFolder);
+            }
 
             useCachedThumbnail = false;
             // Check if thumbnail exists

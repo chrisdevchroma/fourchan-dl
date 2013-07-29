@@ -8,6 +8,11 @@
 #include "../../gui/ParserPluginInterface.h"
 #include "../../gui/structs.h"
 
+struct RegExpPosition {
+    int imagelink;
+    int filename;
+};
+
 class ParserChanArchive : public QObject, public ParserPluginInterface {
     Q_OBJECT
     Q_INTERFACES(ParserPluginInterface)

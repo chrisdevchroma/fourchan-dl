@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
 
 #if QT_VERSION >= 0x050000
     a.setStyle("windowsvista");
+    //a.setStyle("fusion");
 #else
     a.setStyle("cleanlooks");
 #endif
@@ -96,8 +97,8 @@ int main(int argc, char *argv[])
     mainWindow->restoreTabs();
 
     a.connect(&a, SIGNAL(aboutToQuit()), mainWindow, SLOT(aboutToQuit()));
-    a.connect(&a, SIGNAL(aboutToQuit()), &thumbnailThread, SLOT(terminate()));
-    a.connect(&a, SIGNAL(aboutToQuit()), downloadManager, SLOT(deleteLater()));
+    a.connect(mainWindow, SIGNAL(quitAll()), &thumbnailThread, SLOT(terminate()));
+    a.connect(mainWindow, SIGNAL(quitAll()), downloadManager, SLOT(deleteLater()));
 
     return a.exec();
 }
@@ -107,6 +108,7 @@ void checkEnvironment() {
     QDir updaterDir;
     QDir pluginDir;
     QStringList neededFiles;
+    QStringList qt4Files;
     QFile f;
 
     dir.setPath(QApplication::applicationDirPath());
@@ -114,7 +116,23 @@ void checkEnvironment() {
     pluginDir.setPath(dir.path()+"/plugins");
 
 #ifdef Q_OS_WIN32
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    neededFiles << "Qt5Core.dll" << "Qt5Network.dll" << "libgcc_s_sjlj-1.dll" << "libstdc++-6.dll" << "upd4t3r.exe" << "libwinpthread-1.dll";
+    qt4Files << "QtCore4.dll" << "QtGui4.dll" << "libgcc_s_dw2-1.dll" << "QtNetwork4.dll" << "QtXml4.dll" << "imageformats/qgif4.dll";
+    qt4Files << "imageformats/qico4.dll" << "imageformats/qjpeg4.dll" << "imageformats/qmng4.dll" << "imageformats/qsvg4.dll";
+    qt4Files << "imageformats/qtiff4.dll" << "updater/libgcc_s_dw2-1.dll" << "updater/mingwm10.dll" << "updater/QtCore4.dll" << "updater/QtNetwork4.dll";
+
+    // Clean up qt4 files
+    foreach (QString filename, qt4Files) {
+        if (QFile::exists(QString("%1/%2").arg(dir.absolutePath()).arg(filename))) {
+            if (f.remove(QString("%1/%2").arg(dir.absolutePath()).arg(filename))) {
+                QLOG_INFO() << "APP :: Deleting Qt4 file " << filename;
+            }
+        }
+    }
+#else
     neededFiles << "QtCore4.dll" << "QtNetwork4.dll" << "mingwm10.dll" << "libgcc_s_dw2-1.dll" << "au.exe" << "upd4t3r.exe";
+#endif
 #endif
 
     // Check for updater folders
@@ -126,8 +144,10 @@ void checkEnvironment() {
     // Check if all files are present
     foreach (QString filename, neededFiles) {
         if (!QFile::exists(QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename))) {
-            QLOG_INFO() << "APP :: " << filename << "does not exists - copying from application dir";
-            f.copy(QString("%1/%2").arg(dir.absolutePath()).arg(filename), QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename));
+            QLOG_INFO() << "APP :: " << QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename) << "does not exists - copying from application dir";
+            if (!f.copy(QString("%1/%2").arg(dir.absolutePath()).arg(filename), QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename))) {
+                QLOG_WARN() << "APP :: Copying " << QString("%1/%2").arg(dir.absolutePath()).arg(filename) << ">" << QString("%1/%2").arg(updaterDir.absolutePath()).arg(filename) << "failed";
+            }
         }
     }
 

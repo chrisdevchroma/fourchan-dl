@@ -21,7 +21,7 @@ public:
 private:
     QHash<qint64,QUrl> requests;
 signals:
-    void response(QUrl, QByteArray);
+    void response(QUrl, QByteArray, bool);
     void responseError(QUrl, int);
 public slots:
 };

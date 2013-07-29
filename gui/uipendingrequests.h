@@ -25,7 +25,6 @@ private slots:
 
 public slots:
     void showPendingRequestList(QMap<qint64, QString>);
-    void showRunningRequestList(QMap<qint64, QString>);
 
 signals:
     void reloadRequested();

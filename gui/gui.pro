@@ -34,8 +34,7 @@ SOURCES += main.cpp\
     uiimageviewer.cpp \
     thumbnailcreator.cpp \
     thumbnailremover.cpp \
-    uipendingrequests.cpp \
-    httprequest.cpp
+    uipendingrequests.cpp
 
 HEADERS  += mainwindow.h \
     uiimageoverview.h \
@@ -62,8 +61,7 @@ HEADERS  += mainwindow.h \
     uiimageviewer.h \
     thumbnailcreator.h \
     thumbnailremover.h \
-    uipendingrequests.h \
-    httprequest.h
+    uipendingrequests.h
 
 FORMS    += mainwindow.ui \
     uiimageoverview.ui \
@@ -86,7 +84,7 @@ macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
 VERSION = 1.6.0
-DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"$${VERSION}\\\""
+DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"$${VERSION}\\\"" __GUI__
 
 win32: LIBS += libole32
 

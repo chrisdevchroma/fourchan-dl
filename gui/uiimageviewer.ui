@@ -139,6 +139,9 @@
          <iconset resource="resources.qrc">
           <normaloff>:/icons/resources/reload.png</normaloff>:/icons/resources/reload.png</iconset>
         </property>
+        <property name="shortcut">
+         <string>L</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -155,6 +158,9 @@
         <property name="icon">
          <iconset resource="resources.qrc">
           <normaloff>:/icons/resources/rotateCW.png</normaloff>:/icons/resources/rotateCW.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>R</string>
         </property>
        </widget>
       </item>

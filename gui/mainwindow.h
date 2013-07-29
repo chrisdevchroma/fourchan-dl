@@ -65,6 +65,7 @@ private:
     QList<QString> updateableComponents;
     bool runUpdate;
     EcWin7 win7;
+    bool _paused;
 
     void restoreWindowSettings(void);
     void updateWidgetSettings(void);
@@ -90,6 +91,8 @@ private:
 
     QTimer* autosaveTimer;
 
+    void cleanThreadCache();
+
 protected:
     void keyPressEvent(QKeyEvent *event);
 #ifdef Q_OS_WIN
@@ -111,6 +114,7 @@ private slots:
     void processCloseRequest(UIImageOverview*, int);
     void createTab(QString);
     void startAll(void);
+    void pauseAll(void);
     void stopAll(void);
     void pendingThumbnailsChanged(int);
     void showTab(QTreeWidgetItem*, int);
@@ -119,7 +123,7 @@ private slots:
     void overviewTimerTimeout();
     void scheduleOverviewUpdate();
     void restoreFromHistory(QAction*);
-    void processRequestResponse(QUrl url, QByteArray ba);
+    void processRequestResponse(QUrl url, QByteArray ba, bool cached);
     void updaterConnected();
     void updateFinished();
     void setUpdaterVersion(QString);
@@ -134,6 +138,7 @@ private slots:
 
 signals:
     void removeFiles(QStringList);
+    void quitAll();
 };
 
 #endif // MAINWINDOW_H

@@ -196,5 +196,4 @@ void UIInfo::showRequests() {
 
 void UIInfo::reloadRequests() {
     uiPendingRequests->showPendingRequestList(downloadManager->getPendingRequestsMap());
-    uiPendingRequests->showRunningRequestList(downloadManager->getRunningRequestsMap());
 }

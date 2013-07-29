@@ -8,7 +8,7 @@ PluginManager::PluginManager(QObject *parent) :
 
 void PluginManager::loadPlugins(void)
 {
-    QDir pluginDir(QApplication::applicationDirPath());
+    QDir pluginDir(QCoreApplication::applicationDirPath());
     component_information c;
 #ifdef __DEBUG__
 #if defined(Q_OS_WIN)

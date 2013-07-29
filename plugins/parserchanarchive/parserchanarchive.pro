@@ -11,7 +11,7 @@ else:TARGET = ../parserchanarchive
 TEMPLATE = lib
 CONFIG += dll plugin
 
-DEFINES += _LIB_VERSION="\\\"0.2\\\""
+DEFINES += _LIB_VERSION="\\\"0.3\\\""
 
 SOURCES += parserchanarchive.cpp
 

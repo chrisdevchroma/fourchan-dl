@@ -31,7 +31,7 @@ void RequestHandler::request(QUrl u, int priority) {
 
     if (downloadManager != 0) {
         uid = downloadManager->requestDownload(this, u, prio);
-//        QLOG_TRACE() << "RequestHandler :: Adding request" << uid << ":" << u.toString() << "prio" <<prio;
+        QLOG_TRACE() << "RequestHandler :: Adding request" << uid << ":" << u.toString() << "prio" <<prio;
         requests.insert(uid, u);
     }
     else {
@@ -42,14 +42,22 @@ void RequestHandler::request(QUrl u, int priority) {
 void RequestHandler::requestFinished(qint64 uid) {
     QByteArray ba;
     QUrl url;
+    bool cachedReply;
 
+    cachedReply = false;
+
+    QLOG_TRACE() << "RequestHandler :: Request " << uid << " finished";
     ba = downloadManager->getByteArray(uid);
+    QLOG_TRACE() << "RequestHandler :: " << QString(ba);
+
+    cachedReply = downloadManager->cached(uid);
+
     url = requests.value(uid, QUrl("NONE"));
 
     requests.remove(uid);
     downloadManager->freeRequest(uid);
 
-    emit response(url, ba);
+    emit response(url, ba, cachedReply);
 }
 
 void RequestHandler::error(qint64 req, int err) {

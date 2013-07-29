@@ -27,19 +27,6 @@ void UIPendingRequests::showPendingRequestList(QMap<qint64, QString> list) {
     }
 }
 
-void UIPendingRequests::showRunningRequestList(QMap<qint64, QString> list) {
-    QMapIterator<qint64, QString> i(list);
-    QStringList data;
-    ui->twRunning->clear();
-
-    while (i.hasNext()) {
-        i.next();
-        data.clear();
-        data << QString("%1").arg(i.key()) << i.value();
-
-        ui->twRunning->addTopLevelItem(new QTreeWidgetItem(ui->twRunning, data));
-    }
-}
 
 void UIPendingRequests::reload() {
     emit reloadRequested();

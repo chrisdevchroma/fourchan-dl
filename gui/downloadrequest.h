@@ -28,19 +28,29 @@ public:
     void setProcessing(bool b) {_processing = b;}
     void reset();
     bool finished() {return _finished;}
+    bool cached() {return _cached_reply;}
+    void setCached(bool b) {_cached_reply = b;}
+
+    bool paused() {return _paused;}
+    void pause(int s);
 
 private:
     RequestHandler* _rh;
     QUrl _url;
     int _prio;
     QByteArray _response;
+    QTimer* pauseTimer;
     bool _processing;
     bool _finished;
+    bool _cached_reply;
+    bool _paused;
+
+
+private slots:
+    void pauseTimerTriggered();
 
 signals:
-
-public slots:
-
+    void requestUnpaused();
 };
 
 #endif // DOWNLOADREQUEST_H

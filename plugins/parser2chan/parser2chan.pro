@@ -11,7 +11,7 @@ else:TARGET = ../parser2chan
 TEMPLATE = lib
 CONFIG += dll plugin
 
-DEFINES += PARSER2CHAN_LIBRARY _LIB_VERSION="\\\"0.3\\\""
+DEFINES += PARSER2CHAN_LIBRARY _LIB_VERSION="\\\"0.4\\\""
 
 SOURCES += parser2chan.cpp
 

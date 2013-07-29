@@ -10,6 +10,7 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     requestHandler = new RequestHandler(this);
     iParser = 0;
     oParser = 0;
+    _cachedResult = false;
 
     pendingThumbnails.clear();
 
@@ -45,7 +46,7 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     }
 
     connect(requestHandler, SIGNAL(responseError(QUrl, int)), this, SLOT(errorHandler(QUrl, int)));
-    connect(requestHandler, SIGNAL(response(QUrl, QByteArray)), this, SLOT(processRequestResponse(QUrl, QByteArray)));
+    connect(requestHandler, SIGNAL(response(QUrl, QByteArray, bool)), this, SLOT(processRequestResponse(QUrl, QByteArray, bool)));
 
     connect(ui->leSavepath, SIGNAL(textChanged(QString)), this, SIGNAL(directoryChanged(QString)));
     connect(ui->listWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(openFile()));
@@ -703,7 +704,7 @@ void UIImageOverview::deleteAllThumbnails() {
     emit removeFiles(fileList);
 }
 
-void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
+void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba, bool cached) {
     QString requestURI;
     QList<_IMAGE>   imageList;
     QList<QUrl>     threadList;
@@ -773,6 +774,8 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
             }
         }
         else {
+            _cachedResult = cached;
+
             if (status.isFrontpage) {
                 QStringList newTab;
                 QString v;
@@ -801,6 +804,12 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba) {
                     ui->lTitle2->setText(iParser->getThreadTitle());
                 }
             }
+        }
+
+        if (cached) {
+            timer->stop();
+            ui->cbRescan->setChecked(false);
+            setStatus("Cached");
         }
     }
 }
@@ -1036,8 +1045,14 @@ void UIImageOverview::updateDownloadStatus() {
 
         QLOG_DEBUG() << "UIImageOverview :: updateDownloadStatus() :: item count: " << ui->listWidget->count() << "; expectedThumbnailCount " << expectedThumbnailCount;
         if (ui->listWidget->count() >= expectedThumbnailCount) {
-            setTabTitle("Finished");
-            setStatus("Finished");
+            if (_cachedResult) {
+                setTabTitle("Cached");
+                setStatus("Cached");
+            }
+            else {
+                setTabTitle("Finished");
+                setStatus("Finished");
+            }
         }
         else {
             setTabTitle("Rendering");

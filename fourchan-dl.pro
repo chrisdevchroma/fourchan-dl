@@ -1,4 +1,5 @@
 TEMPLATE      = subdirs
 SUBDIRS       = gui\
                 plugins \
-                updater
+                updater \
+                console

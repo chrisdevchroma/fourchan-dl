@@ -138,6 +138,8 @@ void UIConfig::loadSettings(void) {
         ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",20).toInt());
         ui->sbDownloadTimeoutInitial->setValue(settings->value("initial_timeout",30).toInt());
         ui->sbDownloadTimeoutInbetween->setValue(settings->value("running_timeout",2).toInt());
+        ui->cbKeepLocalHTMLCopy->setChecked(settings->value("use_thread_cache", false).toBool());
+        ui->leThreadCachePath->setText(settings->value("thread_cache_path", "").toString());
     settings->endGroup();
 
     timeoutValueEditor->loadSettings();
@@ -200,6 +202,8 @@ void UIConfig::accept(void) {
         settings->setValue("concurrent_downloads", ui->sbConcurrentDownloads->value());
         settings->setValue("initial_timeout", ui->sbDownloadTimeoutInitial->value());
         settings->setValue("running_timeout", ui->sbDownloadTimeoutInbetween->value());
+        settings->setValue("use_thread_cache", ui->cbKeepLocalHTMLCopy->isChecked());
+        settings->setValue("thread_cache_path", ui->leThreadCachePath->text());
     settings->endGroup();
 
     settings->sync();
@@ -223,9 +227,17 @@ void UIConfig::chooseLocation(void) {
 void UIConfig::chooseThumbnailCacheLocation(void) {
     QString loc;
 
-    loc = QFileDialog::getExistingDirectory(this, "Choose storage directory", ui->leThumbnailCacheFolder->text());
+    loc = QFileDialog::getExistingDirectory(this, "Choose thumbnail cache directory", ui->leThumbnailCacheFolder->text());
     if (!loc.isEmpty())
         ui->leThumbnailCacheFolder->setText(loc);
+}
+
+void UIConfig::chooseThreadCacheLocation(void) {
+    QString loc;
+
+    loc = QFileDialog::getExistingDirectory(this, "Choose thread cache directory", ui->leThreadCachePath->text());
+    if (!loc.isEmpty())
+        ui->leThreadCachePath->setText(loc);
 }
 
 void UIConfig::editTimeoutValues(void) {
@@ -282,4 +294,13 @@ void UIConfig::deleteShortcut() {
         folderShortcuts->deleteShortcut(name);
     else
         ui->listWidget->removeItemWidget(ui->listWidget->currentItem());
+}
+
+void UIConfig::toggleLogLevelWarning(QString s) {
+    if (s == "Trace") {
+        ui->lLogLevelWarning->show();
+    }
+    else {
+        ui->lLogLevelWarning->hide();
+    }
 }

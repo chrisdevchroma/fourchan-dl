@@ -77,6 +77,7 @@ private:
     bool downloading;
     int expectedThumbnailCount;
     int thumbnailCount;
+    bool _cachedResult;
 
     void loadSettings(void);
     void setStatus(QString s);
@@ -118,7 +119,7 @@ private slots:
     void startDownload(void);
     void stopDownload(void);
     void download(bool b);
-    void processRequestResponse(QUrl url, QByteArray ba);
+    void processRequestResponse(QUrl url, QByteArray ba, bool cached);
     void setCompleted(QString uri, QString filename);
     bool isImage(QUrl);
     void updateDownloadStatus();
