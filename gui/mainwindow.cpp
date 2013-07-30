@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _paused = false;
 
     runUpdate = false;
+    checkUpdaterVersion = false;
 
     connect(this, SIGNAL(removeFiles(QStringList)), thumbnailRemover, SLOT(removeFiles(QStringList)));
     ui->setupUi(this);
@@ -45,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
     historyMenu->setTitle("History");
     historyMenu->setIcon(QIcon(":/icons/resources/remove.png"));
     ui->menuBar->addMenu(historyMenu);
+
+    ui->menuBar->addAction(ui->actionGetUpdaterVersion);
 
     ui->menuBar->addAction(ui->actionShowInfo);
 
@@ -469,6 +472,27 @@ void MainWindow::newComponentsAvailable() {
 #endif
 }
 
+void MainWindow::getUpdaterVersion() {
+#ifdef USE_UPDATER
+    QProcess process;
+    QFileInfo fi;
+
+    fi.setFile(updaterFileName);
+
+    QLOG_INFO() << "MainWindow :: Starting updater " << fi.absoluteFilePath();
+
+    checkUpdaterVersion = true;
+    if (process.startDetached(QString("\"%1\"").arg(fi.absoluteFilePath()))) {
+        ui->statusBar->showMessage("Starting updater for version check");
+    }
+    else {
+        ui->statusBar->showMessage("Unable to start process "+fi.absoluteFilePath()+" ("+process.errorString()+")");
+        checkUpdaterVersion = false;
+    }
+
+#endif
+}
+
 void MainWindow::startAll() {
     ui->pbOpenRequests->setFormat("Starting Thread %v/%m (%p%)");
     ui->pbOpenRequests->setMaximum(ui->tabWidget->count());
@@ -780,7 +804,7 @@ void MainWindow::createComponentList() {
 #ifdef Q_OS_WIN32
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     qtFiles << "Qt5Core" << "Qt5Gui" << "Qt5Widgets" << "Qt5Network" << "Qt5Xml";
-    neededLibraries << "libeay32.dll" << "ssleay32.dll" << "imageformats/qgif.dll"
+    neededLibraries << "libeay32.dll" << "ssleay32.dll" << "libstdc++-6.dll" << "imageformats/qgif.dll"
                     << "imageformats/qico.dll" << "imageformats/qjpeg.dll" << "imageformats/qsvg.dll"
                     << "libgcc_s_sjlj-1.dll" << "libwinpthread-1.dll";
 
@@ -874,13 +898,27 @@ void MainWindow::updaterConnected() {
     QStringList fileList;
     component_information c;
 
-    if (runUpdate) {
-        foreach (QString component, updateableComponents) {
-            c = components.value(component);
-            fileList.append(QString("%1->%2").arg(c.src).arg(c.target));
+    if (checkUpdaterVersion) {
+        QLOG_INFO() << "Mainwidow :: updaterConnected :: Just checking updater version";
+        aui->closeUpdaterExe();
+        checkUpdaterVersion = false;
+    }
+    else {
+        if (runUpdate) {
+            tnt->halt();
+            downloadManager->pauseDownloads();
+
+            foreach (QString component, updateableComponents) {
+                c = components.value(component);
+                fileList.append(QString("%1->%2").arg(c.src).arg(c.target));
+            }
+            aui->addFiles(fileList);
+            aui->startUpdate();
         }
-        aui->addFiles(fileList);
-        aui->startUpdate();
+        else {
+            QLOG_WARN() << "Mainwidow :: updaterConnected :: Updater connected, but I didn't know what to do";
+            aui->closeUpdaterExe();
+        }
     }
 }
 

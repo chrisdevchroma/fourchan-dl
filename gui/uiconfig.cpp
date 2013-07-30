@@ -142,6 +142,9 @@ void UIConfig::loadSettings(void) {
         ui->leThreadCachePath->setText(settings->value("thread_cache_path", "").toString());
     settings->endGroup();
 
+    ui->sbUpdaterPort->setValue(settings->value("updater/updater_port", 60000).toInt());
+    ui->sbApplicationPort->setValue(settings->value("updater/application_port", 60001).toInt());
+
     timeoutValueEditor->loadSettings();
 }
 
@@ -205,6 +208,9 @@ void UIConfig::accept(void) {
         settings->setValue("use_thread_cache", ui->cbKeepLocalHTMLCopy->isChecked());
         settings->setValue("thread_cache_path", ui->leThreadCachePath->text());
     settings->endGroup();
+
+    settings->setValue("updater/updater_port", ui->sbUpdaterPort->value());
+    settings->setValue("updater/application_port", ui->sbApplicationPort->value());
 
     settings->sync();
 

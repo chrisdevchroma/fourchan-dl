@@ -15,17 +15,17 @@ ApplicationInterface::ApplicationInterface(QObject *parent) :
     connect(timer, SIGNAL(timeout()), this, SLOT(timerTrigger()));
     connect(timeout, SIGNAL(timeout()), this, SLOT(timeoutOccured()));
 
-    if (!(udpSocket->bind(QHostAddress(HOST_ADDRESS), settings->value("updater/updater_port", 60001).toInt())))
-        p(QString("Could not bind to %1:%2").arg(HOST_ADDRESS).arg(settings->value("updater/updater_port", 60001).toInt()));
+    if (!(udpSocket->bind(QHostAddress(HOST_ADDRESS), settings->value("updater/updater_port", 60000).toInt())))
+        p(QString("Could not bind to %1:%2").arg(HOST_ADDRESS).arg(settings->value("updater/updater_port", 60000).toInt()));
     else {
-        p(QString("Listening on %1:%2").arg(HOST_ADDRESS).arg(settings->value("updater/updater_port", 60001).toInt()));
+        p(QString("Listening on %1:%2").arg(HOST_ADDRESS).arg(settings->value("updater/updater_port", 60000).toInt()));
 
         timer->start(1000);
     }
 }
 
 void ApplicationInterface::timerTrigger(void) {
-    udpSocket->writeDatagram(createCommand(PING), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+    udpSocket->writeDatagram(createCommand(PING), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
     pinging = true;
     timeout->start(TIMEOUT_VALUE);
 }
@@ -74,7 +74,7 @@ void ApplicationInterface::processCommand(QByteArray a) {
 
     switch (command) {
     case PING:
-        udpSocket->writeDatagram(createCommand(PONG), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+        udpSocket->writeDatagram(createCommand(PONG), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
         break;
 
     case PONG:
@@ -87,7 +87,7 @@ void ApplicationInterface::processCommand(QByteArray a) {
             }
 
             if (_updateFinished) {
-                udpSocket->writeDatagram(createCommand(UPDATE_FINISHED), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+                udpSocket->writeDatagram(createCommand(UPDATE_FINISHED), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
             }
 
             pinging = false;
@@ -153,7 +153,7 @@ void ApplicationInterface::processCommand(QByteArray a) {
         break;
 
     case GET_VERSION:
-        udpSocket->writeDatagram(createCommand(VERSION, QString(PROGRAM_VERSION)), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+        udpSocket->writeDatagram(createCommand(VERSION, QString(PROGRAM_VERSION)), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
         break;
 
     case STOP:
@@ -163,7 +163,7 @@ void ApplicationInterface::processCommand(QByteArray a) {
 }
 
 void ApplicationInterface::sendCloseRequest() {
-    udpSocket->writeDatagram(createCommand(CLOSE_REQUEST), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+    udpSocket->writeDatagram(createCommand(CLOSE_REQUEST), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
 
     closingApplication = true;
 
@@ -171,11 +171,11 @@ void ApplicationInterface::sendCloseRequest() {
 }
 
 void ApplicationInterface::sendMessage(QString s) {
-    udpSocket->writeDatagram(createCommand(DISPLAY_MSG, s), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+    udpSocket->writeDatagram(createCommand(DISPLAY_MSG, s), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
 }
 
 void ApplicationInterface::sendError(QString s) {
-    udpSocket->writeDatagram(createCommand(ERROR_CMD, s), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+    udpSocket->writeDatagram(createCommand(ERROR_CMD, s), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
 }
 
 void ApplicationInterface::setFailedFiles(QList<FileUpdate> l) {
@@ -189,12 +189,12 @@ void ApplicationInterface::setFailedFiles(QList<FileUpdate> l) {
 
 void ApplicationInterface::sendFailedFiles() {
     if (_connected && (failedFiles.count() > 0)) {
-        udpSocket->writeDatagram(createCommand(CLEAR), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+        udpSocket->writeDatagram(createCommand(CLEAR), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
 
         for (int i=0; i<failedFiles.count(); i++) {
-            udpSocket->writeDatagram(createCommand(SET_URI, failedFiles.at(i).tmpFilename), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
-            udpSocket->writeDatagram(createCommand(SET_TARGET, failedFiles.at(i).filename), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
-            udpSocket->writeDatagram(createCommand(ADD_SET), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60000).toInt());
+            udpSocket->writeDatagram(createCommand(SET_URI, failedFiles.at(i).tmpFilename), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
+            udpSocket->writeDatagram(createCommand(SET_TARGET, failedFiles.at(i).filename), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
+            udpSocket->writeDatagram(createCommand(ADD_SET), QHostAddress(HOST_ADDRESS), settings->value("updater/application_port", 60001).toInt());
         }
         failedFiles.clear();
 

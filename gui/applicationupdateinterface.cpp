@@ -14,8 +14,8 @@ ApplicationUpdateInterface::ApplicationUpdateInterface(QObject *parent) :
     fileToMoveTo = "";
     filesToMove.clear();
 
-    if (!udpSocket->bind(settings->value("updater/application_port", 60000).toInt())) {
-        QLOG_ERROR() << "ApplicationUpdateInterface :: " << "Could not create socket on port " << settings->value("updater/application_port", 60000).toInt() << "(" << udpSocket->errorString() << ")";
+    if (!udpSocket->bind(settings->value("updater/application_port", 60001).toInt())) {
+        QLOG_ERROR() << "ApplicationUpdateInterface :: " << "Could not create socket on port " << settings->value("updater/application_port", 60001).toInt() << "(" << udpSocket->errorString() << ")";
     }
 
     connect(udpSocket, SIGNAL(readyRead()), this, SLOT(readPendingDatagrams()));
@@ -93,7 +93,8 @@ void ApplicationUpdateInterface::processCommand(QByteArray a) {
         break;
 
     case ADD_SET:
-        filesToMove.append(QString("%1->%2").arg(fileToMoveFrom).arg(fileToMoveTo));
+
+        filesToMove.insert(fileToMoveFrom, fileToMoveTo);
         QLOG_INFO() << "ApplicationUpdateInterface :: " << "add set";
         break;
 
@@ -136,7 +137,7 @@ void ApplicationUpdateInterface::writeCommand(int c, QByteArray a) {
     udpSocket->writeDatagram(
             createCommand(c, a),
             QHostAddress(HOST_ADDRESS),
-            settings->value("updater/updater_port", 60001).toInt()
+            settings->value("updater/updater_port", 60000).toInt()
             );
 }
 
@@ -166,18 +167,17 @@ void ApplicationUpdateInterface::addFiles(QStringList list) {
 }
 
 void ApplicationUpdateInterface::exchangeFiles() {
-    QStringList sl;
-    QString from, to;
+    QString from, to, tempFilename;
     QFile source;
     QFile target;
+    QUuid uuid;
     bool success;
 
-
-    for(int i=0; i<filesToMove.count(); i++) {
-        sl = filesToMove.at(i).split("->");
-
-        from = sl.at(0);
-        to = sl.at(1);
+    QHashIterator<QString, QString> i(filesToMove);
+    while (i.hasNext()) {
+        i.next();
+        from = i.key();
+        to = i.value();
 
         source.setFileName(from);
         target.setFileName(to);
@@ -185,26 +185,28 @@ void ApplicationUpdateInterface::exchangeFiles() {
         QLOG_INFO() << "ApplicationUpdateInterface :: " << "Moving" << source.fileName() << "to" << target.fileName();
         success = false;
 
-        while (!target.remove());
+        // First rename target instead of deleting it
+        tempFilename = uuid.createUuid().toString()+".file";
+        target.rename(tempFilename);
 
-//        if (target.remove()) {
-            if (source.rename(to)) {
-                success = true;
-            }
-            else {
-                QLOG_ERROR() << "ApplicationUpdateInterface :: " << "rename failed";
-            }
-//        }
+        if (source.rename(to)) {
+            success = true;
+        }
 
         if (!success) {
             QLOG_ERROR() << "ApplicationUpdateInterface :: " << " Failed";
+            QFile::rename(tempFilename, to);    // Restore old file
         }
         else {
             QLOG_INFO() << "ApplicationUpdateInterface :: " << " Success!";
+            QFile::remove(tempFilename);        // remove backup
         }
     }
+
+    filesToMove.clear();
 }
 
 void ApplicationUpdateInterface::closeUpdaterExe() {
     writeCommand(CLOSE_REQUEST);
+    connected = false;
 }

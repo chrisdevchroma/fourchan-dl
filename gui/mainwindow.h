@@ -64,6 +64,7 @@ private:
     QMap<QString, component_information> components;
     QList<QString> updateableComponents;
     bool runUpdate;
+    bool checkUpdaterVersion;
     EcWin7 win7;
     bool _paused;
 
@@ -135,6 +136,7 @@ private slots:
     void removeThreadOverviewMark();
     void addThreadOverviewMark(QTreeWidgetItem *item);
     void addThreadOverviewMark(int index);
+    void getUpdaterVersion();
 
 signals:
     void removeFiles(QStringList);

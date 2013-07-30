@@ -33,6 +33,7 @@ QTextStream logOutput;
 MainWindow* mainWindow;
 
 void checkEnvironment();
+bool checkIfNewerVersion(QString, QString);
 
 int main(int argc, char *argv[])
 {
@@ -110,6 +111,7 @@ void checkEnvironment() {
     QStringList neededFiles;
     QStringList qt4Files;
     QFile f;
+    QSettings settings("settings.ini", QSettings::IniFormat);
 
     dir.setPath(QApplication::applicationDirPath());
     updaterDir.setPath(dir.path()+"/updater");
@@ -122,11 +124,13 @@ void checkEnvironment() {
     qt4Files << "imageformats/qico4.dll" << "imageformats/qjpeg4.dll" << "imageformats/qmng4.dll" << "imageformats/qsvg4.dll";
     qt4Files << "imageformats/qtiff4.dll" << "updater/libgcc_s_dw2-1.dll" << "updater/mingwm10.dll" << "updater/QtCore4.dll" << "updater/QtNetwork4.dll";
 
-    // Clean up qt4 files
-    foreach (QString filename, qt4Files) {
-        if (QFile::exists(QString("%1/%2").arg(dir.absolutePath()).arg(filename))) {
-            if (f.remove(QString("%1/%2").arg(dir.absolutePath()).arg(filename))) {
-                QLOG_INFO() << "APP :: Deleting Qt4 file " << filename;
+    // Clean up qt4 files, but only after the updater is at least version 1.2
+    if (checkIfNewerVersion(settings.value("updater/version", "0.0").toString(),"1.1")) {
+        foreach (QString filename, qt4Files) {
+            if (QFile::exists(QString("%1/%2").arg(dir.absolutePath()).arg(filename))) {
+                if (f.remove(QString("%1/%2").arg(dir.absolutePath()).arg(filename))) {
+                    QLOG_INFO() << "APP :: Deleting Qt4 file " << filename;
+                }
             }
         }
     }
@@ -172,4 +176,28 @@ void checkEnvironment() {
         QLOG_INFO()  << "APP :: Plugin directory does not exists. Creating " << QString("%1/plugins").arg(dir.absolutePath());
         dir.mkdir("plugins");
     }
+}
+
+bool checkIfNewerVersion(QString _new, QString _old) {
+    bool ret;
+    QStringList newVersion, oldVersion;
+
+    ret = false;
+
+    newVersion = _new.split(".");
+    oldVersion = _old.split(".");
+
+    for (int i=0; i<newVersion.count(); i++) {
+        if (newVersion.value(i).toInt() > oldVersion.at(i).toInt()) {
+            ret = true;
+            break;
+        }
+        else {
+            if (oldVersion.at(i).toInt() > newVersion.value(i).toInt()) {
+                break;
+            }
+        }
+    }
+
+    return ret;
 }
