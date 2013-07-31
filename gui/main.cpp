@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     a.setStyle("windowsvista");
     //a.setStyle("fusion");
 #else
-    a.setStyle("cleanlooks");
+    a.setStyle("plastique");
 #endif
 
     // init the logging mechanism
