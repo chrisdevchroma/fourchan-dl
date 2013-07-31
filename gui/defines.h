@@ -3,7 +3,7 @@
 
 #ifdef Q_OS_WIN32
 #define APP_NAME        "fourchan-dl.exe"
-#define UPDATE_TREE     "win32-qt5"
+#define UPDATE_TREE     "win32"
 #define USE_UPDATER
 #define CONSOLE_APPNAME "fourchan-dl-console.exe"
 #else

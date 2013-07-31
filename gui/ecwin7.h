@@ -106,6 +106,8 @@ DECLARE_INTERFACE_(ITaskbarList3,IUnknown)
 typedef ITaskbarList3 *LPITaskbarList3;
 
 // Windows only data d#endifefinitions - END
+#else
+#define HWND int
 #endif
 
 // ********************************************************************
