@@ -31,7 +31,8 @@ QString Parser4chan::getDomain() {
 
 ParsingStatus Parser4chan::parseHTML(QString html) {
     QStringList res;
-    QRegExp rxImagesNew("<span class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)//i\\.4cdn\\.org/([^\"]+)\"(?:[^<]+)</a>[^<]*(<span title=\"([^\"]+)\">[^<]+)*</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    //QRegExp rxImagesNew("<span class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)//i\\.4cdn\\.org/([^\"]+)\"(?:[^<]+)</a>[^<]*(<span title=\"([^\"]+)\">[^<]+)*</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rxImagesNew("<span class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)//([^/]+)/([^\"]+)\"(?:[^<]+)</a>[^<]*(<span title=\"([^\"]+)\">[^<]+)*</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rxThreadsNew("<div class=\"thread\" id=\"t([^\"]+)\">", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitleNew("<span class=\"subject\">([^<]+)</span>");
     QRegExp rxImagesOld("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
@@ -105,13 +106,15 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                     pos = rxImagesNew.indexIn(html, pos+1);
                     res = rxImagesNew.capturedTexts();
 
-                    if (res.at(4).isEmpty()) {
-                        i.originalFilename = res.at(2).right(res.at(2).length() - res.at(2).lastIndexOf("/") - 1);
+                    if (res.at(5).isEmpty()) {
+//                        i.originalFilename = res.at(2).right(res.at(2).length() - res.at(2).lastIndexOf("/") - 1);
+                        i.originalFilename = res.at(3).right(res.at(3).length() - res.at(3).lastIndexOf("/") - 1);
                     }
                     else {
-                        i.originalFilename = res.at(4);
+                        i.originalFilename = res.at(5);
+//                        i.originalFilename = res.at(4);
                     }
-                    i.largeURI = "http://i.4cdn.org/"+res.at(2);
+                    i.largeURI = "http://"+res.at(2)+"/"+res.at(3);
                     i.thumbURI = "";
 
                     if (pos != -1) {

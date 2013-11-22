@@ -45,23 +45,23 @@ void UIConfig::loadSettings(void) {
     b = settings->value("automatic_close",false).toBool();
         ui->cbAutoClose->setChecked(b);
 
-    b = settings->value("resume_session",false).toBool();
+    b = settings->value("resume_session",true).toBool();
         ui->cbReopenTabs->setChecked(b);
 
     b = settings->value("enlarge_thumbnails",false).toBool();
         ui->cbEnlargeThumbnails->setChecked(b);
 
-    b = settings->value("hq_thumbnails",false).toBool();
+    b = settings->value("hq_thumbnails",true).toBool();
         ui->cbHQThumbnail->setChecked(b);
 
     b = settings->value("default_original_filename",false).toBool();
         ui->cbDefaultOriginalFilename->setChecked(b);
 
-    b = settings->value("remember_directory",false).toBool();
+    b = settings->value("remember_directory",true).toBool();
         ui->cbRememberDirectory->setChecked(b);
 
     ui->cbCloseOverviewThreads->setChecked(settings->value("close_overview_threads", true).toBool());
-    ui->cbUseInternalViewer->setChecked(settings->value("use_internal_viewer", false).toBool());
+    ui->cbUseInternalViewer->setChecked(settings->value("use_internal_viewer", true).toBool());
 
     ui->sbConcurrentDownloads->setValue(settings->value("concurrent_downloads",1).toInt());
     ui->sbRescheduleInterval->setValue(settings->value("reschedule_interval", 60).toInt());

@@ -42,8 +42,11 @@ int main(int argc, char *argv[])
     int logLevel;
 
 #if QT_VERSION >= 0x050000
+#ifdef Q_OS_WIN
     a.setStyle("windowsvista");
-    //a.setStyle("fusion");
+#else
+    a.setStyle("fusion");
+#endif
 #else
     a.setStyle("plastique");
 #endif
