@@ -1,4 +1,4 @@
-#include "imagethread.h"
+﻿#include "imagethread.h"
 
 ImageThread::ImageThread(QObject *parent) :
     QObject(parent)
@@ -153,7 +153,7 @@ bool ImageThread::selectParser(QUrl url) {
     ParserPluginInterface* tmp;
 
     if (url.isEmpty()) {
-        url = QUrl(_sUrl);
+        url = QUrl(_sUrl.toLatin1());
     }
 
     tmp = pluginManager->getParser(url, &ret);
@@ -296,7 +296,7 @@ void ImageThread::processCloseRequest() {
 
 
 void ImageThread::startDownload(void) {
-    createSupervisedDownload(QUrl(_sUrl));
+    createSupervisedDownload(QUrl(_sUrl.toLatin1()));
 }
 
 void ImageThread::stopDownload(void) {
@@ -322,7 +322,7 @@ void ImageThread::download(bool b) {
         _downloading = true;
 
         while (getNextImage(&imgURI) != 0)
-                createSupervisedDownload(QUrl(imgURI));
+                createSupervisedDownload(QUrl(imgURI.toLatin1()));
     } else {
         _downloading = false;
     }

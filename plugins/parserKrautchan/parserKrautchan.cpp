@@ -1,4 +1,4 @@
-#include "parserKrautchan.h"
+﻿#include "parserKrautchan.h"
 
 ParserKrautchan::ParserKrautchan()
 {
@@ -7,6 +7,7 @@ ParserKrautchan::ParserKrautchan()
   _statusCode.hasImages = false;
   _statusCode.hasTitle = false;
   _statusCode.isFrontpage = false;
+  _statusCode.hasRedirect = false;
   _errorCode = 0;
   _redirect = QUrl();
   _images.clear();
@@ -63,6 +64,8 @@ ParsingStatus ParserKrautchan::parseHTML(QString html) {
   if (pageIsFrontpage) {
       pos = 0;
       _statusCode.isFrontpage = true;
+      _statusCode.hasTitle = true;
+      _threadTitle = _url.toString();
 
       while (pos > -1) {
           pos = rxThreads.indexIn(html, pos + 1);

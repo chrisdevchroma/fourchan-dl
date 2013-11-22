@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     uiimageviewer.cpp \
     thumbnailcreator.cpp \
     thumbnailremover.cpp \
-    uipendingrequests.cpp
+    uipendingrequests.cpp \
+    HtmlEntities.cpp
 
 HEADERS  += mainwindow.h \
     uiimageoverview.h \
@@ -61,7 +62,8 @@ HEADERS  += mainwindow.h \
     uiimageviewer.h \
     thumbnailcreator.h \
     thumbnailremover.h \
-    uipendingrequests.h
+    uipendingrequests.h \
+    HtmlEntities.h
 
 FORMS    += mainwindow.ui \
     uiimageoverview.ui \
@@ -83,8 +85,10 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-VERSION = 1.6.0
+VERSION = 1.6.1
 DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"$${VERSION}\\\"" __GUI__
+#DEFINES += QT_NO_URL_CAST_FROM_STRING
+#DEFINES += QT_NO_CAST_FROM_ASCII
 
 win32: LIBS += libole32
 

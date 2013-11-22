@@ -1,4 +1,4 @@
-#include "parser4chan.h"
+﻿#include "parser4chan.h"
 
 Parser4chan::Parser4chan()
 {
@@ -7,6 +7,7 @@ Parser4chan::Parser4chan()
     _statusCode.hasImages = false;
     _statusCode.hasTitle = false;
     _statusCode.isFrontpage = false;
+    _statusCode.hasRedirect = false;
     _errorCode = 0;
     _redirect = QUrl();
     _images.clear();
@@ -30,7 +31,7 @@ QString Parser4chan::getDomain() {
 
 ParsingStatus Parser4chan::parseHTML(QString html) {
     QStringList res;
-    QRegExp rxImagesNew("<span class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)</a>[^<]*(<span title=\"([^\"]+)\">[^<]+)*</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
+    QRegExp rxImagesNew("<span class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)//i\\.4cdn\\.org/([^\"]+)\"(?:[^<]+)</a>[^<]*(<span title=\"([^\"]+)\">[^<]+)*</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rxThreadsNew("<div class=\"thread\" id=\"t([^\"]+)\">", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitleNew("<span class=\"subject\">([^<]+)</span>");
     QRegExp rxImagesOld("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
@@ -110,7 +111,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                     else {
                         i.originalFilename = res.at(4);
                     }
-                    i.largeURI = "http://images.4chan.org/"+res.at(2);
+                    i.largeURI = "http://i.4cdn.org/"+res.at(2);
                     i.thumbURI = "";
 
                     if (pos != -1) {
@@ -162,6 +163,8 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
 
                     _urlList << QUrl(sUrl);
                     _statusCode.isFrontpage = true;
+                    _threadTitle = _url.toString();
+                    _statusCode.hasTitle = true;
                 }
             }
 
@@ -244,6 +247,9 @@ QString Parser4chan::parseSavepath(QString s) {
     s.replace("%n", threadNumber);
     s.replace("%b", boardName);
     s.replace("%h", _url.host());
+    s.replace("%a", "");
+
+    s.replace("//", "/");
 
     return s;
 }

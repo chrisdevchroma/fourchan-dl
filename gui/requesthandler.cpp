@@ -18,7 +18,7 @@ void RequestHandler::request(QUrl u, int priority) {
     if (priority < 0) {
         if (sUrl.indexOf(QRegExp(__IMAGE_REGEXP__, Qt::CaseInsensitive)) != -1) {
             //Image requested
-            prio = 100;
+            prio = qMax(downloadManager->getHighestPriority() + 1,100);
         }
         else {
             // HTML page requested

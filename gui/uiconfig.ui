@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>426</width>
+    <width>474</width>
     <height>476</height>
    </rect>
   </property>
@@ -183,6 +183,13 @@
           <widget class="QPushButton" name="btnDeleteAllThumbnails">
            <property name="text">
             <string>Delete all thumbnails</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lDeleteThumbnailsStatus">
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>

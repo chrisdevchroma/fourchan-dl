@@ -1,4 +1,4 @@
-#include "uiimageoverview.h"
+﻿#include "uiimageoverview.h"
 #include "ui_uiimageoverview.h"
 
 UIImageOverview::UIImageOverview(QWidget *parent) :
@@ -6,11 +6,14 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     ui(new Ui::UIImageOverview)
 {
     QClipboard *clipboard = QApplication::clipboard();
+    QTime time;
 
     requestHandler = new RequestHandler(this);
     iParser = 0;
     oParser = 0;
     _cachedResult = false;
+    _threadBlocked = false;
+    fresh_thread = true;
 
     pendingThumbnails.clear();
 
@@ -22,6 +25,10 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
 
     timer = new QTimer(this);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
+
+    thumbnailCheckTimer = new QTimer(this);
+    thumbnailCheckTimer->setInterval(5000+time.msec());
+    thumbnailCheckTimer->setSingleShot(true);
 
     thumbnailsizeLocked = false;
     closeWhenFinished = false;
@@ -67,6 +74,9 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     connect(ui->listWidget, SIGNAL(reloadItem()), this, SLOT(reloadFile()));
 
     connect(tnt, SIGNAL(thumbnailAvailable(QString,QString)), this, SLOT(addThumbnail(QString,QString)));
+    connect(tnt, SIGNAL(thumbnailsAvailable(QString)), this, SLOT(addThumbnails(QString)));
+
+    connect(thumbnailCheckTimer, SIGNAL(timeout()), this, SLOT(checkForMissingThumbnails()));
 
     setTabTitle("idle");
 
@@ -100,72 +110,77 @@ void UIImageOverview::start(void) {
     QDir dir;
     QString savepath;
 
-    running = true;
-    setStatus("Running");
+    if (_threadBlocked) {
+        setStatus("Blocked");
+    }
+    else {
+        running = true;
+        setStatus("Running");
 
-    if (ui->leURI->text() != "") {
-        ui->leURI->setReadOnly(true);
+        if (ui->leURI->text() != "") {
+            ui->leURI->setReadOnly(true);
 
-        if (!ui->leURI->text().startsWith("http")) {
-            QString s;
-            s = ui->leURI->text();
-            s.prepend("http://");
-            ui->leURI->setText(s);
-        }
-
-        // Check if we can parse this URI
-        if (selectParser()) {
-            savepath = getSavepath();
-
-            if (savepath.endsWith("\\")) {
-                savepath.chop(1);
-                //ui->leSavepath->setText(savepath);
-            }
-            QLOG_TRACE() << "UIImageOverview :: Setting save path to " << savepath;
-            dir.setPath(savepath);
-
-            if (!dir.exists()) {
-                QDir d;
-
-                d.mkpath(savepath);
-                QLOG_INFO() << "UIImageOverview :: Directory" << savepath << " does not exist. Creating...";
+            if (!ui->leURI->text().startsWith("http")) {
+                QString s;
+                s = ui->leURI->text();
+                s.prepend("http://");
+                ui->leURI->setText(s);
             }
 
-            if (dir.exists()) {
-                ui->leSavepath->setEnabled(false);
-                startDownload();
+            // Check if we can parse this URI
+            if (selectParser()) {
+                savepath = getSavepath();
 
-                ui->btnStart->setEnabled(false);
-                ui->btnStop->setEnabled(true);
-                ui->cbRescan->setEnabled(false);
-                ui->comboBox->setEnabled(false);
-                //                ui->progressBar->setEnabled(true);
-                ui->cbOriginalFilename->setEnabled(false);
-                ui->btnChoosePath->setEnabled(false);
-                ui->cbFolderShortcuts->setEnabled(false);
-
-                if (ui->cbRescan->isChecked()) {
-                    timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
-
-                    timer->start();
+                if (savepath.endsWith("\\")) {
+                    savepath.chop(1);
+                    //ui->leSavepath->setText(savepath);
                 }
-                // Hide thread settings
-                if ((ui->btnToggleView->isChecked()))
-                    ui->btnToggleView->setChecked(false);
+                QLOG_TRACE() << "UIImageOverview :: Setting save path to " << savepath;
+                dir.setPath(savepath);
+
+                if (!dir.exists()) {
+                    QDir d;
+
+                    d.mkpath(savepath);
+                    QLOG_INFO() << "UIImageOverview :: Directory" << savepath << " does not exist. Creating...";
+                }
+
+                if (dir.exists()) {
+                    ui->leSavepath->setEnabled(false);
+                    startDownload();
+
+                    ui->btnStart->setEnabled(false);
+                    ui->btnStop->setEnabled(true);
+                    ui->cbRescan->setEnabled(false);
+                    ui->comboBox->setEnabled(false);
+                    //                ui->progressBar->setEnabled(true);
+                    ui->cbOriginalFilename->setEnabled(false);
+                    ui->btnChoosePath->setEnabled(false);
+                    ui->cbFolderShortcuts->setEnabled(false);
+
+                    if (ui->cbRescan->isChecked()) {
+                        timer->setInterval(timeoutValues.at(ui->comboBox->currentIndex())*1000);
+
+                        timer->start();
+                    }
+                    // Hide thread settings
+                    if ((ui->btnToggleView->isChecked()))
+                        ui->btnToggleView->setChecked(false);
+                }
+                else
+                {
+                    stop();
+                    emit errorMessage("Directory does not exist / Could not be created");
+                    setStatus("Directory does not exist / Could not be created");
+                    QLOG_ERROR() << "UIImageOverview :: Directory" << savepath << " does not exist and I couldn't create it.";
+                }
             }
-            else
-            {
+            else {
                 stop();
-                emit errorMessage("Directory does not exist / Could not be created");
-                setStatus("Directory does not exist / Could not be created");
-                QLOG_ERROR() << "UIImageOverview :: Directory" << savepath << " does not exist and I couldn't create it.";
+                emit errorMessage("Could not find a parser for this URL (" + ui->leURI->text() + ")");
+                setStatus("No parser available");
+                QLOG_WARN() << "UIImageOverview :: I couldn't find a parser for uri " << ui->leURI->text();
             }
-        }
-        else {
-            stop();
-            emit errorMessage("Could not find a parser for this URL (" + ui->leURI->text() + ")");
-            setStatus("No parser available");
-            QLOG_WARN() << "UIImageOverview :: I couldn't find a parser for uri " << ui->leURI->text();
         }
     }
 }
@@ -212,35 +227,91 @@ void UIImageOverview::chooseLocation(void) {
 }
 
 void UIImageOverview::triggerRescan(void) {
-    startDownload();
-    timer->start();
+    if (!_threadBlocked) {
+        startDownload();
+        timer->start();
 
-    setStatus("rescanning");
+        setStatus("rescanning");
+    }
 }
 
 void UIImageOverview::createThumbnail(QString s) {
-        tnt->addToList(s);
+    QString thumbnail_location;
+    if (!_threadBlocked) {
+        thumbnail_location = tnt->addToList(s);
+        QLOG_TRACE() << __PRETTY_FUNCTION__ << ":: Adding thumbnail for" << s;
         pendingThumbnails.append(s);
+
+        missingThumbs.insert(s, thumbnail_location);
+        if (!thumbnailCheckTimer->isActive()) {
+            thumbnailCheckTimer->start();
+        }
         expectedThumbnailCount++;
+    }
 }
 
 void UIImageOverview::addThumbnail(QString filename, QString tnFilename) {
     QListWidgetItem* item;
 
-    if (pendingThumbnails.contains(filename)) {     // The generated thumbnail is needed
-        pendingThumbnails.removeAll(filename);
-        item = new QListWidgetItem(
-                    QIcon(tnFilename),
-                    filename,
-                    ui->listWidget);
+    QLOG_TRACE() << __PRETTY_FUNCTION__ << "::" << filename << "," << tnFilename;
+    if (tnFilename != "") {
+//        if (pendingThumbnails.contains(filename)) {
+//            pendingThumbnails.removeAll(filename);
+        if (missingThumbs.contains(filename)) {
+//            missingThumbs.remove(filename);
+            item = new QListWidgetItem(
+                        QIcon(tnFilename),
+                        filename,
+                        ui->listWidget);
 
-        ui->listWidget->addItem(item);
-        thumbnailsizeLocked = true;
+            ui->listWidget->addItem(item);
+            thumbnailsizeLocked = true;
 
-        if (++thumbnailCount >= expectedThumbnailCount) {
-    //    if (isDownloadFinished()) {
-            updateDownloadStatus();
+            if (++thumbnailCount >= expectedThumbnailCount) {
+                //    if (isDownloadFinished()) {
+                updateDownloadStatus();
+            }
         }
+    }
+}
+
+void UIImageOverview::addThumbnails(QString thumbnails) {
+    QStringList image_filenames;
+    image_filenames = thumbnails.split(";;;");
+
+    QLOG_TRACE() << __PRETTY_FUNCTION__ << ":: Map size " << image_filenames.count();
+    for (int i=0; i<image_filenames.count(); i++) {
+        if (pendingThumbnails.contains(image_filenames.at(i).split(":::").at(0))) {
+            addThumbnail(image_filenames.at(i).split(":::").at(0),
+                         image_filenames.at(i).split(":::").at(1));
+        }
+    }
+}
+
+void UIImageOverview::checkForMissingThumbnails() {
+    QMap<QString,QString>::iterator i;
+    QList<QString> found_thumbs;
+
+    QLOG_TRACE() << __PRETTY_FUNCTION__ << ":: Checking for thumbnails";
+
+    for (i=missingThumbs.begin(); i!=missingThumbs.end(); i++) {
+        QLOG_TRACE() << __PRETTY_FUNCTION__ << ":: Checking for thumbnail" << i.value();
+        if (QFile::exists(i.value())) {
+            QLOG_TRACE() << __PRETTY_FUNCTION__ << ":: " << i.value() << "found";
+            addThumbnail(i.key(), i.value());
+            found_thumbs << i.key();
+        }
+    }
+
+    for (int k=0; k<found_thumbs.count(); k++) {
+        missingThumbs.remove(found_thumbs.at(k));
+    }
+
+    if (missingThumbs.size() > 0) {
+        thumbnailCheckTimer->start();
+    }
+    else {
+        updateDownloadStatus();
     }
 }
 
@@ -422,6 +493,7 @@ QString UIImageOverview::getValues(void) {
     list << QString("%1").arg(ui->comboBox->itemData(ui->comboBox->currentIndex()).toInt());
     list << QString("%1").arg(ui->cbOriginalFilename->isChecked());
     list << QString("%1").arg(running);
+    list << QString("%1").arg(_threadBlocked);
 
     ret = list.join(";;");
 
@@ -452,25 +524,18 @@ void UIImageOverview::setValues(QString s) {
     }
 
     ui->cbOriginalFilename->setChecked((bool)list.value(4).toInt());
-    if (list.value(5) == "1")
+
+    if (list.value(6).toInt() == 1) {
+        ui->btnBlockThread->setChecked(true);
+    }
+
+    if (list.value(5) == "1") {
         start();
+    }
 }
 
 void UIImageOverview::debugButton(void) {
-    QStringList slImageList;
-
-    for (int i=0; i<images.length(); i++) {
-        if ((images.at(i).downloaded)) {
-            slImageList << images.at(i).savedAs;
-        }
-    }
-    QLOG_TRACE() << slImageList;
-    imageViewer->setImageList(slImageList);
-    if (ui->listWidget->selectedItems().count() > 0 &&
-        ui->listWidget->currentItem()->text() != "") {
-        imageViewer->setCurrentImage(ui->listWidget->currentItem()->text());
-    }
-    imageViewer->show();
+    QLOG_ALWAYS() << __PRETTY_FUNCTION__ << ":: " << QString("%1/%2").arg(getDownloadedImagesCount()).arg(getTotalImagesCount());
 }
 
 void UIImageOverview::closeEvent(QCloseEvent *event)
@@ -617,8 +682,21 @@ void UIImageOverview::addShortcut() {
 }
 
 void UIImageOverview::startDownload(void) {
+    QUrl u;
+
+    u = QUrl(ui->leURI->text().toLatin1());
     // Plausibility of leURI was checked before at function start()
-    createSupervisedDownload(QUrl(ui->leURI->text()));
+//    if (fresh_thread) {
+//        // If the thread was never downloaded within this session
+//        // first get a cached version (if available) and then request the download
+//        // This helps showing thread right from start
+//        if (downloadManager->cacheAvailable(u)) {
+// //            processRequestResponse(u, downloadManager->getCachedReply(u), true);
+//        }
+//        fresh_thread = false;
+//    }
+    ui->btnReloadThread->setEnabled(true);
+    createSupervisedDownload(u);
 }
 
 void UIImageOverview::download(bool b) {
@@ -704,6 +782,21 @@ void UIImageOverview::deleteAllThumbnails() {
     emit removeFiles(fileList);
 }
 
+void UIImageOverview::deleteAllFiles() {
+    QStringList files;
+
+    for (int i=0; i<ui->listWidget->count(); i++) {
+        files.append(ui->listWidget->item(i)->text());
+        files.append(tnt->getCacheFile(
+                            ui->listWidget->item(i)->text()
+                            )
+                        );
+    }
+
+    ui->listWidget->clear();
+    emit removeFiles(files);
+}
+
 void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba, bool cached) {
     QString requestURI;
     QList<_IMAGE>   imageList;
@@ -714,102 +807,118 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba, bool cache
 
     requestURI = url.toString();
     path = url.path();
+    QLOG_TRACE() << "UIImageOverview :: Got response for " << url.toString() << ":" << QString(ba);
+    if (!_threadBlocked) {
+        if (isImage(url)) {
+            QFile f;
+            QRegExp rx(__IMAGEFILE_REGEXP__, Qt::CaseInsensitive, QRegExp::RegExp2);
+            QStringList res;
+            int pos;
 
-    if (isImage(url)) {
-        QFile f;
-        QRegExp rx(__IMAGEFILE_REGEXP__, Qt::CaseInsensitive, QRegExp::RegExp2);
-        QStringList res;
-        int pos;
+            pos = 0;
 
-        pos = 0;
+            pos = rx.indexIn(requestURI);
+            res = rx.capturedTexts();
 
-        pos = rx.indexIn(requestURI);
-        res = rx.capturedTexts();
+            if (pos != -1) {
+                f.setFileName(getSavepath()+"/"+res.at(1)+res.at(2));
 
-        if (pos != -1) {
-            f.setFileName(getSavepath()+"/"+res.at(1)+res.at(2));
+                if (ui->cbOriginalFilename->isChecked()) {
+                    _IMAGE tmp;
 
-            if (ui->cbOriginalFilename->isChecked()) {
-                _IMAGE tmp;
+                    for (int i=0; i<images.count(); i++) {
+                        if (images.at(i).largeURI.endsWith("/"+res.at(1)+res.at(2))) {
+                            tmp = images.at(i);
 
-                for (int i=0; i<images.count(); i++) {
-                    if (images.at(i).largeURI.endsWith("/"+res.at(1)+res.at(2))) {
-                        tmp = images.at(i);
-
-                        f.setFileName(getSavepath()+"/"+tmp.originalFilename);
-                        break;
+                            f.setFileName(getSavepath()+"/"+tmp.originalFilename);
+                            break;
+                        }
                     }
                 }
+
+                f.open(QIODevice::ReadWrite);
+                bytesWritten = f.write(ba);
+                f.close();
+
+                if (bytesWritten == ba.size()) {
+                    createThumbnail(f.fileName());
+                    setCompleted(requestURI, f.fileName());
+                }
+                else {
+                    QLOG_ERROR() << "UIImageOverview :: Couldn't save file from URI " << url.toString();
+                }
             }
 
-            f.open(QIODevice::ReadWrite);
-            bytesWritten = f.write(ba);
-            f.close();
-
-            if (bytesWritten == ba.size()) {
-                createThumbnail(f.fileName());
-                setCompleted(requestURI, f.fileName());
-            }
-            else {
-                QLOG_ERROR() << "UIImageOverview :: Couldn't save file from URI " << url.toString();
-            }
-        }
-
-    }
-    else {
-        setStatus("Parsing");
-        iParser->setURL(url);
-        status = iParser->parseHTML(ba);
-
-        if (status.hasErrors) {
-            QLOG_ERROR() << "ImageOverview :: Parser error " << iParser->getErrorCode();
-            switch (iParser->getErrorCode()) {
-            case 404:
-                stopDownload();
-                processCloseRequest();
-                break;
-
-            default:
-                break;
-            }
         }
         else {
-            _cachedResult = cached;
+            setStatus("Parsing");
+            iParser->setURL(url);
+            status = iParser->parseHTML(ba);
 
-            if (status.isFrontpage) {
-                QStringList newTab;
-                QString v;
+            if (status.hasErrors) {
+                QLOG_ERROR() << "ImageOverview :: Parser error " << iParser->getErrorCode();
+                switch (iParser->getErrorCode()) {
+                case 404:
+                    stopDownload();
+                    processCloseRequest();
+                    break;
 
-                v = getValues();
-                newTab = v.split(";;");
-                threadList = iParser->getUrlList();
-
-                foreach (QUrl u, threadList) {
-                    newTab.replace(0, u.toString());
-                    emit createTabRequest(newTab.join(";;"));
-                }
-
-                if (settings->value("options/close_overview_threads", true).toBool()) {
-                    emit closeRequest(this, 0);
+                default:
+                    break;
                 }
             }
             else {
-                if (status.hasImages) {
-                    imageList = iParser->getImageList();
-                    mergeImageList(imageList);
+                _cachedResult = cached;
+
+                if (status.isFrontpage) {
+                    QStringList newTab;
+                    QString v;
+
+                    v = getValues();
+                    newTab = v.split(";;");
+                    threadList = iParser->getUrlList();
+
+                    foreach (QUrl u, threadList) {
+                        newTab.replace(0, u.toString());
+                        emit createTabRequest(newTab.join(";;"));
+                    }
+
+                    if (settings->value("options/close_overview_threads", true).toBool()) {
+                        emit closeRequest(this, 0);
+                    }
+                    else {
+                        if (status.hasTitle) {
+                            ui->lTitle->setText(HTML::decode(iParser->getThreadTitle()));
+                            ui->lTitle2->setText(HTML::decode(iParser->getThreadTitle()));
+                        }
+                    }
+                }
+                else if (status.hasRedirect) {
+                    ui->leURI->setText(iParser->getRedirectURL().toString());
+                    QLOG_INFO() << __PRETTY_FUNCTION__ << ":: redirecting to " << iParser->getRedirectURL().toString();
+                    stop();
+                    start();
+                }
+                else {
+                    if (status.hasImages) {
+                        imageList = iParser->getImageList();
+                        mergeImageList(imageList);
+                    }
+
+                    if (status.hasTitle) {
+                        ui->lTitle->setText(HTML::decode(iParser->getThreadTitle()));
+                        ui->lTitle2->setText(HTML::decode(iParser->getThreadTitle()));
+                    }
                 }
 
-                if (status.hasTitle) {
-                    ui->lTitle->setText(iParser->getThreadTitle());
-                    ui->lTitle2->setText(iParser->getThreadTitle());
-                }
             }
-        }
 
-        if (cached) {
-            timer->stop();
-            ui->cbRescan->setChecked(false);
-            setStatus("Cached");
+            if (cached) {
+                timer->stop();
+                ui->cbRescan->setChecked(false);
+                setStatus("Cached");
+                ui->btnReloadThread->setEnabled(false);
+            }
         }
     }
 }
@@ -900,7 +1009,7 @@ bool UIImageOverview::selectParser(QUrl url) {
     ParserPluginInterface* tmp;
 
     if (url.isEmpty())
-        url = QUrl(ui->leURI->text());
+        url = QUrl(ui->leURI->text().toLatin1());
 
     tmp = pluginManager->getParser(url, &ret);
     if (ret) {
@@ -969,8 +1078,9 @@ bool UIImageOverview::addImage(_IMAGE img) {
         if (!alreadyInList) {
             // Check if already downloaded
             QFile f;
-            if (ui->cbOriginalFilename->isChecked())
+            if (ui->cbOriginalFilename->isChecked()) {
                 f.setFileName(getSavepath()+"/"+img.originalFilename);
+            }
             else {
                 QRegExp rx(__IMAGEFILE_REGEXP__, Qt::CaseInsensitive, QRegExp::RegExp2);
                 QStringList res;
@@ -990,6 +1100,12 @@ bool UIImageOverview::addImage(_IMAGE img) {
                 img.downloaded = true;
                 fileExists = true;
                 img.savedAs = f.fileName();
+            }
+            else if (_cachedResult) {
+                blackList->add(img.largeURI);
+                img.savedAs = "";
+                img.downloaded = true;
+                fileExists = true;
             }
 
             images.append(img);
@@ -1044,7 +1160,7 @@ void UIImageOverview::updateDownloadStatus() {
         ui->progressBar->setVisible(false);
 
         QLOG_DEBUG() << "UIImageOverview :: updateDownloadStatus() :: item count: " << ui->listWidget->count() << "; expectedThumbnailCount " << expectedThumbnailCount;
-        if (ui->listWidget->count() >= expectedThumbnailCount) {
+        if (missingThumbs.count() == 0) {
             if (_cachedResult) {
                 setTabTitle("Cached");
                 setStatus("Cached");
@@ -1122,5 +1238,42 @@ void UIImageOverview::updateExpectedThumbnailCount() {
                 images.at(i).savedAs != "") {
             expectedThumbnailCount++;
         }
+    }
+}
+
+void UIImageOverview::showImagePreview() {
+    QStringList slImageList;
+
+    if (settings->value("options/use_internal_viewer", false).toBool()) {
+        for (int i=0; i<images.length(); i++) {
+            if ((images.at(i).downloaded) && !blackList->contains(images.at(i).largeURI)) {
+                slImageList << images.at(i).savedAs;
+            }
+        }
+
+        imageViewer->setImageList(slImageList);
+
+        if (slImageList.count() > 0) {
+            imageViewer->setCurrentImage(0);
+        }
+    }
+}
+
+void UIImageOverview::blockThread(bool b) {
+    _threadBlocked = b;
+    if (_threadBlocked) {
+        QLOG_INFO() << "UIImageOverview :: Blocking thread";
+        running = false;
+        stopDownload();
+        setStatus("Blocked");
+    }
+    else {
+        QLOG_INFO() << "UIImageOverview :: Unblocking thread";
+
+        // Make it a fresh start for this images thread
+        images.clear();
+        deleteAllThumbnails();
+        ui->listWidget->clear();
+        start();
     }
 }

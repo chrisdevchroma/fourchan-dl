@@ -1,4 +1,4 @@
-#ifndef DOWNLOADMANAGER_H
+﻿#ifndef DOWNLOADMANAGER_H
 #define DOWNLOADMANAGER_H
 
 //#include <QThread>
@@ -35,6 +35,9 @@ public:
     QMap<qint64, QString> getPendingRequestsMap();
     QMap<qint64, QString> getRunningRequestsMap();
     QString getFilenameForURL(QUrl);
+    int getHighestPriority();
+    bool cacheAvailable(QUrl url);
+    QByteArray getCachedReply(QUrl url);
 
 private:
     QList<NetworkAccessManager*> nams;
@@ -58,6 +61,7 @@ private:
     float statistic_downloadedKBytes;
     bool _useThreadCache;
     QString _threadCachePath;
+    int _highestPriority;
 
     void addRequest(qint64, DownloadRequest*);
     void handleError(qint64, QNetworkReply*);
@@ -65,8 +69,6 @@ private:
     void processRequests();
     inline qint64 getUID() {return ++lastid;}
 
-    bool cacheAvailable(QUrl url);
-    QByteArray getCachedReply(QUrl url);
     QString encodeURL(QString);
     QString decodeURL(QString);
 

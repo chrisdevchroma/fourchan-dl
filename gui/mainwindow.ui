@@ -308,6 +308,24 @@
     <string>Get updater version</string>
    </property>
   </action>
+  <action name="actionAskForUpdate">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/package-upgrade.png</normaloff>:/icons/resources/package-upgrade.png</iconset>
+   </property>
+   <property name="text">
+    <string>AskForUpdate</string>
+   </property>
+   <property name="toolTip">
+    <string>Updates available</string>
+   </property>
+   <property name="statusTip">
+    <string>Updates available</string>
+   </property>
+   <property name="whatsThis">
+    <string>Updates available</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
@@ -458,6 +476,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAskForUpdate</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>askForUpdate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>342</x>
+     <y>304</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addTab()</slot>
@@ -470,5 +504,6 @@
   <slot>addForegroundTab()</slot>
   <slot>toggleThreadOverview()</slot>
   <slot>getUpdaterVersion()</slot>
+  <slot>askForUpdate()</slot>
  </slots>
 </ui>

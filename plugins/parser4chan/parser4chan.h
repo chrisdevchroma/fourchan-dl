@@ -1,4 +1,4 @@
-#ifndef PARSER4CHAN_H
+﻿#ifndef PARSER4CHAN_H
 #define PARSER4CHAN_H
 
 #include <QStringList>

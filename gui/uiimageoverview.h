@@ -1,4 +1,4 @@
-#ifndef UIIMAGEOVERVIEW_H
+﻿#ifndef UIIMAGEOVERVIEW_H
 #define UIIMAGEOVERVIEW_H
 
 #include <QWidget>
@@ -19,6 +19,7 @@
 #include "pluginmanager.h"
 #include "requesthandler.h"
 #include "uiimageviewer.h"
+#include "HtmlEntities.h"
 
 class ThumbnailCreator;
 class MainWindow;
@@ -57,6 +58,7 @@ public:
 private:
     Ui::UIImageOverview *ui;
     QTimer* timer;
+    QTimer* thumbnailCheckTimer;
     QList<int> timeoutValues;
     QList<_IMAGE> images;
     QSize iconSize;
@@ -65,6 +67,8 @@ private:
     QAction* openFileAction;
     QSettings* settings;
     QStringList pendingThumbnails;
+    QMap<QString,QString> missingThumbs;
+
     BlackList* blackList;
     QString _status;
     RequestHandler* requestHandler;
@@ -78,6 +82,8 @@ private:
     int expectedThumbnailCount;
     int thumbnailCount;
     bool _cachedResult;
+    bool _threadBlocked;
+    bool fresh_thread;
 
     void loadSettings(void);
     void setStatus(QString s);
@@ -99,6 +105,7 @@ private slots:
     void triggerRescan(void);
     void createThumbnail(QString);
     void deleteFile(void);
+    void deleteAllFiles(void);
     void reloadFile(void);
     void openFile(void);
     void errorHandler(QUrl, int);
@@ -123,9 +130,14 @@ private slots:
     void setCompleted(QString uri, QString filename);
     bool isImage(QUrl);
     void updateDownloadStatus();
+    void showImagePreview();
+    void blockThread(bool);
+
+    void checkForMissingThumbnails();
 
 public slots:
     void addThumbnail(QString, QString);
+    void addThumbnails(QString);
     void start(void);
     void stop(void);
     bool checkForExistingThread(QString s="");

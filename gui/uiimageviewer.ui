@@ -16,6 +16,10 @@
   <property name="windowTitle">
    <string>Image Viewer</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/resources/image-preview-16x16.png</normaloff>:/icons/resources/image-preview-16x16.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0">
@@ -255,6 +259,14 @@
    </layout>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionHide">
+   <property name="text">
+    <string>hide</string>
+   </property>
+   <property name="shortcut">
+    <string>Esc</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="resources.qrc"/>
@@ -385,6 +397,22 @@
     <hint type="destinationlabel">
      <x>695</x>
      <y>578</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionHide</sender>
+   <signal>triggered()</signal>
+   <receiver>UIImageViewer</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
     </hint>
    </hints>
   </connection>

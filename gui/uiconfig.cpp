@@ -1,4 +1,4 @@
-#include "uiconfig.h"
+﻿#include "uiconfig.h"
 #include "ui_uiconfig.h"
 
 UIConfig::UIConfig(QWidget *parent) :
@@ -6,6 +6,9 @@ UIConfig::UIConfig(QWidget *parent) :
     ui(new Ui::UIConfig)
 {
     ui->setupUi(this);
+
+    _removing_thumbnails = false;
+
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     timeoutValueEditor = new UIListEditor(this);
     timeoutValueEditor->setModal(true);
@@ -23,6 +26,7 @@ UIConfig::UIConfig(QWidget *parent) :
     connect(dialogFolderShortcut, SIGNAL(shortcutChanged(QString,QString,QString)), folderShortcuts, SLOT(updateShortcut(QString,QString,QString)));
     connect(dialogFolderShortcut, SIGNAL(editCanceled()), this, SLOT(loadShortcuts()));
     connect(ui->btnDeleteAllThumbnails, SIGNAL(clicked()), this, SIGNAL(deleteAllThumbnails()));
+    connect(ui->btnDeleteAllThumbnails, SIGNAL(clicked()), this, SLOT(thumbnailDeletionStarted()));
 }
 
 UIConfig::~UIConfig()
@@ -309,4 +313,16 @@ void UIConfig::toggleLogLevelWarning(QString s) {
     else {
         ui->lLogLevelWarning->hide();
     }
+}
+
+void UIConfig::thumbnailDeletionFinished() {
+    if (_removing_thumbnails) {
+        ui->lDeleteThumbnailsStatus->setText("Deleting finished");
+        _removing_thumbnails = false;
+    }
+}
+
+void UIConfig::thumbnailDeletionStarted() {
+    ui->lDeleteThumbnailsStatus->setText("Deleting");
+    _removing_thumbnails = true;
 }

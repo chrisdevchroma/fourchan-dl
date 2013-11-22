@@ -1,4 +1,4 @@
-#include "thumbnailremover.h"
+﻿#include "thumbnailremover.h"
 
 ThumbnailRemover::ThumbnailRemover(QObject *parent) :
     QObject(parent)
@@ -24,12 +24,15 @@ void ThumbnailRemover::removeOutdated() {
             QLOG_INFO() << "ThumbnailRemover :: removed " << fi.absoluteFilePath() << " because it was created on " << date.toString("dd.MM.yyyy hh:mm:ss");
         }
     }
+    emit filesRemoved();
 }
 
 void ThumbnailRemover::removeFiles(QStringList fileList) {
     foreach (QString s, fileList) {
         QFile::remove(s);
     }
+
+    emit filesRemoved();
 }
 
 void ThumbnailRemover::removeAll() {
@@ -41,4 +44,9 @@ void ThumbnailRemover::removeAll() {
             QFile::remove(fi.absoluteFilePath());
         }
     }
+
+    emit filesRemoved();
+}
+
+void ThumbnailRemover::stop() {
 }

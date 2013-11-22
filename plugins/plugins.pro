@@ -4,4 +4,5 @@ SUBDIRS       = \
                 parser4chan \
 				parserchanarchive \
 				parser.archive.foolz.us \
-				parserKrautchan
+				parserKrautchan \
+				parser.7chan.org

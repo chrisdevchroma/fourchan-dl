@@ -1,4 +1,4 @@
-#include "threadhandler.h"
+﻿#include "threadhandler.h"
 
 ThreadHandler::ThreadHandler(QObject *parent) :
     QObject(parent)
@@ -32,9 +32,9 @@ ThreadHandler::ThreadHandler(QObject *parent) :
     createComponentList();
 
 #ifdef __DEBUG__
-    createSupervisedDownload(QUrl("file:d:/Qt/fourchan-dl/webupdate.xml"));
+    createSupervisedDownload(QUrl(QString::fromUtf8("file:d:/Qt/fourchan-dl/webupdate.xml"));
 #else
-    createSupervisedDownload(QUrl("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download"));
+    createSupervisedDownload(QUrl(QString::fromUtf8("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download")));
 #endif
 
     autosaveTimer = new QTimer(this);
@@ -185,6 +185,7 @@ void ThreadHandler::setUpdaterVersion(QString v) {
 
 void ThreadHandler::aboutToQuit() {
     downloadManager->pauseDownloads();
+    out << "Saving settings.\n";
     saveSettings();
 }
 

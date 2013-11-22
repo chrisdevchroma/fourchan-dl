@@ -30,5 +30,9 @@
         <file>resources/rotateCW.png</file>
         <file>resources/media-playback-pause.png</file>
         <file>resources/media-playback-pause-red.png</file>
+        <file>resources/image-preview-16x16.png</file>
+        <file>resources/process-stop.png</file>
+        <file>resources/process-stop-inactive.png</file>
+        <file>resources/package-upgrade.png</file>
     </qresource>
 </RCC>

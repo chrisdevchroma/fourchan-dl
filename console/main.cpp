@@ -1,4 +1,4 @@
-#include <QCoreApplication>
+﻿#include <QCoreApplication>
 #include <QtDebug>
 #include <QFile>
 #include <QDateTime>
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 //    a.connect(&a, SIGNAL(aboutToQuit()), &threadHandler, SLOT(deleteLater()));
 //    a.connect(&a, SIGNAL(aboutToQuit()), downloadManager, SLOT(deleteLater()));
 
-    downloadManager->resumeDownloads();
+    //downloadManager->resumeDownloads();
 
     return a.exec();
 }

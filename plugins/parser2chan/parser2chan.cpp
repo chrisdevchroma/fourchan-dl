@@ -1,4 +1,4 @@
-#include "parser2chan.h"
+﻿#include "parser2chan.h"
 
 Parser2chan::Parser2chan()
 {
@@ -7,6 +7,7 @@ Parser2chan::Parser2chan()
     _statusCode.hasImages = false;
     _statusCode.hasTitle = false;
     _statusCode.isFrontpage = false;
+    _statusCode.hasRedirect = false;
     _errorCode = 0;
     _redirect = QUrl();
     _images.clear();
@@ -79,6 +80,9 @@ ParsingStatus Parser2chan::parseHTML(QString html) {
 
             _urlList << QUrl("res/"+res.at(1));
             _statusCode.isFrontpage = true;
+            _statusCode.hasTitle = true;
+            _threadTitle = _url.toString();
+
         }
     }
 

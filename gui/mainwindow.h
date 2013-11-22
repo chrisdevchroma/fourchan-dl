@@ -1,4 +1,4 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
@@ -80,7 +80,6 @@ private:
     void removeSupervisedDownload(QUrl);
 
     void createComponentList();
-    void newComponentsAvailable();
 
     QAction *restoreAction;
     QAction *quitAction;
@@ -137,6 +136,7 @@ private slots:
     void addThreadOverviewMark(QTreeWidgetItem *item);
     void addThreadOverviewMark(int index);
     void getUpdaterVersion();
+    void askForUpdate();
 
 signals:
     void removeFiles(QStringList);

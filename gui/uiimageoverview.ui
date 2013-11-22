@@ -49,6 +49,55 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btnDeleteAllFiles">
+       <property name="toolTip">
+        <string>Delete all files</string>
+       </property>
+       <property name="statusTip">
+        <string>Delete all files</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/remove.png</normaloff>:/icons/resources/remove.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnBlockThread">
+       <property name="toolTip">
+        <string>Block thread</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/process-stop-inactive.png</normaloff>
+         <normalon>:/icons/resources/process-stop.png</normalon>:/icons/resources/process-stop-inactive.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnShowImagePreview">
+       <property name="toolTip">
+        <string>Open Image Preview</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/icons/resources/image-preview-16x16.png</normaloff>:/icons/resources/image-preview-16x16.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btnStart">
        <property name="text">
         <string/>
@@ -562,8 +611,56 @@
      <y>21</y>
     </hint>
     <hint type="destinationlabel">
-     <x>364</x>
+     <x>289</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnShowImagePreview</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>showImagePreview()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>377</x>
      <y>21</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>234</x>
+     <y>337</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnBlockThread</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>blockThread(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>343</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>293</x>
+     <y>5</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btnDeleteAllFiles</sender>
+   <signal>clicked()</signal>
+   <receiver>UIImageOverview</receiver>
+   <slot>deleteAllFiles()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>320</x>
+     <y>23</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>397</x>
+     <y>4</y>
     </hint>
    </hints>
   </connection>
@@ -578,5 +675,8 @@
   <slot>checkForExistingThread(QString)</slot>
   <slot>rebuildThumbnails()</slot>
   <slot>reloadThread()</slot>
+  <slot>showImagePreview()</slot>
+  <slot>blockThread(bool)</slot>
+  <slot>deleteAllFiles()</slot>
  </slots>
 </ui>

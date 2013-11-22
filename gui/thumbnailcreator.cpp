@@ -1,4 +1,4 @@
-#include "thumbnailcreator.h"
+﻿#include "thumbnailcreator.h"
 
 ThumbnailCreator::ThumbnailCreator(QObject *parent) :
     QObject(parent)
@@ -8,6 +8,16 @@ ThumbnailCreator::ThumbnailCreator(QObject *parent) :
     newImages = false;
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     halted = false;
+    use_combined_thumbnail_list = false;
+
+    event_emit_timer = new QTimer(this);
+
+    if (use_combined_thumbnail_list) {
+        event_emit_timer->setInterval(2000);
+        event_emit_timer->setSingleShot(true);
+
+        connect(event_emit_timer, SIGNAL(timeout()), this, SLOT(eventEmitTimerTriggered()));
+    }
 }
 
 void ThumbnailCreator::go() {
@@ -61,36 +71,51 @@ void ThumbnailCreator::go() {
 
             if (!useCachedThumbnail){
                 QLOG_TRACE() << "ThumbnailCreator :: Creating new thumbnail for " << currentFilename;
-                original.load(currentFilename);
-                QLOG_TRACE() << "ThumbnailCreator :: Loaded original file " << currentFilename;
-                if (original.width()<iconWidth
-                    && original.height()<iconHeight
-                    && !(enlargeThumbnails)) {
-                    QLOG_TRACE() << "ThumbnailCreator :: Setting original as thumbnail";
-                    tn = original;
-                } else {
-                    QLOG_TRACE() << "ThumbnailCreator :: Rendering thumbnail";
+                if (original.load(currentFilename)) {
+                    QLOG_TRACE() << "ThumbnailCreator :: Loaded original file " << currentFilename;
+                    if (original.width()<iconWidth
+                        && original.height()<iconHeight
+                        && !(enlargeThumbnails)) {
+                        QLOG_TRACE() << "ThumbnailCreator :: Setting original as thumbnail";
+                        tn = original;
+                    } else {
+                        QLOG_TRACE() << "ThumbnailCreator :: Rendering thumbnail";
 
-                    if (hqRendering) {
-                        tn = original.scaled(*iconSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+                        if (hqRendering) {
+                            tn = original.scaled(*iconSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+                        }
+                        else {
+                            tn = original.scaled(*iconSize,Qt::KeepAspectRatio,Qt::FastTransformation);
+                        }
                     }
-                    else {
-                        tn = original.scaled(*iconSize,Qt::KeepAspectRatio,Qt::FastTransformation);
-                    }
+
+                    tn.save(cacheFile, "PNG");
+                    QLOG_TRACE() << "ThumbnailCreator :: Saving thumbnail as " << cacheFile;
                 }
-
-                tn.save(cacheFile, "PNG");
-                QLOG_TRACE() << "ThumbnailCreator :: Saving thumbnail as " << cacheFile;
+                else {
+                    QLOG_ERROR() << __PRETTY_FUNCTION__ << ":: Could not load image" << currentFilename << ". Thumbnail not created.";
+                }
             }
 
             mutex.lock();
-                emit thumbnailAvailable(currentFilename, cacheFile);
-                emit pendingThumbnails(list.count());
-                newImages = false;
-
-                if (list.count() == 0) {
-                    condition.wait(&mutex);
+            if (use_combined_thumbnail_list) {
+                rendered_thumbnails << QString("%1:::%2").arg(currentFilename, cacheFile);
+                if (!event_emit_timer->isActive()) {
+                    event_emit_timer->start();
                 }
+            }
+            else {
+//                emit thumbnailAvailable(currentFilename, cacheFile);
+            }
+            emit pendingThumbnails(list.count());
+            newImages = false;
+
+            if (list.count() == 0) {
+                if (use_combined_thumbnail_list) {
+                    eventEmitTimerTriggered();
+                }
+                condition.wait(&mutex);
+            }
 
             mutex.unlock();
         }
@@ -109,14 +134,20 @@ void ThumbnailCreator::setIconSize(QSize s) {
     mutex.unlock();
 }
 
-void ThumbnailCreator::addToList(QString s) {
+QString ThumbnailCreator::addToList(QString s) {
+    QString ret;
+
+    ret = "";
     mutex.lock();
     if (!list.contains(s)) {
+        ret = getCacheFile(s);
         list.append(s);
+        newImages = true;
     }
-    newImages = true;
     mutex.unlock();
     condition.wakeAll();
+
+    return ret;
 }
 
 QString ThumbnailCreator::getCacheFile(QString filename) {
@@ -139,4 +170,33 @@ void ThumbnailCreator::resume() {
     mutex.lock();
     halted = false;
     mutex.unlock();
+}
+/*
+void ThumbnailCreator::thumbnailAvailable(QString image_filename, QString cache_filename) {
+//    mutex.lock();
+    rendered_thumbnails.append(QString("%1:::%2").arg(image_filename, cache_filename));
+    QLOG_TRACE() << __PRETTY_FUNCTION__ << ":: adding to list: " << rendered_thumbnails;
+    thumbnails_created = true;
+
+    if (!event_emit_timer->isActive()) {
+        event_emit_timer->start();
+    }
+//    mutex.unlock();
+}
+*/
+void ThumbnailCreator::eventEmitTimerTriggered() {
+    mutex.lock();
+    QLOG_TRACE() << __PRETTY_FUNCTION__ << ":: triggered";
+    if (thumbnails_created) {
+        thumbnails_created=false;
+        QLOG_TRACE() << __PRETTY_FUNCTION__ << "emitting signal";
+        QLOG_ALWAYS() << __PRETTY_FUNCTION__ << ":: Thumbnails ready: " << rendered_thumbnails;
+//        emit thumbnailsAvailable(rendered_thumbnails.join(";;;"));
+        rendered_thumbnails.clear();
+    }
+    mutex.unlock();
+}
+
+void ThumbnailCreator::wakeup() {
+    condition.wakeAll();
 }

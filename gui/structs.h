@@ -1,4 +1,4 @@
-#ifndef STRUCTS_H
+﻿#ifndef STRUCTS_H
 #define STRUCTS_H
 
 struct _IMAGE
@@ -17,6 +17,7 @@ struct ParsingStatus
     bool hasTitle;
     bool isFrontpage;
     bool hasErrors;
+    bool hasRedirect;
 };
 
 struct component_information {

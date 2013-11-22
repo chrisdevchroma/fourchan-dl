@@ -1,4 +1,4 @@
-#ifndef THUMBNAILREMOVER_H
+﻿#ifndef THUMBNAILREMOVER_H
 #define THUMBNAILREMOVER_H
 
 #include <QObject>
@@ -18,7 +18,8 @@ class ThumbnailRemover : public QObject
     Q_OBJECT
 public:
     explicit ThumbnailRemover(QObject *parent = 0);
-    
+    void stop();
+
 private:
     QSettings* settings;
     int ttl;
@@ -28,7 +29,7 @@ private:
     QFileInfoList fileInfoList;
 
 signals:
-    
+    void filesRemoved();
 public slots:
     void removeFiles(QStringList fileList);
     void removeAll();

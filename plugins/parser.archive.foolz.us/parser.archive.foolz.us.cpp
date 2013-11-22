@@ -1,4 +1,4 @@
-#include "parser.archive.foolz.us.h"
+﻿#include "parser.archive.foolz.us.h"
 
 ParserArchiveFoolzUs::ParserArchiveFoolzUs()
 {
@@ -7,6 +7,7 @@ ParserArchiveFoolzUs::ParserArchiveFoolzUs()
     _statusCode.hasImages = false;
     _statusCode.hasTitle = false;
     _statusCode.isFrontpage = false;
+    _statusCode.hasRedirect = false;
     _errorCode = 0;
     _redirect = QUrl();
     _images.clear();
@@ -59,6 +60,8 @@ ParsingStatus ParserArchiveFoolzUs::parseHTML(QString html) {
     if (pageIsFrontpage) {
         pos = 0;
         _statusCode.isFrontpage = true;
+        _statusCode.hasTitle = true;
+        _threadTitle = _url.toString();
 
         while (pos > -1) {
             pos = rxThreads.indexIn(html, pos + 1);

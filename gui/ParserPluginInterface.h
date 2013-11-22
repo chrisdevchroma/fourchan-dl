@@ -1,10 +1,10 @@
-#ifndef PARSERPLUGININTERFACE_H
+﻿#ifndef PARSERPLUGININTERFACE_H
 #define PARSERPLUGININTERFACE_H
 #include <QtPlugin>
 #include <QUrl>
 #include "structs.h"
 
-#define _PARSER_PLUGIN_INTERFACE_REVISION "1.2"
+#define _PARSER_PLUGIN_INTERFACE_REVISION "1.3"
 
 class ParserPluginInterface
 {

@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -16,10 +16,11 @@ MainWindow::MainWindow(QWidget *parent) :
     thumbnailRemover = new ThumbnailRemover();
     thumbnailRemover->moveToThread(thumbnailRemoverThread);
     connect(thumbnailRemoverThread, SIGNAL(started()), thumbnailRemover, SLOT(removeOutdated()));
+    connect(thumbnailRemover, SIGNAL(filesRemoved()), uiConfig, SLOT(thumbnailDeletionFinished()));
     thumbnailRemoverThread->start(QThread::LowPriority);
 
     overviewUpdateTimer = new QTimer(this);
-    overviewUpdateTimer->setInterval(1000);
+    overviewUpdateTimer->setInterval(2354);
     overviewUpdateTimer->setSingleShot(true);
     _updateOverview = false;
     _paused = false;
@@ -47,7 +48,7 @@ MainWindow::MainWindow(QWidget *parent) :
     historyMenu->setIcon(QIcon(":/icons/resources/remove.png"));
     ui->menuBar->addMenu(historyMenu);
 
-    ui->menuBar->addAction(ui->actionGetUpdaterVersion);
+    //ui->menuBar->addAction(ui->actionGetUpdaterVersion);
 
     ui->menuBar->addAction(ui->actionShowInfo);
 
@@ -97,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef __DEBUG__
     createSupervisedDownload(QUrl("file:d:/Qt/fourchan-dl/webupdate.xml"));
 #else
-    createSupervisedDownload(QUrl("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download"));
+    createSupervisedDownload(QUrl(QString::fromUtf8("http://www.sourceforge.net/projects/fourchan-dl/files/webupdate/webupdate.xml/download")));
 #endif
 
 #ifdef Q_OS_WIN
@@ -258,6 +259,7 @@ void MainWindow::restoreTabs() {
     int tabCount;
 
     tabCount = settings->value("tabs/count",0).toInt();
+    downloadManager->pauseDownloads();
 
     ui->pbOpenRequests->setMaximum(tabCount);
     ui->pbOpenRequests->setValue(0);
@@ -283,6 +285,7 @@ void MainWindow::restoreTabs() {
 //    ui->pbOpenRequests->setFormat("%v/%m (%p%) requests finished");
 //    ui->pbOpenRequests->setValue(0);
 //    ui->pbOpenRequests->setMaximum(0);
+    downloadManager->resumeDownloads();
 }
 
 void MainWindow::saveSettings(void) {
@@ -417,7 +420,7 @@ void MainWindow::updateWidgetSettings(void) {
     }
 }
 
-void MainWindow::newComponentsAvailable() {
+void MainWindow::askForUpdate() {
 #ifdef USE_UPDATER
     QProcess process;
     QFileInfo fi;
@@ -425,7 +428,7 @@ void MainWindow::newComponentsAvailable() {
 
     QString msg;
 
-    msg = "There are new components available to download from sourceforge:";
+    msg = "There are new components available:";
 
     for (int i=0; i<updateableComponents.count(); i++) {
         component_information c;
@@ -445,7 +448,7 @@ void MainWindow::newComponentsAvailable() {
                                   QMessageBox::Yes | QMessageBox::No)) {
     case QMessageBox::Ok:
     case QMessageBox::Yes:
-
+        saveSettings();
         fi.setFile(updaterFileName);
 
         QLOG_INFO() << "MainWindow :: Starting updater " << fi.absoluteFilePath();
@@ -457,6 +460,8 @@ void MainWindow::newComponentsAvailable() {
             ui->statusBar->showMessage("Unable to start process "+fi.absoluteFilePath()+" ("+process.errorString()+")");
         }
         break;
+
+        ui->menuBar->removeAction(ui->actionAskForUpdate);
 
     case QMessageBox::No:
     default:
@@ -592,6 +597,8 @@ void MainWindow::updateThreadOverview() {
             sl << tab->getStatus();
             sl << tab->getURI();
 
+            QLOG_DEBUG() << __PRETTY_FUNCTION__ << "::" << i << ":" << sl;
+
             if (ui->threadOverview->topLevelItemCount() > i) {                   // If there is an entry for the i-th tab
                 item = ui->threadOverview->topLevelItem(i);     //  change its content
                 for (int k=0; k<4; k++)
@@ -708,6 +715,8 @@ void MainWindow::checkForUpdates(QString xml) {
     component_information c, local, remote;
     QList<QString> foundComponents;
 
+    QLOG_ALWAYS() << __PRETTY_FUNCTION__ << ":: Checking for updates on release tree " << UPDATE_TREE;
+
     pos = rx.indexIn(xml);
     res = rx.capturedTexts();
 
@@ -763,7 +772,9 @@ void MainWindow::checkForUpdates(QString xml) {
         }
     }
 
-    if (runUpdate) newComponentsAvailable();
+    if (runUpdate) {
+        ui->menuBar->addAction(ui->actionAskForUpdate);
+    }
     QLOG_TRACE() << "MainWindow :: " << xml;
 }
 
@@ -1025,12 +1036,13 @@ void MainWindow::toggleThreadOverview() {
 
 void MainWindow::aboutToQuit() {
     downloadManager->pauseDownloads();
-    tnt->halt();
     tnt->deleteLater();
+    tnt->wakeup();
     saveSettings();
     removeTrayIcon();
     cleanThreadCache();
-    thumbnailRemoverThread->terminate();
+    thumbnailRemover->deleteLater();
+    thumbnailRemoverThread->exit(0);
 
     emit quitAll();
 }

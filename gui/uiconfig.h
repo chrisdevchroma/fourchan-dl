@@ -1,4 +1,4 @@
-#ifndef UICONFIG_H
+﻿#ifndef UICONFIG_H
 #define UICONFIG_H
 
 #include <QDialog>
@@ -28,7 +28,10 @@ private:
     QSettings* settings;
     UIListEditor* timeoutValueEditor;
     DialogFolderShortcut* dialogFolderShortcut;
+    bool _removing_thumbnails;
 
+public slots:
+    void thumbnailDeletionFinished();
 private slots:
     void accept(void);
     void reject(void);
@@ -44,6 +47,7 @@ private slots:
     void editShortcutItem(QListWidgetItem*);
     void loadShortcuts();
     void toggleLogLevelWarning(QString);
+    void thumbnailDeletionStarted();
 signals:
     void configurationChanged(void);
     void deleteAllThumbnails();

@@ -1,4 +1,4 @@
-#ifndef THUMBNAILCREATOR_H
+﻿#ifndef THUMBNAILCREATOR_H
 #define THUMBNAILCREATOR_H
 
 #include <QObject>
@@ -21,10 +21,11 @@ class ThumbnailCreator : public QObject
 public:
     explicit ThumbnailCreator(QObject *parent = 0);
     void setIconSize(QSize s);
-    void addToList(QString s);
+    QString addToList(QString s);
     QString getCacheFile(QString);
     void halt();
     void resume();
+    void wakeup();
 
 private:
     QStringList list;
@@ -38,10 +39,19 @@ private:
     bool useCache;
     QMutex mutex;
     QWaitCondition condition;
+
+    QTimer* event_emit_timer;
+    bool thumbnails_created;
+    QStringList rendered_thumbnails;
+    bool use_combined_thumbnail_list;
+
+private slots:
+    void eventEmitTimerTriggered();
     
 signals:
     void pendingThumbnails(int);
     void thumbnailAvailable(QString, QString);
+    void thumbnailsAvailable(QString);
     
 public slots:
     void go();

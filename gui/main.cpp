@@ -1,4 +1,4 @@
-#include <QApplication>
+﻿#include <QApplication>
 #include <QtDebug>
 
 #if QT_VERSION < 0x050000
@@ -117,8 +117,8 @@ void checkEnvironment() {
     updaterDir.setPath(dir.path()+"/updater");
     pluginDir.setPath(dir.path()+"/plugins");
 
-#ifdef Q_OS_WIN32
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#ifdef Q_OS_WIN
+#if (QT_VERSION >= 0x050000)
     neededFiles << "Qt5Core.dll" << "Qt5Network.dll" << "libgcc_s_sjlj-1.dll" << "libstdc++-6.dll" << "upd4t3r.exe" << "libwinpthread-1.dll";
     qt4Files << "QtCore4.dll" << "QtGui4.dll" << "libgcc_s_dw2-1.dll" << "QtNetwork4.dll" << "QtXml4.dll" << "imageformats/qgif4.dll";
     qt4Files << "imageformats/qico4.dll" << "imageformats/qjpeg4.dll" << "imageformats/qmng4.dll" << "imageformats/qsvg4.dll";
