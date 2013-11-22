@@ -1106,6 +1106,8 @@ bool UIImageOverview::addImage(_IMAGE img) {
                 img.savedAs = "";
                 img.downloaded = true;
                 fileExists = true;
+
+                QLOG_INFO() << __PRETTY_FUNCTION__ << ":: Image " << img.largeURI << " from cached result does not exists. Looked in " << getSavepath();
             }
 
             images.append(img);
