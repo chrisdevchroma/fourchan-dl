@@ -1,4 +1,4 @@
-#ifndef DOWNLOADREQUEST_H
+﻿#ifndef DOWNLOADREQUEST_H
 #define DOWNLOADREQUEST_H
 
 #include <QObject>
@@ -34,6 +34,9 @@ public:
     bool paused() {return _paused;}
     void pause(int s);
 
+    int error_count() {return _error_count;}
+    void download_error(int increment=1);
+
 private:
     RequestHandler* _rh;
     QUrl _url;
@@ -44,6 +47,7 @@ private:
     bool _finished;
     bool _cached_reply;
     bool _paused;
+    int _error_count;
 
 
 private slots:

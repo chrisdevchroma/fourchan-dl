@@ -1,4 +1,4 @@
-#include "uilisteditor.h"
+﻿#include "uilisteditor.h"
 #include "ui_uilisteditor.h"
 
 UIListEditor::UIListEditor(QWidget *parent) :
@@ -65,7 +65,7 @@ void UIListEditor::sortList() {
 void UIListEditor::loadSettings() {
     QStringList sl;
 
-    sl = settings->value("options/timeout_values", (QStringList()<<"30"<<"60"<<"120"<<"300"<<"600")).toStringList();
+    sl = settings->value("options/timeout_values", (QStringList()<<"300"<<"600")).toStringList();
     ui->listWidget->clear();
     ui->listWidget->addItems(sl);
 

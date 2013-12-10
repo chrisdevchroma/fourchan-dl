@@ -1,4 +1,4 @@
-#include "downloadrequest.h"
+﻿#include "downloadrequest.h"
 
 DownloadRequest::DownloadRequest(QObject *parent) :
     QObject(parent)
@@ -13,11 +13,13 @@ DownloadRequest::DownloadRequest(QObject *parent) :
     _url = QUrl("");
     _prio = 0;
     _cached_reply = false;
+    _error_count = 0;
 }
 
 void DownloadRequest::reset() {
     _finished = false;
     _processing = false;
+    _error_count = 0;
 }
 
 void DownloadRequest::setResponse(QByteArray ba) {
@@ -39,4 +41,9 @@ void DownloadRequest::pauseTimerTriggered() {
     _paused = false;
 
     emit requestUnpaused();
+}
+
+void DownloadRequest::download_error(int increment) {
+    _error_count += increment;
+    pause(10);
 }

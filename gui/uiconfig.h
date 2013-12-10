@@ -48,6 +48,7 @@ private slots:
     void loadShortcuts();
     void toggleLogLevelWarning(QString);
     void thumbnailDeletionStarted();
+    void setUserAgentString();
 signals:
     void configurationChanged(void);
     void deleteAllThumbnails();

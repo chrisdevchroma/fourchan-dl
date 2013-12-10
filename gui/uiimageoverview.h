@@ -10,6 +10,7 @@
 #include <QSettings>
 #include <QImage>
 #include <QCloseEvent>
+#include <QThread>
 #include "defines.h"
 #include "mainwindow.h"
 #include "thumbnailcreator.h"
@@ -74,6 +75,7 @@ private:
     RequestHandler* requestHandler;
     ParserPluginInterface* iParser;
     QObject* oParser;
+    QThread* parserThread;
 
     bool thumbnailsizeLocked;
     bool running;
@@ -84,6 +86,7 @@ private:
     bool _cachedResult;
     bool _threadBlocked;
     bool fresh_thread;
+    bool follow_redirects;
 
     void loadSettings(void);
     void setStatus(QString s);

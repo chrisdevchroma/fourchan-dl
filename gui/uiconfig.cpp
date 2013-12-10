@@ -71,7 +71,7 @@ void UIConfig::loadSettings(void) {
                                                         .arg("tncache")).toString());
     ui->sbThumbnailTTL->setValue(settings->value("thumbnail_TTL", 60).toInt());
 
-    sl = settings->value("timeout_values", (QStringList()<<"30"<<"60"<<"120"<<"300"<<"600")).toStringList();
+    sl = settings->value("timeout_values", (QStringList()<<"300"<<"600")).toStringList();
     ui->cbRescanInterval->clear();
     ui->cbRescanInterval->addItem("Never", 0);
     foreach (QString s, sl) {
@@ -144,6 +144,13 @@ void UIConfig::loadSettings(void) {
         ui->sbDownloadTimeoutInbetween->setValue(settings->value("running_timeout",2).toInt());
         ui->cbKeepLocalHTMLCopy->setChecked(settings->value("use_thread_cache", false).toBool());
         ui->leThreadCachePath->setText(settings->value("thread_cache_path", "").toString());
+        ui->cbCompressCacheFile->setChecked(settings->value("compress_cache_file", true).toBool());
+
+        ui->leUserAgent->setText(settings->value("user-agent", "Wget/1.12").toString());
+        ui->cmbUserAgent->addItem("wget", QString("Wget/1.12"));
+        ui->cmbUserAgent->addItem("Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14");
+        ui->cmbUserAgent->addItem("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0");
+        ui->cmbUserAgent->addItem("Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36");
     settings->endGroup();
 
     ui->sbUpdaterPort->setValue(settings->value("updater/updater_port", 60000).toInt());
@@ -179,6 +186,7 @@ void UIConfig::accept(void) {
         settings->setValue("close_to_tray", ui->cbCloseToTray->isChecked());
 
         settings->setValue("log_level", ui->cbLoggingLevel->currentIndex());
+
     settings->endGroup();
     settings->beginGroup("blacklist");
         if (ui->cbUseBlackList->isChecked())
@@ -211,6 +219,8 @@ void UIConfig::accept(void) {
         settings->setValue("running_timeout", ui->sbDownloadTimeoutInbetween->value());
         settings->setValue("use_thread_cache", ui->cbKeepLocalHTMLCopy->isChecked());
         settings->setValue("thread_cache_path", ui->leThreadCachePath->text());
+        settings->setValue("user-agent", ui->leUserAgent->text());
+        settings->setValue("compress_cache_file", ui->cbCompressCacheFile->isChecked());
     settings->endGroup();
 
     settings->setValue("updater/updater_port", ui->sbUpdaterPort->value());
@@ -325,4 +335,10 @@ void UIConfig::thumbnailDeletionFinished() {
 void UIConfig::thumbnailDeletionStarted() {
     ui->lDeleteThumbnailsStatus->setText("Deleting");
     _removing_thumbnails = true;
+}
+
+void UIConfig::setUserAgentString() {
+    if (ui->cmbUserAgent->currentText() != "---") {
+        ui->leUserAgent->setText(ui->cmbUserAgent->currentText());
+    }
 }

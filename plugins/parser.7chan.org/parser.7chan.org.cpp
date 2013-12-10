@@ -7,6 +7,7 @@ Parser7ChanOrg::Parser7ChanOrg()
     _statusCode.hasImages = false;
     _statusCode.hasTitle = false;
     _statusCode.isFrontpage = false;
+    _statusCode.threadFragmented = false;
     _errorCode = 0;
     _redirect = QUrl();
     _images.clear();
@@ -59,7 +60,7 @@ ParsingStatus Parser7ChanOrg::parseHTML(QString html) {
     i.requested = false;
 //    pageIsFrontpage = !html.contains("<div id=\"ca_thread_html\">");
     pageIsFrontpage = html.count("</aside>") > 1 ? true:false;
-    threadHasMorePages = html.count(">Entire Thread</a>") > 1 ? true:false;
+    threadHasMorePages = html.count(">Entire Thread</a>") >= 1 ? true:false;
 
     if (pageIsFrontpage) {
         pos = 0;
@@ -83,10 +84,35 @@ ParsingStatus Parser7ChanOrg::parseHTML(QString html) {
         rxEntireThread.indexIn(html, 1);
         res = rxEntireThread.capturedTexts();
         redirect = QString("http://www.7chan.org%1").arg(res.at(1));
-        _redirect = redirect.replace("&amp;", "&");
+        redirect = redirect.replace("&amp;", "&");
 
-        if (_redirect != _url.toString()) {
-            _statusCode.hasRedirect = true;
+        QRegExp rxPages(".+&p=p([0-9]+)-([0-9]+).*$", Qt::CaseSensitive, QRegExp::RegExp2);
+        int pos;
+
+        pos = rxPages.indexIn(redirect, 0);
+        QStringList l = rxPages.capturedTexts();
+
+        if (pos != -1) {
+            int endPage;
+            QString sURIBase;
+            sURIBase = redirect.replace("&p=p1-"+l.at(2), "");
+            endPage = l.at(2).toInt();
+
+            QString sURI;
+            int page;
+            for (page=1; (page+100)<endPage; page=page+100) {
+                sURI = QString("%1&p=p%2-%3").arg(sURIBase).arg(page).arg(page+99);
+                _urlList.append(QUrl(sURI));
+            }
+            sURI = QString("%1&p=p%2-%3").arg(sURIBase).arg(page).arg(endPage);
+            _urlList.append(QUrl(sURI));
+            _statusCode.threadFragmented = true;
+        }
+        else {
+            if (redirect != _url.toString()) {
+                _redirect = QUrl(redirect);
+                _statusCode.hasRedirect = true;
+            }
         }
     }
 
@@ -100,6 +126,7 @@ ParsingStatus Parser7ChanOrg::parseHTML(QString html) {
 
             i.originalFilename = res.at(1).right(res.at(1).length() - res.at(1).lastIndexOf("/") - 1);
             i.largeURI = res.at(1);
+            i.largeURI = i.largeURI.replace("https://", "http://"); // Images throw error 301 "Protocol "https" is unknown"
             i.thumbURI = "";
 
             if (pos != -1) {

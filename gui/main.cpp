@@ -84,9 +84,9 @@ int main(int argc, char *argv[])
     downloadManager->pauseDownloads();  // Do not download anything until we are fully set
 
     QThread thumbnailThread;
-    thumbnailThread.setPriority(QThread::NormalPriority);
     tnt = new ThumbnailCreator();
     tnt->moveToThread(&thumbnailThread);
+//    thumbnailThread.setPriority(QThread::NormalPriority);
 
     a.connect(&thumbnailThread, SIGNAL(started()), tnt, SLOT(go()));
     downloadManager->resumeDownloads();

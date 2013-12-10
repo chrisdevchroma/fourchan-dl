@@ -4,9 +4,9 @@
 #include <QUrl>
 #include "structs.h"
 
-#define _PARSER_PLUGIN_INTERFACE_REVISION "1.3"
+#define _PARSER_PLUGIN_INTERFACE_REVISION "1.4"
 
-class ParserPluginInterface
+class ParserPluginInterface //: public QObject
 {
 public:
     virtual ~ParserPluginInterface() { }

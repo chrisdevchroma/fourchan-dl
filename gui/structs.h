@@ -18,6 +18,7 @@ struct ParsingStatus
     bool isFrontpage;
     bool hasErrors;
     bool hasRedirect;
+    bool threadFragmented;
 };
 
 struct component_information {

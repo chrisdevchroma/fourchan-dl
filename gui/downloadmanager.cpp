@@ -80,7 +80,8 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
         QLOG_INFO() << "DownloadManager :: " << "uid 0 finished; url=" << reply->url().toString();
     }
     if (uid != -1) {
-        if (reply->bytesAvailable() < reply->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
+        if (reply->header(QNetworkRequest::ContentLengthHeader).toLongLong() != -1
+                && reply->bytesAvailable() < reply->header(QNetworkRequest::ContentLengthHeader).toLongLong()) {
             QLOG_INFO() << "DownloadManager :: " << "Received less byte than expected - Possibly because the download timed out";
             reschedule(uid);
         }
@@ -113,7 +114,12 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
                                 f.setFileName(threadCacheFilename);
                                 f.open(QIODevice::WriteOnly | QIODevice::Truncate);
                                 if (f.isOpen() && f.isWritable()) {
-                                    f.write(qCompress(dr->response()));
+                                    if (settings->value("download_manager/compress_cache_file", true).toBool()) {
+                                        f.write(qCompress(dr->response()));
+                                    }
+                                    else {
+                                        f.write(dr->response());
+                                    }
                                     QLOG_DEBUG() << "DownloadManager :: Writing cache file " << threadCacheFilename;
                                 }
                                 f.close();
@@ -294,7 +300,7 @@ void DownloadManager::startRequest(qint64 uid) {
 
         req = QNetworkRequest(dr->url());
         req.setAttribute(QNetworkRequest::CookieSaveControlAttribute, QNetworkRequest::Automatic);
-        req.setRawHeader("User-Agent", "Wget/1.12");
+        req.setRawHeader("User-Agent", settings->value("options/user-agent", "Wget/1.12").toString().toLatin1());
 //        req.setRawHeader("User-Agent", "Opera/9.80 (Windows NT 6.1; U; en) Presto/2.9.168 Version/11.50");
         currentRequests++;
         nam = getFreeNAM();
@@ -335,33 +341,25 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
 
             break;
 
-        case 301:   // Service unavailable
-            QLOG_INFO() << "DownloadManager :: " << "Service unavailable" << r->url().host();
-            emit error(QString("%1: Service unavailable").arg(r->url().host()));
-            // Pause downloading to let the server relax
-    //        pauseDownloads();
-            // Abort all downloads
-    //        foreach (QNetworkReply* r, activeReplies) {
-    //            r->abort();
-    //        }
+//        case 205:
+//        case 99:
+//        case 299:
+//        case 5:         // aborted
+//        case 2:         // Connection closed
+//        case 301:
+        default:
+            QLOG_INFO() << "DownloadManager :: Error on " << r->url().host() << r->errorString();
+            if (dr->error_count() < 10) {
+                dr->download_error();
+                reschedule(uid);
+            }
+            else {
+                QLOG_INFO() << "DownloadManager :: Had 10 errors with one download. Giving up.";
+                dr->requestHandler()->error(uid, 404);
+            }
 
-    //        waitTimer->start();
-            dr->pause(10);
-            reschedule(uid);
             break;
-        case 205:
-        case 99:
-        case 299:
-        case 5:         // aborted
-        case 2:         // Connection closed
-            //        QLOG_TRACE() << "DownloadManager :: " << "response:" << QString(r->readAll());
-            //        QLOG_TRACE() << "DownloadManager :: " << "finished:" << r->isFinished();
-            dr->pause(10);
-            reschedule(uid);
-
-    //        emit message(QString("Rescheduled %1").arg(r->url().toString()));
-            break;
-
+/*
         case 202:
             dr->requestHandler()->error(uid, 202);
 
@@ -385,6 +383,7 @@ void DownloadManager::handleError(qint64 uid, QNetworkReply* r) {
             processRequests();
 
             break;
+*/
         }
     }
     else {
@@ -549,7 +548,12 @@ QByteArray DownloadManager::getCachedReply(QUrl url) {
         f.open(QIODevice::ReadOnly);
 
         if (f.isOpen() && f.isReadable()) {
-            ret = qUncompress(f.readAll());
+            if (settings->value("download_manager/compress_cache_file", true).toBool()) {
+                ret = qUncompress(f.readAll());
+            }
+            else {
+                ret = f.readAll();
+            }
             QLOG_DEBUG() << "DownloadManager :: reading cache file for " << url.toString();
         }
         f.close();

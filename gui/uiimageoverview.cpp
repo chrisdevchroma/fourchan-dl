@@ -11,9 +11,11 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     requestHandler = new RequestHandler(this);
     iParser = 0;
     oParser = 0;
+    parserThread = new QThread();
     _cachedResult = false;
     _threadBlocked = false;
     fresh_thread = true;
+    follow_redirects = true;
 
     pendingThumbnails.clear();
 
@@ -560,7 +562,7 @@ void UIImageOverview::loadSettings() {
     QStringList sl;
     int index, defaultTimeout;
 
-    sl = settings->value("options/timeout_values", (QStringList()<<"30"<<"60"<<"120"<<"300"<<"600")).toStringList();
+    sl = settings->value("options/timeout_values", (QStringList()<<"300"<<"600")).toStringList();
 
     ui->comboBox->clear();
 
@@ -696,6 +698,7 @@ void UIImageOverview::startDownload(void) {
 //        fresh_thread = false;
 //    }
     ui->btnReloadThread->setEnabled(true);
+
     createSupervisedDownload(u);
 }
 
@@ -726,6 +729,7 @@ void UIImageOverview::stopDownload(void) {
             images.replace(i, tmp);
         }
     }
+    follow_redirects = true;
 }
 
 void UIImageOverview::createSupervisedDownload(QUrl url) {
@@ -893,7 +897,15 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba, bool cache
                         }
                     }
                 }
-                else if (status.hasRedirect) {
+                else if (status.threadFragmented && follow_redirects) {
+                    follow_redirects = false;
+                    threadList = iParser->getUrlList();
+                    QLOG_INFO() << __PRETTY_FUNCTION__ << ":: redirect list " << threadList;
+                    foreach (QUrl u, threadList) {
+                        createSupervisedDownload(u);
+                    }
+                }
+                else if (status.hasRedirect && follow_redirects) {
                     ui->leURI->setText(iParser->getRedirectURL().toString());
                     QLOG_INFO() << __PRETTY_FUNCTION__ << ":: redirecting to " << iParser->getRedirectURL().toString();
                     stop();
@@ -1014,6 +1026,7 @@ bool UIImageOverview::selectParser(QUrl url) {
     tmp = pluginManager->getParser(url, &ret);
     if (ret) {
         oParser = tmp->createInstance();
+        oParser->moveToThread(parserThread);
         iParser = qobject_cast<ParserPluginInterface*>(oParser);
         iParser->setURL(url);
     }

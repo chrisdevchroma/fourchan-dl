@@ -1,4 +1,4 @@
-#include "uithreadadder.h"
+﻿#include "uithreadadder.h"
 #include "ui_uithreadadder.h"
 
 UIThreadAdder::UIThreadAdder(QWidget *parent) :
@@ -182,7 +182,7 @@ void UIThreadAdder::loadSettings() {
     QStringList sl;
     int index, defaultTimeout;
 
-    sl = settings->value("options/timeout_values", (QStringList()<<"30"<<"60"<<"120"<<"300"<<"600")).toStringList();
+    sl = settings->value("options/timeout_values", (QStringList()<<"300"<<"600")).toStringList();
 
     ui->comboBox->clear();
 

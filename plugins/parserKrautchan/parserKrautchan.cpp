@@ -8,6 +8,7 @@ ParserKrautchan::ParserKrautchan()
   _statusCode.hasTitle = false;
   _statusCode.isFrontpage = false;
   _statusCode.hasRedirect = false;
+  _statusCode.threadFragmented = false;
   _errorCode = 0;
   _redirect = QUrl();
   _images.clear();

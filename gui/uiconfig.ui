@@ -33,7 +33,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -471,51 +471,14 @@
        <string>Download Manager</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_3">
+       <item row="7" column="0">
+        <widget class="QLabel" name="label_23">
          <property name="text">
-          <string>Max. concurrent downloads</string>
-         </property>
-         <property name="textFormat">
-          <enum>Qt::PlainText</enum>
+          <string>User Agent</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QSpinBox" name="sbConcurrentDownloads">
-         <property name="suffix">
-          <string> downloads</string>
-         </property>
-         <property name="maximum">
-          <number>99</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_15">
-         <property name="text">
-          <string>Intitial timeout</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QSpinBox" name="sbDownloadTimeoutInitial">
-         <property name="toolTip">
-          <string>Maximum time until first data bytes arrive. The more concurrent requests are sent the higher this time should be</string>
-         </property>
-         <property name="suffix">
-          <string> seconds</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_17">
-         <property name="text">
-          <string>Downloading timeout</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
+       <item row="2" column="2">
         <widget class="QSpinBox" name="sbDownloadTimeoutInbetween">
          <property name="toolTip">
           <string>Maximum time between 2 data packets</string>
@@ -532,7 +495,7 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="4" column="2">
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
           <widget class="QLineEdit" name="leThreadCachePath"/>
@@ -550,7 +513,7 @@
          </item>
         </layout>
        </item>
-       <item row="5" column="0" colspan="2">
+       <item row="9" column="0" colspan="3">
         <spacer name="verticalSpacer_5">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -563,10 +526,76 @@
          </property>
         </spacer>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="3" column="0" colspan="3">
         <widget class="QCheckBox" name="cbKeepLocalHTMLCopy">
          <property name="text">
           <string>Keep local copy of threads</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
+        <widget class="QLineEdit" name="leUserAgent"/>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Max. concurrent downloads</string>
+         </property>
+         <property name="textFormat">
+          <enum>Qt::PlainText</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QSpinBox" name="sbConcurrentDownloads">
+         <property name="suffix">
+          <string> downloads</string>
+         </property>
+         <property name="maximum">
+          <number>99</number>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_15">
+         <property name="text">
+          <string>Intitial timeout</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QSpinBox" name="sbDownloadTimeoutInitial">
+         <property name="toolTip">
+          <string>Maximum time until first data bytes arrive. The more concurrent requests are sent the higher this time should be</string>
+         </property>
+         <property name="suffix">
+          <string> seconds</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Downloading timeout</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QComboBox" name="cmbUserAgent">
+         <item>
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QCheckBox" name="cbCompressCacheFile">
+         <property name="text">
+          <string>Compress cache files</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -971,8 +1000,8 @@
    <slot>chooseLocation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>64</y>
+     <x>163</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
      <x>309</x>
@@ -987,8 +1016,8 @@
    <slot>editTimeoutValues()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>122</y>
+     <x>163</x>
+     <y>76</y>
     </hint>
     <hint type="destinationlabel">
      <x>309</x>
@@ -1035,12 +1064,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>95</x>
-     <y>141</y>
+     <x>119</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>109</x>
-     <y>164</y>
+     <x>119</x>
+     <y>69</y>
     </hint>
    </hints>
   </connection>
@@ -1051,12 +1080,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>78</x>
-     <y>141</y>
+     <x>110</x>
+     <y>69</y>
     </hint>
     <hint type="destinationlabel">
-     <x>109</x>
-     <y>190</y>
+     <x>119</x>
+     <y>69</y>
     </hint>
    </hints>
   </connection>
@@ -1067,8 +1096,8 @@
    <slot>chooseThumbnailCacheLocation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>390</x>
-     <y>233</y>
+     <x>163</x>
+     <y>86</y>
     </hint>
     <hint type="destinationlabel">
      <x>307</x>
@@ -1083,8 +1112,8 @@
    <slot>addShortcut()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>385</x>
-     <y>74</y>
+     <x>171</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
      <x>423</x>
@@ -1099,8 +1128,8 @@
    <slot>deleteShortcut()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>388</x>
-     <y>98</y>
+     <x>171</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
      <x>421</x>
@@ -1115,8 +1144,8 @@
    <slot>chooseThreadCacheLocation()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>388</x>
-     <y>159</y>
+     <x>450</x>
+     <y>165</y>
     </hint>
     <hint type="destinationlabel">
      <x>212</x>
@@ -1131,12 +1160,28 @@
    <slot>toggleLogLevelWarning(QString)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>197</x>
-     <y>328</y>
+     <x>101</x>
+     <y>63</y>
     </hint>
     <hint type="destinationlabel">
      <x>421</x>
      <y>356</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cmbUserAgent</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>UIConfig</receiver>
+   <slot>setUserAgentString()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>197</x>
+     <y>205</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>466</x>
+     <y>232</y>
     </hint>
    </hints>
   </connection>
@@ -1151,5 +1196,6 @@
   <slot>deleteShortcut()</slot>
   <slot>chooseThreadCacheLocation()</slot>
   <slot>toggleLogLevelWarning(QString)</slot>
+  <slot>setUserAgentString()</slot>
  </slots>
 </ui>
