@@ -869,7 +869,7 @@ void MainWindow::createComponentList() {
     if (version == "unknown" && c.filename.contains("upd4t3r")) {
         // No version information in settings file, but new updater executable present
         // means a freshly updated system. Assume version 1.1
-        version = "1.1";
+        version = "1.2";
         settings->setValue("updater/version", version);
     }
 
