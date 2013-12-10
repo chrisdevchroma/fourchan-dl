@@ -106,7 +106,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                 while (pos > -1) {
                     pos = rxImagesNew.indexIn(html, pos+1);
                     res = rxImagesNew.capturedTexts();
-                    qDebug()<<res;
+
                     if (res.at(4).isEmpty()) {
                         i.originalFilename = res.at(2).right(res.at(2).length() - res.at(2).lastIndexOf("/") - 1);
 //                        i.originalFilename = res.at(3).right(res.at(3).length() - res.at(3).lastIndexOf("/") - 1);
