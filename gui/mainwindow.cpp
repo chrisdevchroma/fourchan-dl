@@ -183,7 +183,7 @@ void MainWindow::createTab(QString s) {
 void MainWindow::closeTab(int i) {
     UIImageOverview* w;
 
-    ui->tabWidget->setCurrentIndex(i);
+//    ui->tabWidget->setCurrentIndex(i);
     w = (UIImageOverview*)ui->tabWidget->widget(i);
 
     addToHistory(w->getValues(), w->getTitle());
@@ -191,12 +191,14 @@ void MainWindow::closeTab(int i) {
     if (w->close()) {
         ui->tabWidget->removeTab(i);
         w->deleteLater();
+        QLOG_TRACE() << "MainWindow :: widget" << i << "closed";
     }
     else {
         QLOG_WARN() << "MainWindow :: Close widget event not accepted";
     }
 
     if (ui->tabWidget->count() == 0) {
+        QLOG_TRACE() << __PRETTY_FUNCTION__ << "Adding new tab, because no tab is left";
         addTab();
     }
 }
@@ -394,6 +396,7 @@ void MainWindow::processCloseRequest(UIImageOverview* w, int reason) {
     int i;
     i = ui->tabWidget->indexOf((QWidget*)w);
 
+    QLOG_TRACE() << __PRETTY_FUNCTION__ << "i: " << i << ", reason " << reason;
     if (reason == 404) {
         if (settings->value("options/automatic_close", false).toBool()) {
             closeTab(i);
@@ -1062,9 +1065,11 @@ void MainWindow::addThreadOverviewMark(QTreeWidgetItem* item) {
 void MainWindow::addThreadOverviewMark(int index) {
     QList<QTreeWidgetItem*> foundItems;
 
-    foundItems = ui->threadOverview->findItems(((UIImageOverview*)(ui->tabWidget->widget(index)))->getURI(), Qt::MatchExactly, 3 );
-    if (foundItems.count() == 1) {
-        addThreadOverviewMark(foundItems.at(0));
+    if (ui->tabWidget->count() > 0) {
+        foundItems = ui->threadOverview->findItems(((UIImageOverview*)(ui->tabWidget->widget(index)))->getURI(), Qt::MatchExactly, 3 );
+        if (foundItems.count() == 1) {
+            addThreadOverviewMark(foundItems.at(0));
+        }
     }
 }
 

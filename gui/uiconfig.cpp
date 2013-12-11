@@ -143,11 +143,12 @@ void UIConfig::loadSettings(void) {
         ui->sbDownloadTimeoutInitial->setValue(settings->value("initial_timeout",30).toInt());
         ui->sbDownloadTimeoutInbetween->setValue(settings->value("running_timeout",2).toInt());
         ui->cbKeepLocalHTMLCopy->setChecked(settings->value("use_thread_cache", false).toBool());
-        ui->leThreadCachePath->setText(settings->value("thread_cache_path", "").toString());
+        ui->leThreadCachePath->setText(settings->value("thread_cache_path", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
+                                                       .arg("thread-cache")).toString());
         ui->cbCompressCacheFile->setChecked(settings->value("compress_cache_file", true).toBool());
 
         ui->leUserAgent->setText(settings->value("user-agent", "Wget/1.12").toString());
-        ui->cmbUserAgent->addItem("wget", QString("Wget/1.12"));
+        ui->cmbUserAgent->addItem("Wget/1.12");
         ui->cmbUserAgent->addItem("Opera/9.80 (Windows NT 6.0) Presto/2.12.388 Version/12.14");
         ui->cmbUserAgent->addItem("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:25.0) Gecko/20100101 Firefox/25.0");
         ui->cmbUserAgent->addItem("Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1667.0 Safari/537.36");

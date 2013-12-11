@@ -111,6 +111,14 @@ void DownloadManager::replyFinished(QNetworkReply* reply) {
                         if (_useThreadCache) {
                             threadCacheFilename = getFilenameForURL(reply->url());
                             if (threadCacheFilename != ".") {
+                                QDir dir;
+                                QString path;
+                                path = settings->value("download_manager/thread_cache_path", QString("%1/%2").arg(QCoreApplication::applicationDirPath())
+                                                       .arg("thread-cache")).toString();
+                                dir.setPath(path);
+                                if (!dir.exists()) {
+                                    dir.mkpath(path);
+                                }
                                 f.setFileName(threadCacheFilename);
                                 f.open(QIODevice::WriteOnly | QIODevice::Truncate);
                                 if (f.isOpen() && f.isWritable()) {
