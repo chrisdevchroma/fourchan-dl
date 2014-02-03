@@ -49,6 +49,8 @@ private:
     QTimer* waitTimer;
     NetworkAccessManager* getFreeNAM();
 //    QNetworkAccessManager* _manager;
+    QNetworkCookieJar* cookies;
+
     void setupNetworkAccessManagers(int count);
     int maxRequests;
     int currentRequests;

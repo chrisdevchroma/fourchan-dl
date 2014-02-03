@@ -92,6 +92,12 @@
     <layout class="QGridLayout" name="gridLayout_2">
      <item row="0" column="0">
       <widget class="QTreeWidget" name="threadOverview">
+       <property name="editTriggers">
+        <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+       </property>
+       <property name="horizontalScrollMode">
+        <enum>QAbstractItemView::ScrollPerItem</enum>
+       </property>
        <column>
         <property name="text">
          <string>Name</string>
@@ -489,6 +495,22 @@
     <hint type="destinationlabel">
      <x>342</x>
      <y>304</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>threadOverview</sender>
+   <signal>itemPressed(QTreeWidgetItem*,int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>showTab(QTreeWidgetItem*,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>513</x>
+     <y>353</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>408</x>
+     <y>328</y>
     </hint>
    </hints>
   </connection>

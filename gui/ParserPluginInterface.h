@@ -4,7 +4,7 @@
 #include <QUrl>
 #include "structs.h"
 
-#define _PARSER_PLUGIN_INTERFACE_REVISION "1.4"
+#define _PARSER_PLUGIN_INTERFACE_REVISION "1.5"
 
 class ParserPluginInterface //: public QObject
 {
@@ -26,6 +26,10 @@ public:
     virtual int getErrorCode() = 0;
     virtual ParsingStatus getStatusCode() = 0;
     virtual QString getThreadTitle() = 0;
+
+    virtual void initPlugin() = 0;
+    virtual QList<QUrl> initialRequests() = 0;
+    virtual QUrl alterUrl(QUrl u) = 0;
 
     virtual QObject* createInstance(void) = 0;
 

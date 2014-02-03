@@ -1,4 +1,4 @@
-#ifndef PARSERARCHIVEFOOLZUS_H
+﻿#ifndef PARSERARCHIVEFOOLZUS_H
 #define PARSERARCHIVEFOOLZUS_H
 
 #include <QStringList>
@@ -31,6 +31,10 @@ public:
     ParsingStatus getStatusCode();
     QString parseSavepath(QString s);
     QMap<QString, QString> getSupportedReplaceCharacters();
+
+    void initPlugin();
+    QList<QUrl> initialRequests();
+    QUrl alterUrl(QUrl u) {return u;}
 
     QObject* createInstance() {return new ParserArchiveFoolzUs();}
 

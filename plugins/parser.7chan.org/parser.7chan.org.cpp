@@ -208,6 +208,18 @@ QMap<QString, QString> Parser7ChanOrg::getSupportedReplaceCharacters() {
     return ret;
 }
 
+void Parser7ChanOrg::initPlugin() {
+
+}
+
+QList<QUrl> Parser7ChanOrg::initialRequests() {
+    QList<QUrl> uris;
+
+    uris.append(QUrl("http://www.4chan.org"));
+
+    return uris;
+}
+
 #if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(pParser7ChanOrg, Parser7ChanOrg)
 #endif

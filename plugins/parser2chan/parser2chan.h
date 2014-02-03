@@ -1,4 +1,4 @@
-#ifndef Parser2chan_H
+﻿#ifndef Parser2chan_H
 #define Parser2chan_H
 
 #include <QStringList>
@@ -32,6 +32,10 @@ public:
     ParsingStatus getStatusCode();
     QString parseSavepath(QString s);
     QMap<QString, QString> getSupportedReplaceCharacters();
+
+    void initPlugin();
+    QList<QUrl> initialRequests();
+    QUrl alterUrl(QUrl u) {return u;}
 
     QObject* createInstance() {return new Parser2chan();}
 

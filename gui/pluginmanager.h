@@ -1,4 +1,4 @@
-#ifndef PLUGINMANAGER_H
+﻿#ifndef PLUGINMANAGER_H
 #define PLUGINMANAGER_H
 
 #include <QObject>
@@ -8,6 +8,9 @@
 #include <QDir>
 #include "QsLog.h"
 #include "ParserPluginInterface.h"
+#include "downloadmanager.h"
+
+extern DownloadManager* downloadManager;
 
 class PluginManager : public QObject
 {
@@ -26,6 +29,7 @@ private:
     QStringList pluginList;
     QMap<QString, component_information> components;
     void loadPlugins(void);
+    RequestHandler* requestHandler;
 signals:
 
 public slots:

@@ -194,6 +194,17 @@ QMap<QString, QString> ParserChanArchive::getSupportedReplaceCharacters() {
     return ret;
 }
 
+void ParserChanArchive::initPlugin() {
+
+}
+
+QList<QUrl> ParserChanArchive::initialRequests() {
+    QList<QUrl> uris;
+
+    uris.append(QUrl("http://www.4chan.org"));
+
+    return uris;
+}
 #if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(pParserChanArchive, ParserChanArchive)
 #endif

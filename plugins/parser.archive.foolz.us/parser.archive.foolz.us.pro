@@ -11,7 +11,7 @@ else:TARGET = ../parser.archive.foolz.us
 TEMPLATE = lib
 CONFIG += dll plugin
 
-DEFINES += _LIB_VERSION="\\\"0.4\\\""
+DEFINES += _LIB_VERSION="\\\"0.5\\\""
 
 SOURCES += parser.archive.foolz.us.cpp
 

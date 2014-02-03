@@ -1,8 +1,9 @@
-#include "pluginmanager.h"
+﻿#include "pluginmanager.h"
 
 PluginManager::PluginManager(QObject *parent) :
     QObject(parent)
 {
+    requestHandler = new RequestHandler(this);
     loadPlugins();
 }
 
@@ -48,6 +49,11 @@ void PluginManager::loadPlugins(void)
                     str.append(fileName);
                     pluginList.append(str);
                     loadedPlugins.append(interface);
+                    interface->initPlugin();
+                    QList<QUrl> initURIs = interface->initialRequests();
+                    for (int i=0; i<initURIs.count(); i++) {
+                        requestHandler->request(initURIs.at(0),1);
+                    }
                 }
                 else {
 

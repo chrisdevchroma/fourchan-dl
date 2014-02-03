@@ -11,7 +11,7 @@ else:TARGET = ../parser.7chan.org
 TEMPLATE = lib
 CONFIG += dll plugin
 
-DEFINES += _LIB_VERSION="\\\"0.3\\\""
+DEFINES += _LIB_VERSION="\\\"0.4\\\""
 
 SOURCES += parser.7chan.org.cpp
 

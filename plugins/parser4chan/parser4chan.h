@@ -33,6 +33,10 @@ public:
     QString parseSavepath(QString s);
     QMap<QString, QString> getSupportedReplaceCharacters();
 
+    void initPlugin();
+    QList<QUrl> initialRequests();
+    QUrl alterUrl(QUrl u);
+
     QObject* createInstance() {return new Parser4chan();}
 
 private:

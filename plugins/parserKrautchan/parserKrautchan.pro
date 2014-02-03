@@ -11,7 +11,7 @@ else:TARGET = ../parserKrautchan
 TEMPLATE = lib
 CONFIG += dll plugin
 
-DEFINES += KRAUTCHANPARSER_LIBRARY _LIB_VERSION="\\\"0.12\\\""
+DEFINES += KRAUTCHANPARSER_LIBRARY _LIB_VERSION="\\\"0.13\\\""
 
 SOURCES += parserKrautchan.cpp
 

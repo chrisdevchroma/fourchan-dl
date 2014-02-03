@@ -169,6 +169,18 @@ QMap<QString, QString> ParserArchiveFoolzUs::getSupportedReplaceCharacters() {
     return ret;
 }
 
+void ParserArchiveFoolzUs::initPlugin() {
+
+}
+
+QList<QUrl> ParserArchiveFoolzUs::initialRequests() {
+    QList<QUrl> uris;
+
+    uris.append(QUrl("http://www.4chan.org"));
+
+    return uris;
+}
+
 #if QT_VERSION < 0x050000
 Q_EXPORT_PLUGIN2(pParserArchiveFoolzUs, ParserArchiveFoolzUs)
 #endif

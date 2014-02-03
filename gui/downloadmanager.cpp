@@ -6,9 +6,11 @@ DownloadManager::DownloadManager(QObject *parent) :
     QObject(parent)
 {
     downloadsPaused = true;
+    cookies = new QNetworkCookieJar();
     setMaxPriority(0);
     nams.clear();
     nams.append(new NetworkAccessManager(this));    // Add at least one AccessManager
+    nams.at(0)->setCookieJar(cookies);
     settings = new QSettings("settings.ini", QSettings::IniFormat);
 
     waitTimer = new QTimer();
@@ -473,6 +475,7 @@ NetworkAccessManager* DownloadManager::getFreeNAM() {
 void DownloadManager::setupNetworkAccessManagers(int count) {
     for (int i=1; i<=count; i++) {
         nams.append(new NetworkAccessManager(this));
+        nams.last()->setCookieJar(cookies);
         connect(nams.last(), SIGNAL(finished(QNetworkReply*)), this, SLOT(replyFinished(QNetworkReply*)));
     }
 }

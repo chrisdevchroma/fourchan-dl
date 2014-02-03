@@ -688,15 +688,7 @@ void UIImageOverview::startDownload(void) {
 
     u = QUrl(ui->leURI->text().toLatin1());
     // Plausibility of leURI was checked before at function start()
-//    if (fresh_thread) {
-//        // If the thread was never downloaded within this session
-//        // first get a cached version (if available) and then request the download
-//        // This helps showing thread right from start
-//        if (downloadManager->cacheAvailable(u)) {
-// //            processRequestResponse(u, downloadManager->getCachedReply(u), true);
-//        }
-//        fresh_thread = false;
-//    }
+
     ui->btnReloadThread->setEnabled(true);
 
     createSupervisedDownload(u);
@@ -734,6 +726,11 @@ void UIImageOverview::stopDownload(void) {
 
 void UIImageOverview::createSupervisedDownload(QUrl url) {
     if (url.isValid()) {
+        if (!isImage(url)) {
+            QLOG_DEBUG() << __PRETTY_FUNCTION__ << "Passing url to plugin " << url.toString();
+            url = iParser->alterUrl(url);
+            QLOG_DEBUG() << __PRETTY_FUNCTION__ << "URL altered to " << url.toString();
+        }
         requestHandler->request(url);
     }
 }
@@ -916,13 +913,15 @@ void UIImageOverview::processRequestResponse(QUrl url, QByteArray ba, bool cache
                         imageList = iParser->getImageList();
                         mergeImageList(imageList);
                     }
+                    else {
+                        setStatus("idle");
+                    }
 
                     if (status.hasTitle) {
                         ui->lTitle->setText(HTML::decode(iParser->getThreadTitle()));
                         ui->lTitle2->setText(HTML::decode(iParser->getThreadTitle()));
                     }
                 }
-
             }
 
             if (cached) {
@@ -1026,7 +1025,6 @@ bool UIImageOverview::selectParser(QUrl url) {
     tmp = pluginManager->getParser(url, &ret);
     if (ret) {
         oParser = tmp->createInstance();
-        oParser->moveToThread(parserThread);
         iParser = qobject_cast<ParserPluginInterface*>(oParser);
         iParser->setURL(url);
     }

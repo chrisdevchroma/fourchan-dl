@@ -1,4 +1,4 @@
-#ifndef PARSERCHANARCHIVE_H
+﻿#ifndef PARSERCHANARCHIVE_H
 #define PARSERCHANARCHIVE_H
 
 #include <QStringList>
@@ -37,6 +37,10 @@ public:
     ParsingStatus getStatusCode();
     QString parseSavepath(QString s);
     QMap<QString, QString> getSupportedReplaceCharacters();
+
+    void initPlugin();
+    QList<QUrl> initialRequests();
+    QUrl alterUrl(QUrl u) {return u;}
 
     QObject* createInstance() {return new ParserChanArchive();}
 

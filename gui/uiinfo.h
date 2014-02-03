@@ -1,4 +1,4 @@
-#ifndef UIINFO_H
+﻿#ifndef UIINFO_H
 #define UIINFO_H
 
 #include <QDialog>

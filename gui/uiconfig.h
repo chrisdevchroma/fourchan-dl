@@ -29,6 +29,7 @@ private:
     UIListEditor* timeoutValueEditor;
     DialogFolderShortcut* dialogFolderShortcut;
     bool _removing_thumbnails;
+    QMap<QString,QString> userAgentStrings;
 
 public slots:
     void thumbnailDeletionFinished();
