@@ -70,9 +70,9 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
         html.replace("}]}", "");             //  -"- footer
 
         posts = html.split("},{");
-        qDebug() << "Found " << posts.count() << "posts\n";
+//        qDebug() << "Found " << posts.count() << "posts\n";
         foreach (QString post, posts) {
-            qDebug() << "starting parsing post: " + post +"\n";
+//            qDebug() << "starting parsing post: " + post +"\n";
 
             if (post.contains(",\"tim\":")) {
                 postDetails.clear();
@@ -117,6 +117,12 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
 
                     _images.append(img);
                     _statusCode.hasImages = true;
+
+                    qDebug() << "Found image " << img.largeURI << " (" << img.originalFilename << ")\n";
+                }
+                if (postDetails.contains("sub")) {
+                    _statusCode.hasTitle = true;
+                    _threadTitle = postDetails.value("sub");
                 }
             }
         }

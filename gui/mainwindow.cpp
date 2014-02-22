@@ -501,6 +501,14 @@ void MainWindow::getUpdaterVersion() {
 #endif
 }
 
+void MainWindow::getConsoleVersion() {
+    QProcess process;
+
+    if (process.startDetached("fourchan-dl-console.exe --version")) {
+        ui->statusBar->showMessage("Starting fourchan-dl-console for version check", 2000);
+    }
+}
+
 void MainWindow::startAll() {
     ui->pbOpenRequests->setFormat("Starting Thread %v/%m (%p%)");
     ui->pbOpenRequests->setMaximum(ui->tabWidget->count());
@@ -560,6 +568,7 @@ void MainWindow::showTab(QTreeWidgetItem* item, int idx) {
 
     if (index != -1) {
         ui->tabWidget->setCurrentIndex(index);
+        ((UIImageOverview*)(ui->tabWidget->currentWidget()))->threadViewed();
     }
 }
 
@@ -604,8 +613,25 @@ void MainWindow::updateThreadOverview() {
 
             if (ui->threadOverview->topLevelItemCount() > i) {                   // If there is an entry for the i-th tab
                 item = ui->threadOverview->topLevelItem(i);     //  change its content
-                for (int k=0; k<4; k++)
+                QFont f = item->font(0);
+                for (int k=0; k<4; k++) {
+
+                    if (k == 0) {
+                        if (tab->hasNewImages()) {
+                            item->setTextColor(0, Qt::darkGreen);
+                            f.setBold(true);
+                            item->setFont(0, f);
+                            QLOG_TRACE() << __PRETTY_FUNCTION__ << "tab" << i << "Changing font to bold/red";
+                        }
+                        else {
+                            item->setTextColor(0, Qt::black);
+                            f.setBold(false);
+                            item->setFont(0, f);
+                            QLOG_TRACE() << __PRETTY_FUNCTION__ << "tab" << i << "Changing font to normal";
+                        }
+                    }
                     item->setText(k, sl.at(k));
+                }
             }
             else {                                              // Otherwise create a new one and append it
                 ui->threadOverview->addTopLevelItem(new QTreeWidgetItem(ui->threadOverview, sl));
@@ -820,7 +846,7 @@ void MainWindow::createComponentList() {
     qtFiles << "Qt5Core" << "Qt5Gui" << "Qt5Widgets" << "Qt5Network" << "Qt5Xml";
     neededLibraries << "libeay32.dll" << "ssleay32.dll" << "libstdc++-6.dll" << "imageformats/qgif.dll"
                     << "imageformats/qico.dll" << "imageformats/qjpeg.dll" << "imageformats/qsvg.dll"
-                    << "libgcc_s_sjlj-1.dll" << "libwinpthread-1.dll";
+                    << "libgcc_s_sjlj-1.dll" << "libwinpthread-1.dll" << "platforms/qwindows.dll";
 
 #else
     qtFiles << "QtCore4" << "QtGui4" << "QtNetwork4" << "QtXml4";
@@ -939,6 +965,10 @@ void MainWindow::updaterConnected() {
 void MainWindow::updateFinished() {
     aui->closeUpdaterExe();
     aui->exchangeFiles();
+
+    // We may have updated versions for the updater.exe or console.exe
+    getUpdaterVersion();
+    getConsoleVersion();
 }
 
 QList<component_information> MainWindow::getComponents() {
@@ -1104,5 +1134,11 @@ void MainWindow::cleanThreadCache() {
         foreach (cacheFile, threadCachesToRemove) {
             QFile::remove(cacheFile);
         }
+    }
+}
+
+void MainWindow::markAllViewed() {
+    for (int i=0; i<ui->tabWidget->count(); i++) {
+        ((UIImageOverview*)ui->tabWidget->widget(i))->threadViewed();
     }
 }

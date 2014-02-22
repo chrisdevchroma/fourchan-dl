@@ -136,7 +136,9 @@ private slots:
     void addThreadOverviewMark(QTreeWidgetItem *item);
     void addThreadOverviewMark(int index);
     void getUpdaterVersion();
+    void getConsoleVersion();
     void askForUpdate();
+    void markAllViewed();
 
 signals:
     void removeFiles(QStringList);

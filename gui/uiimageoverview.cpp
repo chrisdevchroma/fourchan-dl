@@ -86,6 +86,7 @@ UIImageOverview::UIImageOverview(QWidget *parent) :
     fillShortcutComboBox();
     expectedThumbnailCount = 0;
     thumbnailCount = 0;
+    thumbnailCountLastViewed = 0;
 }
 
 UIImageOverview::~UIImageOverview()
@@ -272,6 +273,10 @@ void UIImageOverview::addThumbnail(QString filename, QString tnFilename) {
             if (++thumbnailCount >= expectedThumbnailCount) {
                 //    if (isDownloadFinished()) {
                 updateDownloadStatus();
+            }
+
+            if (this->isVisible()) {
+                thumbnailCountLastViewed = thumbnailCount;
             }
         }
     }
@@ -1289,4 +1294,22 @@ void UIImageOverview::blockThread(bool b) {
         ui->listWidget->clear();
         start();
     }
+}
+
+bool UIImageOverview::hasNewImages() {
+    bool ret;
+
+    ret = false;
+
+    QLOG_DEBUG() << __PRETTY_FUNCTION__ << "tnCountLast: " << thumbnailCountLastViewed << "; tnCount: " << thumbnailCount;
+    if (thumbnailCountLastViewed < thumbnailCount) {
+        ret = true;
+    }
+
+    return ret;
+}
+
+void UIImageOverview::threadViewed() {
+    thumbnailCountLastViewed = thumbnailCount;
+    emit changed();
 }

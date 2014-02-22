@@ -45,6 +45,8 @@ public:
     QString getURI();
     QString getTitle();
     QString getStatus();
+    bool hasNewImages();
+    void threadViewed();
 
     void setDirectory(QString);
     QString getValues(void);
@@ -87,6 +89,7 @@ private:
     bool _threadBlocked;
     bool fresh_thread;
     bool follow_redirects;
+    int thumbnailCountLastViewed;
 
     void loadSettings(void);
     void setStatus(QString s);

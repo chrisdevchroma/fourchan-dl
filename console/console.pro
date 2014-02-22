@@ -38,7 +38,7 @@ win32: RC_FILE = fourchan-dl-win.rc
 #macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-VERSION = 0.1.1
+VERSION = 0.1.2
 DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"$${VERSION}\\\""
 
 win32: LIBS += libole32

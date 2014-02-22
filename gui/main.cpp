@@ -138,7 +138,7 @@ void checkEnvironment() {
         }
     }
 #else
-    neededFiles << "QtCore4.dll" << "QtNetwork4.dll" << "mingwm10.dll" << "libgcc_s_dw2-1.dll" << "au.exe" << "upd4t3r.exe";
+    neededFiles << "QtCore4.dll" << "QtNetwork4.dll" << "mingwm10.dll" << "libgcc_s_dw2-1.dll" << "upd4t3r.exe";
 #endif
 #endif
 

@@ -45,28 +45,32 @@ int main(int argc, char *argv[])
 
     settings.setValue("console/version", PROGRAM_VERSION);
     settings.sync();
-
-    logLevel = settings.value("options/log_level", -1).toInt();
-    if (logLevel != -1) {
-        logger.setLoggingLevel((QsLogging::Level)logLevel);
-        QLOG_ALWAYS() << "APP :: Setting logging level to " << logLevel;
+    if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
+        // Just checking the version -> close immediately
+        return 0;
     }
+    else {
+        logLevel = settings.value("options/log_level", -1).toInt();
+        if (logLevel != -1) {
+            logger.setLoggingLevel((QsLogging::Level)logLevel);
+            QLOG_ALWAYS() << "APP :: Setting logging level to " << logLevel;
+        }
 
-    QLOG_ALWAYS() << "APP :: Console started";
-    QLOG_ALWAYS() << "APP :: Built with Qt" << QT_VERSION_STR << "running on" << qVersion();
+        QLOG_ALWAYS() << "APP :: Console started";
+        QLOG_ALWAYS() << "APP :: Built with Qt" << QT_VERSION_STR << "running on" << qVersion();
 
-    downloadManager = new DownloadManager();
-    pluginManager = new PluginManager();
+        downloadManager = new DownloadManager();
+        pluginManager = new PluginManager();
 
-    downloadManager->pauseDownloads();  // Do not download anything until we are fully set
-    ThreadHandler threadHandler;
-    threadHandler.restoreThreads();
+        downloadManager->pauseDownloads();  // Do not download anything until we are fully set
+        ThreadHandler threadHandler;
+        threadHandler.restoreThreads();
 
-    a.connect(&a, SIGNAL(aboutToQuit()), &threadHandler, SLOT(saveSettings()));
-//    a.connect(&a, SIGNAL(aboutToQuit()), &threadHandler, SLOT(deleteLater()));
-//    a.connect(&a, SIGNAL(aboutToQuit()), downloadManager, SLOT(deleteLater()));
+        a.connect(&a, SIGNAL(aboutToQuit()), &threadHandler, SLOT(saveSettings()));
+        //    a.connect(&a, SIGNAL(aboutToQuit()), &threadHandler, SLOT(deleteLater()));
+        //    a.connect(&a, SIGNAL(aboutToQuit()), downloadManager, SLOT(deleteLater()));
 
-    //downloadManager->resumeDownloads();
-
+        //downloadManager->resumeDownloads();
+    }
     return a.exec();
 }
