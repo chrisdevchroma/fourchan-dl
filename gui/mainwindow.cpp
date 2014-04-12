@@ -66,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) :
     updateWidgetSettings();
 
     connect(requestHandler, SIGNAL(response(QUrl,QByteArray,bool)), this, SLOT(processRequestResponse(QUrl,QByteArray,bool)));
-    connect(requestHandler, SIGNAL(responseError(QUrl,int)), this, SLOT(handleRequestError(QUrl,int)));
+//    connect(requestHandler, SIGNAL(responseError(QUrl,int)), this, SLOT(handleRequestError(QUrl,int)));
 
     connect(ui->tabWidget, SIGNAL(tabCloseRequested(int)), this, SLOT(closeTab(int)));
     connect(uiConfig, SIGNAL(configurationChanged()), this, SLOT(loadOptions()));

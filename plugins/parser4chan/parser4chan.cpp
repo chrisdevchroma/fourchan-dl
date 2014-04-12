@@ -65,12 +65,14 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
         QMap<QString,QString> postDetails;
         QString key, value;
         int i,k;
+        bool first_post;
 
         html.replace("{\"posts\":[{", "");   // Remove unnecessary header
         html.replace("}]}", "");             //  -"- footer
 
         posts = html.split("},{");
 //        qDebug() << "Found " << posts.count() << "posts\n";
+        first_post = true;
         foreach (QString post, posts) {
 //            qDebug() << "starting parsing post: " + post +"\n";
 
@@ -120,11 +122,20 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
 
                     qDebug() << "Found image " << img.largeURI << " (" << img.originalFilename << ")\n";
                 }
-                if (postDetails.contains("sub")) {
+                if (postDetails.contains("sub") && !_statusCode.hasTitle) {
                     _statusCode.hasTitle = true;
                     _threadTitle = postDetails.value("sub");
                 }
+                else if (first_post && postDetails.contains("com")) {
+                    _statusCode.hasTitle = true;
+                    _threadTitle = postDetails.value("com");
+
+                    if (_threadTitle.length() > 50) {
+                        _threadTitle = postDetails.value("com").left(postDetails.value("com").indexOf(" ", 49));
+                    }
+                }
             }
+            first_post = false;
         }
 
     }

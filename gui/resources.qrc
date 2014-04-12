@@ -34,5 +34,6 @@
         <file>resources/process-stop.png</file>
         <file>resources/process-stop-inactive.png</file>
         <file>resources/package-upgrade.png</file>
+        <file>resources/image-missing.png</file>
     </qresource>
 </RCC>

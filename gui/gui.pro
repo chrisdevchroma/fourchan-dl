@@ -85,7 +85,7 @@ os2: RC_FILE = fourchan-dl-os2.rc
 macx: ICON = resources/fourchan-dl.icns
 
 BUILDDATE = __DATE__
-VERSION = 1.6.4
+VERSION = 1.7.0
 DEFINES += BUILDDATE=$${BUILDDATE} PROGRAM_VERSION="\\\"$${VERSION}\\\"" __GUI__
 #DEFINES += QT_NO_URL_CAST_FROM_STRING
 #DEFINES += QT_NO_CAST_FROM_ASCII

@@ -43,6 +43,7 @@ void ThumbnailCreator::go() {
 
         if (newImages) {
             bool useCachedThumbnail;
+            bool image_loaded;
 
             iconWidth = iconSize->width();
             iconHeight = iconSize->height();
@@ -59,6 +60,7 @@ void ThumbnailCreator::go() {
             }
 
             useCachedThumbnail = false;
+            image_loaded = false;
             // Check if thumbnail exists
             if (useCache && QFile::exists(cacheFile)) {
                 QLOG_TRACE() << "ThumbnailCreator :: Cached thumbnail available for " << currentFilename;
@@ -72,6 +74,24 @@ void ThumbnailCreator::go() {
             if (!useCachedThumbnail){
                 QLOG_TRACE() << "ThumbnailCreator :: Creating new thumbnail for " << currentFilename;
                 if (original.load(currentFilename)) {
+                    image_loaded = true;
+                }
+                else {
+                    if (QFile::exists(currentFilename)) {
+                        QLOG_DEBUG() << __PRETTY_FUNCTION__ << ":: Image" << currentFilename << "cannot be processed. Using default thumbnail instead.";
+                        if (original.load(":/icons/resources/image-missing.png")) {
+                            image_loaded = true;
+
+                            QLOG_TRACE() << __PRETTY_FUNCTION__ << ":: Loaded default image";
+                        }
+                    }
+                    else {
+                        QLOG_ERROR() << __PRETTY_FUNCTION__ << ":: Image" << currentFilename << " does not exist. Thumbnail not created.";
+                        image_loaded = false;
+                    }
+                }
+
+                if (image_loaded) {
                     QLOG_TRACE() << "ThumbnailCreator :: Loaded original file " << currentFilename;
                     if (original.width()<iconWidth
                         && original.height()<iconHeight
@@ -91,9 +111,6 @@ void ThumbnailCreator::go() {
 
                     tn.save(cacheFile, "PNG");
                     QLOG_TRACE() << "ThumbnailCreator :: Saving thumbnail as " << cacheFile;
-                }
-                else {
-                    QLOG_ERROR() << __PRETTY_FUNCTION__ << ":: Could not load image" << currentFilename << ". Thumbnail not created.";
                 }
             }
 

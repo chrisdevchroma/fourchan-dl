@@ -227,11 +227,11 @@ void UIThreadAdder::loadSettings() {
     if (index != -1) ui->comboBox->setCurrentIndex(index);
 
     if (defaultTimeout == 0) {
-        ui->comboBox->setEnabled(false);
+//        ui->comboBox->setEnabled(false);
         ui->cbRescan->setChecked(false);
     }
     else {
-        ui->comboBox->setEnabled(true);
+//        ui->comboBox->setEnabled(true);
         ui->cbRescan->setChecked(true);
     }
 

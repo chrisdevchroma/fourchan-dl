@@ -98,6 +98,15 @@ void UIImageViewer::loadImage(int i) {
                 ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
                 ui->lImageInfo->setText("");
             }
+            else if (filename.endsWith(".webm")) {
+                p.load(":/icons/resources/image-missing.png");
+                originalPixmap = p;
+                transformPixmap();
+                fitImage();
+                ui->statusbar->showMessage("webm is not supported", 2000);
+                ui->lCurrentImage->setText(QString("%1/%2").arg(currentImage+1).arg(imagesToDisplay.count()));
+                ui->lImageInfo->setText(filename);
+            }
             else {
                 if (p.load(filename)) {
                     originalPixmap = p;

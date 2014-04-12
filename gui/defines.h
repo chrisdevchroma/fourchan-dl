@@ -26,7 +26,7 @@
 
 #define debug_out(STRING, LEVEL)    qDebug() << STRING;
 
-#define __IMAGE_REGEXP__ "(\\.jpg|\\.gif|\\.png|\\.jpeg)+"
+#define __IMAGE_REGEXP__ "(\\.jpg|\\.gif|\\.png|\\.jpeg|\\.webm)+"
 #define __IMAGEFILE_REGEXP__ QString("%1%2").arg("\\/(\\w+)").arg(__IMAGE_REGEXP__)
 
 #endif // DEFINES_H
