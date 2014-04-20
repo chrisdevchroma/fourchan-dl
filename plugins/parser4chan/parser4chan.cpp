@@ -36,9 +36,9 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
     QRegExp rxImagesNew("<div class=\"fileText\"[^>]*>[^<]*<a href=\"([^/]*)//([^/]+)/([^\"]+)\"(?:[^<]+)</a>[^<]*<span[^>]*>([^<]+)*</span>", Qt::CaseInsensitive, QRegExp::RegExp2);
     QRegExp rxThreadsNew("<div class=\"thread\" id=\"t([^\"]+)\">", Qt::CaseSensitive, QRegExp::RegExp2);
     QRegExp rxTitleNew("<span class=\"subject\">([^<]+)</span>");
-    QRegExp rxImagesOld("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
-    QRegExp rxThreadsOld("<a href=\"res/(\\d+)\">Reply</a>", Qt::CaseSensitive, QRegExp::RegExp2);
-    QRegExp rxTitleOld("<span class=\"filetitle\">([^<]+)</span>");
+//    QRegExp rxImagesOld("<span title=\"([^\"]+)\">[^>]+</span>\\)</span><br><a href=\"([^/]*)//images\\.4chan\\.org/([^\"]+)\"(?:[^<]+)<img src=([^\\s]+)(?:[^<]+)</a>", Qt::CaseInsensitive, QRegExp::RegExp2);
+//    QRegExp rxThreadsOld("<a href=\"res/(\\d+)\">Reply</a>", Qt::CaseSensitive, QRegExp::RegExp2);
+//    QRegExp rxTitleOld("<span class=\"filetitle\">([^<]+)</span>");
 
     //bool imagesAdded;
     //bool pageIsFrontpage;
@@ -109,7 +109,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                 }
 
                 if (postDetails.contains("tim")) { // Image in post
-                    img.largeURI = QString("http://i.4cdn.org/%3/src/%1%2")
+                    img.largeURI = QString("http://i.4cdn.org/%3/%1%2")
                             .arg(postDetails.value("tim"))
                             .arg(postDetails.value("ext"))
                             .arg(boardName);
@@ -120,7 +120,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                     _images.append(img);
                     _statusCode.hasImages = true;
 
-                    qDebug() << "Found image " << img.largeURI << " (" << img.originalFilename << ")\n";
+//                    qDebug() << "Found image " << img.largeURI << " (" << img.originalFilename << ")\n";
                 }
                 if (postDetails.contains("sub") && !_statusCode.hasTitle) {
                     _statusCode.hasTitle = true;
@@ -163,7 +163,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                 stop = true;
                 break;
             }
-            sUrl = QString("%1://boards.4chan.org/%2/res/%3").arg(_url.scheme()).arg(boardName).arg(html.mid(i, k-i));
+            sUrl = QString("%1://boards.4chan.org/%2/thread/%3").arg(_url.scheme()).arg(boardName).arg(html.mid(i, k-i));
             _urlList << QUrl(sUrl);
             _statusCode.isFrontpage = true;
             i=k+1;
@@ -184,7 +184,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                         res = rxThreadsNew.capturedTexts();
 
                         if (res.at(1) != "") {
-                            u.setUrl(QString("res/%1").arg(res.at(1)));
+                            u.setUrl(QString("thread/%1").arg(res.at(1)));
 
                             // build complete url
 
@@ -194,7 +194,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                                     // We need to complete only the host
                                     sUrl = QString("%1/%2").arg(_url.host()).arg(u.path());
                                 }
-                                else if (u.path().startsWith("res")) {
+                                else if (u.path().startsWith("res") || u.path().startsWith("thread")) {
                                     sUrl = QString("%1://boards.4chan.org/%2/%3").arg(_url.scheme()).arg(boardName).arg(u.path());
                                 }
                                 else {
@@ -247,69 +247,9 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                     }
                 }
             }
-            else {
-                //Page is using the old html
-
-                // CHecking for Thread Links
-                while (pos > -1) {
-                    pos = rxThreadsOld.indexIn(html, pos+1);
-                    res = rxThreadsOld.capturedTexts();
-
-                    if (res.at(1) != "") {
-                        u.setUrl(QString("res/%1").arg(res.at(1)));
-
-                        // build complete url
-                        boardName = _url.path().section("/", 1, 1);
-
-                        if (u.isRelative()) {
-                            sUrl = "";
-                            if (u.path().startsWith("/")) {
-                                // We need to complete only the host
-                                sUrl = QString("%1/%2").arg(_url.host()).arg(u.path());
-                            }
-                            else if (u.path().startsWith("res")) {
-                                sUrl = QString("http://boards.4chan.org/%1/%2").arg(boardName).arg(u.path());
-                            }
-                            else {
-                                qDebug() << "Parsing front page and don't know what to do. Found url" << u.toString();
-                            }
-                        }
-
-                        _urlList << QUrl(sUrl);
-                        _statusCode.isFrontpage = true;
-                        _threadTitle = _url.toString();
-                        _statusCode.hasTitle = true;
-                    }
-                }
-
-                // Checking for Images
-                pos = 0;
-                while (pos > -1) {
-                    pos = rxImagesOld.indexIn(html, pos+1);
-                    res = rxImagesOld.capturedTexts();
-                    QUrl temp = QUrl::fromEncoded(res.at(1).toLatin1());
-
-                    img.originalFilename = temp.toString();
-                    img.largeURI = "http://images.4chan.org/"+res.at(3);
-                    img.thumbURI = res.at(4);
-
-                    if (pos != -1) {
-                        _images.append(img);
-                        _statusCode.hasImages = true;
-                    }
-                }
-
-                pos = 0;
-                while (pos > -1) {
-                    pos = rxTitleOld.indexIn(html,pos+1);
-                    res = rxTitleOld.capturedTexts();
-
-                    if (res.at(1) != "") {
-                        _threadTitle = res.at(1);
-                        _statusCode.hasTitle = true;
-                    }
-
-                }
+            else {  // 'Old' Thread layout not supported anymore for maintance reasons
+                _statusCode.hasErrors = true;
+                _errorCode = 1;
             }
         }
     }
@@ -358,7 +298,7 @@ void Parser4chan::setURL(QUrl url) {
     }
 
     boardName = _url.path().section("/",1,1);
-    if (_url.path().contains("res")) {
+    if (_url.path().contains("res") || _url.path().contains("thread/")) {
         threadNumber = _url.path().section("/",3,3);
     }
     else {
@@ -394,7 +334,7 @@ void Parser4chan::initPlugin() {
 QList<QUrl> Parser4chan::initialRequests() {
     QList<QUrl> uris;
 
-    uris.append(QUrl("http://boards.4chan.org/i/#cfg=%7B%22settings%22%3A%22%7B%5C%22quotePreview%5C%22%3Atrue%2C%5C%22backlinks%5C%22%3Atrue%2C%5C%22quickReply%5C%22%3Atrue%2C%5C%22threadUpdater%5C%22%3Afalse%2C%5C%22threadHiding%5C%22%3Afalse%2C%5C%22pageTitle%5C%22%3Afalse%2C%5C%22hideGlobalMsg%5C%22%3Atrue%2C%5C%22alwaysAutoUpdate%5C%22%3Afalse%2C%5C%22topPageNav%5C%22%3Afalse%2C%5C%22threadWatcher%5C%22%3Afalse%2C%5C%22imageExpansion%5C%22%3Afalse%2C%5C%22fitToScreenExpansion%5C%22%3Afalse%2C%5C%22threadExpansion%5C%22%3Afalse%2C%5C%22alwaysDepage%5C%22%3Afalse%2C%5C%22imageSearch%5C%22%3Afalse%2C%5C%22reportButton%5C%22%3Atrue%2C%5C%22localTime%5C%22%3Atrue%2C%5C%22stickyNav%5C%22%3Atrue%2C%5C%22keyBinds%5C%22%3Atrue%2C%5C%22inlineQuotes%5C%22%3Atrue%2C%5C%22filter%5C%22%3Afalse%2C%5C%22revealSpoilers%5C%22%3Atrue%2C%5C%22replyHiding%5C%22%3Afalse%2C%5C%22imageHover%5C%22%3Afalse%2C%5C%22threadStats%5C%22%3Afalse%2C%5C%22IDColor%5C%22%3Atrue%2C%5C%22downloadFile%5C%22%3Atrue%2C%5C%22inlineReport%5C%22%3Atrue%2C%5C%22noPictures%5C%22%3Afalse%2C%5C%22embedYouTube%5C%22%3Afalse%2C%5C%22embedSoundCloud%5C%22%3Afalse%2C%5C%22updaterSound%5C%22%3Afalse%2C%5C%22customCSS%5C%22%3Afalse%2C%5C%22autoScroll%5C%22%3Afalse%2C%5C%22hideStubs%5C%22%3Afalse%2C%5C%22compactThreads%5C%22%3Afalse%2C%5C%22dropDownNav%5C%22%3Afalse%2C%5C%22fixedThreadWatcher%5C%22%3Afalse%2C%5C%22persistentQR%5C%22%3Afalse%2C%5C%22disableAll%5C%22%3Afalse%2C%5C%22TW-position%5C%22%3A%5C%22left%3A%2019px%3B%20top%3A%20387px%3B%5C%22%2C%5C%22customMenu%5C%22%3Afalse%2C%5C%22embedVocaroo%5C%22%3Afalse%7D%22%7D"));
+//    uris.append(QUrl("http://boards.4chan.org/i/#cfg=%7B%22settings%22%3A%22%7B%5C%22quotePreview%5C%22%3Atrue%2C%5C%22backlinks%5C%22%3Atrue%2C%5C%22quickReply%5C%22%3Atrue%2C%5C%22threadUpdater%5C%22%3Afalse%2C%5C%22threadHiding%5C%22%3Afalse%2C%5C%22pageTitle%5C%22%3Afalse%2C%5C%22hideGlobalMsg%5C%22%3Atrue%2C%5C%22alwaysAutoUpdate%5C%22%3Afalse%2C%5C%22topPageNav%5C%22%3Afalse%2C%5C%22threadWatcher%5C%22%3Afalse%2C%5C%22imageExpansion%5C%22%3Afalse%2C%5C%22fitToScreenExpansion%5C%22%3Afalse%2C%5C%22threadExpansion%5C%22%3Afalse%2C%5C%22alwaysDepage%5C%22%3Afalse%2C%5C%22imageSearch%5C%22%3Afalse%2C%5C%22reportButton%5C%22%3Atrue%2C%5C%22localTime%5C%22%3Atrue%2C%5C%22stickyNav%5C%22%3Atrue%2C%5C%22keyBinds%5C%22%3Atrue%2C%5C%22inlineQuotes%5C%22%3Atrue%2C%5C%22filter%5C%22%3Afalse%2C%5C%22revealSpoilers%5C%22%3Atrue%2C%5C%22replyHiding%5C%22%3Afalse%2C%5C%22imageHover%5C%22%3Afalse%2C%5C%22threadStats%5C%22%3Afalse%2C%5C%22IDColor%5C%22%3Atrue%2C%5C%22downloadFile%5C%22%3Atrue%2C%5C%22inlineReport%5C%22%3Atrue%2C%5C%22noPictures%5C%22%3Afalse%2C%5C%22embedYouTube%5C%22%3Afalse%2C%5C%22embedSoundCloud%5C%22%3Afalse%2C%5C%22updaterSound%5C%22%3Afalse%2C%5C%22customCSS%5C%22%3Afalse%2C%5C%22autoScroll%5C%22%3Afalse%2C%5C%22hideStubs%5C%22%3Afalse%2C%5C%22compactThreads%5C%22%3Afalse%2C%5C%22dropDownNav%5C%22%3Afalse%2C%5C%22fixedThreadWatcher%5C%22%3Afalse%2C%5C%22persistentQR%5C%22%3Afalse%2C%5C%22disableAll%5C%22%3Afalse%2C%5C%22TW-position%5C%22%3A%5C%22left%3A%2019px%3B%20top%3A%20387px%3B%5C%22%2C%5C%22customMenu%5C%22%3Afalse%2C%5C%22embedVocaroo%5C%22%3Afalse%7D%22%7D"));
 
     return uris;
 }
@@ -404,6 +344,7 @@ QUrl Parser4chan::alterUrl(QUrl u){
     QString sUrl;
     QStringList sl;
     sUrl = u.toString();
+    sUrl.replace("/res/", "/thread/");
 
     if (sUrl.endsWith("/")) sUrl.remove(sUrl.length()-1,1);
     sl = sUrl.split("/");
