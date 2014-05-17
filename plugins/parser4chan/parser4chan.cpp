@@ -287,8 +287,11 @@ QList<QUrl> Parser4chan::getUrlList() {
 
 void Parser4chan::setURL(QUrl url) {
     QString s;
+    QString s_url;
 
-    if (url.toString().endsWith(".json")) {
+    s_url = url.toString();
+
+    if (s_url.endsWith(".json")) {
         s = url.toString();
         s.replace(".json", "");
         _url = QUrl(s);
@@ -341,21 +344,35 @@ QList<QUrl> Parser4chan::initialRequests() {
 
 QUrl Parser4chan::alterUrl(QUrl u){
     // Function is only called for non-images!
-    QString sUrl;
+    // New URI format is http[s]://[..].4chan.org/<board>/thread/<threadnumber>[/threadtitle]
+    //  Adding .json only works when the threadtitle is ommitted from the uri
+    QString s_url;
     QStringList sl;
-    sUrl = u.toString();
-    sUrl.replace("/res/", "/thread/");
 
-    if (sUrl.endsWith("/")) sUrl.remove(sUrl.length()-1,1);
-    sl = sUrl.split("/");
+    s_url = u.toString();
+    s_url.replace("/res/", "/thread/");
+
+    if (!s_url.startsWith("http")) {
+        s_url.prepend("http://");
+    }
+
+    if (s_url.endsWith("/")) s_url.remove(s_url.length()-1,1);
+
+    sl = s_url.split("/");
     if (sl.count() == 4) {
         // This is the first page of a board.
         //  To get the .json append working we have to add "/0"
-        sUrl.append("/0");
+        s_url.append("/0");
     }
-    if (!sUrl.endsWith(".json")) sUrl.append(".json");   // Only get the JSON files
+    if (sl.contains("thread")) {
+        if (sl.count() == 7) {
+            sl.removeLast();
+            s_url = sl.join("/");
+        }
+    }
+    if (!s_url.endsWith(".json")) s_url.append(".json");   // Only get the JSON files
 
-    return QUrl(sUrl);
+    return QUrl(s_url);
 }
 
 #if QT_VERSION < 0x050000
