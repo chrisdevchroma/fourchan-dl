@@ -361,8 +361,8 @@ QUrl Parser4chan::alterUrl(QUrl u){
     sl = s_url.split("/");
     if (sl.count() == 4) {
         // This is the first page of a board.
-        //  To get the .json append working we have to add "/0"
-        s_url.append("/0");
+        //  To get the .json append working we have to add "/1"
+        s_url.append("/1");
     }
     if (sl.contains("thread")) {
         if (sl.count() == 7) {
