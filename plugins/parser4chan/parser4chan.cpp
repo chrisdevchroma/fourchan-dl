@@ -109,6 +109,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                 }
 
                 if (postDetails.contains("tim")) { // Image in post
+                    //img.largeURI = QString("http://i.4cdn.org/%3/src/%1%2")
                     img.largeURI = QString("http://i.4cdn.org/%3/%1%2")
                             .arg(postDetails.value("tim"))
                             .arg(postDetails.value("ext"))
@@ -163,6 +164,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                 stop = true;
                 break;
             }
+            //sUrl = QString("%1://boards.4chan.org/%2/res/%3").arg(_url.scheme()).arg(boardName).arg(html.mid(i, k-i));
             sUrl = QString("%1://boards.4chan.org/%2/thread/%3").arg(_url.scheme()).arg(boardName).arg(html.mid(i, k-i));
             _urlList << QUrl(sUrl);
             _statusCode.isFrontpage = true;
@@ -184,6 +186,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                         res = rxThreadsNew.capturedTexts();
 
                         if (res.at(1) != "") {
+                            //u.setUrl(QString("res/%1").arg(res.at(1)));
                             u.setUrl(QString("thread/%1").arg(res.at(1)));
 
                             // build complete url
@@ -194,6 +197,7 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
                                     // We need to complete only the host
                                     sUrl = QString("%1/%2").arg(_url.host()).arg(u.path());
                                 }
+                                //else if (u.path().startsWith("res")) {
                                 else if (u.path().startsWith("res") || u.path().startsWith("thread")) {
                                     sUrl = QString("%1://boards.4chan.org/%2/%3").arg(_url.scheme()).arg(boardName).arg(u.path());
                                 }
@@ -250,7 +254,70 @@ ParsingStatus Parser4chan::parseHTML(QString html) {
             else {  // 'Old' Thread layout not supported anymore for maintance reasons
                 _statusCode.hasErrors = true;
                 _errorCode = 1;
-            }
+            /*else {
+                //Page is using the old html
+
+                // CHecking for Thread Links
+                while (pos > -1) {
+                    pos = rxThreadsOld.indexIn(html, pos+1);
+                    res = rxThreadsOld.capturedTexts();
+
+                    if (res.at(1) != "") {
+                        u.setUrl(QString("res/%1").arg(res.at(1)));
+
+                        // build complete url
+                        boardName = _url.path().section("/", 1, 1);
+
+                        if (u.isRelative()) {
+                            sUrl = "";
+                            if (u.path().startsWith("/")) {
+                                // We need to complete only the host
+                                sUrl = QString("%1/%2").arg(_url.host()).arg(u.path());
+                            }
+                            else if (u.path().startsWith("res")) {
+                                sUrl = QString("http://boards.4chan.org/%1/%2").arg(boardName).arg(u.path());
+                            }
+                            else {
+                                qDebug() << "Parsing front page and don't know what to do. Found url" << u.toString();
+                            }
+                        }
+
+                        _urlList << QUrl(sUrl);
+                        _statusCode.isFrontpage = true;
+                        _threadTitle = _url.toString();
+                        _statusCode.hasTitle = true;
+                    }
+                }
+
+                // Checking for Images
+                pos = 0;
+                while (pos > -1) {
+                    pos = rxImagesOld.indexIn(html, pos+1);
+                    res = rxImagesOld.capturedTexts();
+                    QUrl temp = QUrl::fromEncoded(res.at(1).toLatin1());
+
+                    img.originalFilename = temp.toString();
+                    img.largeURI = "http://images.4chan.org/"+res.at(3);
+                    img.thumbURI = res.at(4);
+
+                    if (pos != -1) {
+                        _images.append(img);
+                        _statusCode.hasImages = true;
+                    }
+                }
+
+                pos = 0;
+                while (pos > -1) {
+                    pos = rxTitleOld.indexIn(html,pos+1);
+                    res = rxTitleOld.capturedTexts();
+
+                    if (res.at(1) != "") {
+                        _threadTitle = res.at(1);
+                        _statusCode.hasTitle = true;
+                    }
+
+                }
+            }*/
         }
     }
     if (_threadTitle.trimmed().isEmpty() && !_statusCode.isFrontpage) {
@@ -291,6 +358,7 @@ void Parser4chan::setURL(QUrl url) {
 
     s_url = url.toString();
 
+    //if (url.toString().endsWith(".json")) {
     if (s_url.endsWith(".json")) {
         s = url.toString();
         s.replace(".json", "");
@@ -301,6 +369,7 @@ void Parser4chan::setURL(QUrl url) {
     }
 
     boardName = _url.path().section("/",1,1);
+    //if (_url.path().contains("res")) {
     if (_url.path().contains("res") || _url.path().contains("thread/")) {
         threadNumber = _url.path().section("/",3,3);
     }
@@ -373,6 +442,20 @@ QUrl Parser4chan::alterUrl(QUrl u){
     if (!s_url.endsWith(".json")) s_url.append(".json");   // Only get the JSON files
 
     return QUrl(s_url);
+    /*QString sUrl;
+    QStringList sl;
+    sUrl = u.toString();
+
+    if (sUrl.endsWith("/")) sUrl.remove(sUrl.length()-1,1);
+    sl = sUrl.split("/");
+    if (sl.count() == 4) {
+        // This is the first page of a board.
+        //  To get the .json append working we have to add "/0"
+        sUrl.append("/0");
+    }
+    if (!sUrl.endsWith(".json")) sUrl.append(".json");   // Only get the JSON files
+
+    return QUrl(sUrl);*/
 }
 
 #if QT_VERSION < 0x050000
