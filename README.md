@@ -12,6 +12,7 @@ fourchan-dl can download images and webms from 4chan, 2chan, and other imageboar
 - Supports scanning of overview pages (e. g. boards.4chan.org/wg/1)
 - Saves current opened threads, and reload them the next time the program is started
 - Crossplatform, written in Qt/C++: supports Windows, Linux, MacOS and other unix flavours
+- Built-in application updater
 - Support for other imageboards can be added through new plugins
 
 ## Supported imageboards
@@ -23,6 +24,7 @@ fourchan-dl can download images and webms from 4chan, 2chan, and other imageboar
 - krautchan
 
 You can create an issue if you want to see other imageboards supported
+
 Or create a pull-request with your new plugin :)
 
 ## Fork
