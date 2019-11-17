@@ -198,7 +198,7 @@ void MainWindow::closeTab(int i) {
     }
 
     if (ui->tabWidget->count() == 0) {
-        QLOG_TRACE() << __PRETTY_FUNCTION__ << "Adding new tab, because no tab is left";
+        QLOG_TRACE() << Q_FUNC_INFO << "Adding new tab, because no tab is left";
         addTab();
     }
 }
@@ -396,7 +396,7 @@ void MainWindow::processCloseRequest(UIImageOverview* w, int reason) {
     int i;
     i = ui->tabWidget->indexOf((QWidget*)w);
 
-    QLOG_TRACE() << __PRETTY_FUNCTION__ << "i: " << i << ", reason " << reason;
+    QLOG_TRACE() << Q_FUNC_INFO << "i: " << i << ", reason " << reason;
     if (reason == 404) {
         if (settings->value("options/automatic_close", false).toBool()) {
             closeTab(i);
@@ -609,7 +609,7 @@ void MainWindow::updateThreadOverview() {
             sl << tab->getStatus();
             sl << tab->getURI();
 
-            QLOG_DEBUG() << __PRETTY_FUNCTION__ << "::" << i << ":" << sl;
+            QLOG_DEBUG() << Q_FUNC_INFO << "::" << i << ":" << sl;
 
             if (ui->threadOverview->topLevelItemCount() > i) {                   // If there is an entry for the i-th tab
                 item = ui->threadOverview->topLevelItem(i);     //  change its content
@@ -621,13 +621,13 @@ void MainWindow::updateThreadOverview() {
                             item->setTextColor(0, Qt::darkGreen);
                             f.setBold(true);
                             item->setFont(0, f);
-                            QLOG_TRACE() << __PRETTY_FUNCTION__ << "tab" << i << "Changing font to bold/red";
+                            QLOG_TRACE() << Q_FUNC_INFO << "tab" << i << "Changing font to bold/red";
                         }
                         else {
                             item->setTextColor(0, Qt::black);
                             f.setBold(false);
                             item->setFont(0, f);
-                            QLOG_TRACE() << __PRETTY_FUNCTION__ << "tab" << i << "Changing font to normal";
+                            QLOG_TRACE() << Q_FUNC_INFO << "tab" << i << "Changing font to normal";
                         }
                     }
                     item->setText(k, sl.at(k));
@@ -744,7 +744,7 @@ void MainWindow::checkForUpdates(QString xml) {
     component_information c, local, remote;
     QList<QString> foundComponents;
 
-    QLOG_ALWAYS() << __PRETTY_FUNCTION__ << ":: Checking for updates on release tree " << UPDATE_TREE;
+    QLOG_ALWAYS() << Q_FUNC_INFO << ":: Checking for updates on release tree " << UPDATE_TREE;
 
     pos = rx.indexIn(xml);
     res = rx.capturedTexts();
